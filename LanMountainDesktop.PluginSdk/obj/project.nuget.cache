@@ -1,23 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "5V3rHeTraoU=",
+  "dgSpecHash": "CDqh6VLCHdI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
+  "projectFilePath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER182287\\.nuget\\packages\\avalonia\\11.3.12\\avalonia.11.3.12.nupkg.sha512",
     "C:\\Users\\USER182287\\.nuget\\packages\\avalonia.buildservices\\11.3.2\\avalonia.buildservices.11.3.2.nupkg.sha512",
     "C:\\Users\\USER182287\\.nuget\\packages\\avalonia.remote.protocol\\11.3.12\\avalonia.remote.protocol.11.3.12.nupkg.sha512",
     "C:\\Users\\USER182287\\.nuget\\packages\\microcom.runtime\\0.11.0\\microcom.runtime.0.11.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

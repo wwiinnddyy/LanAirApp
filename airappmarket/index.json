@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceId": "official.lanairapp",
+  "sourceName": "LanAirApp Official Market",
+  "generatedAt": "2026-03-10T01:36:00Z",
+  "plugins": [
+    {
+      "id": "LanMountainDesktop.SamplePlugin",
+      "name": "LanMountain Sample Plugin",
+      "description": "Example plugin used to validate PluginSdk loading and isolation.",
+      "author": "LanMountainDesktop",
+      "version": "1.0.0",
+      "apiVersion": "1.0.0",
+      "minHostVersion": "1.0.0",
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/LanAirApp/releases/LanMountainDesktop.SamplePlugin.1.0.0.laapp",
+      "sha256": "0406898858542be76d4410e3146d22dc570985b12a37897da2faa8fc095605d2",
+      "packageSizeBytes": 1702641,
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "tags": [
+        "example",
+        "official",
+        "sdk"
+      ],
+      "publishedAt": "2026-03-10T01:36:00Z",
+      "updatedAt": "2026-03-10T01:36:00Z",
+      "releaseNotes": "Reference plugin for SDK validation. Published from the standalone sample plugin repository and includes a settings page, a desktop widget, localization resources, service registration, and plugin message bus usage."
+    }
+  ]
+}

@@ -346,11 +346,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
+      "projectUniqueName": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
       "projectName": "LanMountainDesktop.PluginSdk",
-      "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
+      "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
       "packagesPath": "C:\\Users\\USER182287\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanMontainDesktop\\LanMountainDesktop.PluginSdk\\obj\\",
+      "outputPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\USER182287\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -681,13 +681,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }
