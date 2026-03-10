@@ -11,7 +11,7 @@
                         "author":  "LanMountainDesktop",
                         "version":  "1.0.0",
                         "apiVersion":  "1.0.0",
-                        "minHostVersion":  "1.0.0",
+                        "minHostVersion":  "0.0.1",
                         "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.1.0.0.laapp",
                         "sha256":  "c075247af2835aaafa9fc43159cabff87703c633084a7adf2ea13ea36f7677e3",
                         "packageSizeBytes":  1702641,
