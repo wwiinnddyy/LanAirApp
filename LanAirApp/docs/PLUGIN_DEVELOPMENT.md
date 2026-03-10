@@ -1,41 +1,74 @@
-# 插件开发文档
+# 插件开发指南
 
-LanMountainDesktop 插件基于 `LanMountainDesktop.PluginSdk` 开发。
+## 中文
 
-`LanAirApp/` 负责对外发布插件开发标准、示例插件和打包工具；宿主应用内部的插件加载与解析逻辑位于 `LanMountainDesktop/plugins/`。
-`LanMountainDesktop.PluginSdk` 只提供插件作者需要依赖的开发契约，不再承载宿主侧运行时加载实现。
+本指南面向阑山桌面的插件作者，说明如何使用 `LanMountainDesktop.PluginSdk` 开发一个可被宿主发现、加载和展示的插件。
 
-## 必需文件
-- `plugin.json`
-- `plugin.json` 中声明的入口程序集
-- 使用插件入口特性标记的入口类型
+### 必备文件
 
-## 推荐开发流程
-1. 以 `LanAirApp/samples/LanMountainDesktop.SamplePlugin` 为起点。
-2. 修改 `plugin.json`，填写你自己的插件 `id`、名称、作者、版本和入口程序集。
-3. 实现 `IPlugin` 或继承 `PluginBase`。
-4. 通过 `IPluginContext` 注册服务、设置页和桌面组件。
-5. 将输出内容打包为 `.laapp` 文件。
+- `plugin.json`：插件清单，声明 `id`、`name`、`author`、`version`、`apiVersion`、`entranceAssembly`。
+- 插件程序集：包含入口类，并与 `plugin.json` 中的 `entranceAssembly` 一致。
+- 入口类：使用插件入口特性标记，并实现 `IPlugin` 或继承 `PluginBase`。
+- 本地化资源：建议至少提供 `Localization/zh-CN.json` 和 `Localization/en-US.json`。
 
-## 运行时能力
-- 插件可以注册自己的设置页。
-- 插件可以注册自己的桌面组件。
-- 插件可以注册自己的服务，并通过插件消息总线进行通信。
-- 宿主优先加载 `.laapp` 包，其次才是散装清单。
+### 基本开发流程
 
-## 多语言建议
-- 插件应当内置 `Localization/zh-CN.json` 与 `Localization/en-US.json`。
-- 插件界面文案、组件文案、状态文案建议统一通过插件本地化层读取。
-- 建议优先读取宿主传入的语言代码，再回退到插件默认语言。
+1. 以 `samples/LanMountainDesktop.SamplePlugin` 或独立示例插件仓库为模板。
+2. 修改 `plugin.json` 和程序集名称，确保插件 ID 全局唯一。
+3. 在入口类中通过 `IPluginContext` 注册服务、设置页和桌面组件。
+4. 为设置页和组件准备本地化文本与状态数据。
+5. 构建并打包为 `.laapp`。
 
-## 目录建议
-一个标准插件项目建议至少包含：
-- `plugin.json`
-- `Localization/zh-CN.json`
-- `Localization/en-US.json`
-- 插件程序集与依赖文件
+### 运行时能力
 
-## 示例项目与工具
-- 示例插件：`LanAirApp/samples/LanMountainDesktop.SamplePlugin`
-- 打包工具：`LanAirApp/tools/LanMountainDesktop.PluginPackager`
-- 标准模板：`LanAirApp/standards/plugin.template.json`
+插件当前可以：
+
+- 注册设置页。
+- 注册桌面组件。
+- 注册插件内部服务。
+- 使用宿主提供的上下文服务。
+- 使用插件消息总线进行内部通信。
+
+插件当前不应假设：
+
+- 存在强隔离沙箱。
+- 可以热更新自身。
+- 拥有超出 SDK 明确定义的宿主内部访问权限。
+
+### 推荐目录结构
+
+```text
+YourPlugin/
+  plugin.json
+  YourPlugin.csproj
+  Localization/
+    zh-CN.json
+    en-US.json
+  README.md
+  YourPlugin.1.0.0.laapp
+```
+
+### 本地化建议
+
+- 中文作为主文案。
+- 英文作为附加扩展语言。
+- 所有 UI 文案都通过本地化文件读取，不直接硬编码到界面逻辑中。
+
+## English
+
+This guide explains how to build a LanMountainDesktop plugin with `LanMountainDesktop.PluginSdk`.
+
+### Required files
+
+- `plugin.json`: plugin manifest declaring `id`, `name`, `author`, `version`, `apiVersion`, and `entranceAssembly`.
+- Plugin assembly matching the manifest.
+- Entry class marked as the plugin entrance, implementing `IPlugin` or inheriting from `PluginBase`.
+- Localization resources, preferably `Localization/zh-CN.json` and `Localization/en-US.json`.
+
+### Recommended workflow
+
+1. Start from the sample plugin.
+2. Update the manifest and assembly names.
+3. Register services, settings pages, and desktop components through `IPluginContext`.
+4. Prepare localized texts and state handling.
+5. Build and package the plugin as `.laapp`.

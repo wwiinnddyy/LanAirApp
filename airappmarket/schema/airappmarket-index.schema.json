@@ -39,6 +39,14 @@
     "plugin": {
       "type": "object",
       "additionalProperties": false,
+      "dependentRequired": {
+        "releaseTag": [
+          "releaseAssetName"
+        ],
+        "releaseAssetName": [
+          "releaseTag"
+        ]
+      },
       "required": [
         "id",
         "name",
@@ -51,6 +59,8 @@
         "sha256",
         "packageSizeBytes",
         "iconUrl",
+        "projectUrl",
+        "readmeUrl",
         "homepageUrl",
         "repositoryUrl",
         "tags",
@@ -100,6 +110,22 @@
           "minimum": 1
         },
         "iconUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "releaseTag": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        },
+        "releaseAssetName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "projectUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "readmeUrl": {
           "type": "string",
           "format": "uri"
         },

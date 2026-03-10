@@ -1,16 +1,23 @@
-# 插件发布目录
+# 插件发布暂存目录
 
-这个目录用于放置已经打包完成、可以直接分享给用户安装的 `.laapp` 插件包。
+## 中文
 
-当前发布示例：
-- `LanMountainDesktop.SamplePlugin.1.0.0.laapp`
+`LanAirApp/releases/` 不再是阑山桌面内建插件市场的主分发源。
 
-用户安装方式：
-1. 打开阑山桌面。
-2. 进入 `设置 -> 插件`。
-3. 点击 `打开 .laapp 插件包`。
-4. 选择这里的 `.laapp` 文件完成安装。
+### 当前定位
 
-说明：
-- 这里的文件面向分享与发布。
-- 宿主调试时使用的已安装插件包仍然位于 `LanMountainDesktop/bin/.../Extensions/Plugins/`。
+- 用于临时暂存产物
+- 用于手工分享插件包
+- 用于本地调试时的中间输出
+
+### 正式市场分发路径
+
+- 官方市场索引：`LanAirApp/airappmarket/index.json`
+- 插件安装包：各插件项目仓库根目录
+- 插件说明文档：各插件项目仓库根目录的 `README.md`
+
+## English
+
+`LanAirApp/releases/` is no longer the primary distribution source for the built-in LanMountainDesktop market.
+
+It is now reserved for temporary staging, manual sharing, or local debugging output.

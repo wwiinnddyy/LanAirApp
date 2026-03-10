@@ -1,0 +1,14 @@
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\bin\Release\net10.0\LanMountainDesktop.PluginSdk.deps.json
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\bin\Release\net10.0\LanMountainDesktop.PluginSdk.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\bin\Release\net10.0\LanMountainDesktop.PluginSdk.pdb
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.csproj.AssemblyReference.cache
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\Avalonia\Resources.Inputs.cache
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.AssemblyInfoInputs.cache
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.AssemblyInfo.cs
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.csproj.CoreCompileInputs.cache
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.sourcelink.json
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\refint\LanMountainDesktop.PluginSdk.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\LanMountainDesktop.PluginSdk.pdb
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanMountainDesktop.PluginSdk\obj\Release\net10.0\ref\LanMountainDesktop.PluginSdk.dll

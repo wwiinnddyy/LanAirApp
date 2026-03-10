@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("AirAppMarket.Validator")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("LanMountainDesktop.PluginSdk")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94dadd4cfc39745339ab483354c62f26a5dfa2a8")]
-[assembly: System.Reflection.AssemblyProductAttribute("AirAppMarket.Validator")]
-[assembly: System.Reflection.AssemblyTitleAttribute("AirAppMarket.Validator")]
+[assembly: System.Reflection.AssemblyProductAttribute("LanMountainDesktop.PluginSdk")]
+[assembly: System.Reflection.AssemblyTitleAttribute("LanMountainDesktop.PluginSdk")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // 由 MSBuild WriteCodeFragment 类生成。

@@ -119,6 +119,24 @@ internal sealed class MarketIndex
         return normalized;
     }
 
+    internal static string NormalizeReleaseTag(string? value, string propertyName, string sourceName)
+    {
+        var normalized = RequireValue(value, propertyName, sourceName);
+        if (!normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' declares invalid release tag '{normalized}' for '{propertyName}'. Expected format 'v1.2.3'.");
+        }
+
+        if (!TryParseVersion(normalized[1..], out _))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' declares invalid release tag '{normalized}' for '{propertyName}'.");
+        }
+
+        return normalized;
+    }
+
     internal static bool TryParseVersion(string? value, out Version? version)
     {
         version = null;
@@ -126,11 +144,6 @@ internal sealed class MarketIndex
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return false;
-        }
-
-        if (normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
-        {
-            normalized = normalized[1..];
         }
 
         var separatorIndex = normalized.IndexOfAny(['-', '+', ' ']);
@@ -151,7 +164,7 @@ internal sealed class MarketIndex
         return true;
     }
 
-    internal static void EnsureUrl(string? value, string propertyName, string sourceName)
+    internal static string NormalizeUrl(string? value, string propertyName, string sourceName)
     {
         var normalized = RequireValue(value, propertyName, sourceName);
         if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
@@ -160,6 +173,43 @@ internal sealed class MarketIndex
             throw new InvalidOperationException(
                 $"Market index '{sourceName}' declares invalid URL '{normalized}' for '{propertyName}'.");
         }
+
+        return normalized;
+    }
+
+    internal static string NormalizeGitHubRepositoryUrl(string? value, string propertyName, string sourceName)
+    {
+        var normalized = NormalizeUrl(value, propertyName, sourceName);
+        if (!TryParseGitHubRepositoryUrl(normalized, out var owner, out var repositoryName))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' declares invalid GitHub repository URL '{normalized}' for '{propertyName}'.");
+        }
+
+        return $"https://github.com/{owner}/{repositoryName}";
+    }
+
+    internal static bool TryParseGitHubRepositoryUrl(string? value, out string owner, out string repositoryName)
+    {
+        owner = string.Empty;
+        repositoryName = string.Empty;
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var segments = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length != 2)
+        {
+            return false;
+        }
+
+        owner = segments[0];
+        repositoryName = segments[1];
+        return !string.IsNullOrWhiteSpace(owner) && !string.IsNullOrWhiteSpace(repositoryName);
     }
 }
 
@@ -176,6 +226,10 @@ internal sealed class MarketPlugin
     public string Sha256 { get; init; } = string.Empty;
     public long PackageSizeBytes { get; init; }
     public string IconUrl { get; init; } = string.Empty;
+    public string ReleaseTag { get; init; } = string.Empty;
+    public string ReleaseAssetName { get; init; } = string.Empty;
+    public string ProjectUrl { get; init; } = string.Empty;
+    public string ReadmeUrl { get; init; } = string.Empty;
     public string HomepageUrl { get; init; } = string.Empty;
     public string RepositoryUrl { get; init; } = string.Empty;
     public List<string> Tags { get; init; } = [];
@@ -206,10 +260,18 @@ internal sealed class MarketPlugin
                 $"Market index '{sourceName}' declares invalid SHA-256 '{normalizedSha}' for plugin '{Id}'.");
         }
 
-        MarketIndex.EnsureUrl(DownloadUrl, nameof(DownloadUrl), sourceName);
-        MarketIndex.EnsureUrl(IconUrl, nameof(IconUrl), sourceName);
-        MarketIndex.EnsureUrl(HomepageUrl, nameof(HomepageUrl), sourceName);
-        MarketIndex.EnsureUrl(RepositoryUrl, nameof(RepositoryUrl), sourceName);
+        var normalizedReleaseTag = MarketIndex.NormalizeValue(ReleaseTag);
+        var normalizedReleaseAssetName = MarketIndex.NormalizeValue(ReleaseAssetName);
+        if (string.IsNullOrWhiteSpace(normalizedReleaseTag) != string.IsNullOrWhiteSpace(normalizedReleaseAssetName))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' must declare both '{nameof(ReleaseTag)}' and '{nameof(ReleaseAssetName)}' together for plugin '{Id}'.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(normalizedReleaseTag))
+        {
+            normalizedReleaseTag = MarketIndex.NormalizeReleaseTag(normalizedReleaseTag, nameof(ReleaseTag), sourceName);
+        }
 
         if (PackageSizeBytes <= 0)
         {
@@ -232,12 +294,16 @@ internal sealed class MarketPlugin
             Version = MarketIndex.NormalizeVersion(Version, nameof(Version), sourceName),
             ApiVersion = MarketIndex.NormalizeVersion(ApiVersion, nameof(ApiVersion), sourceName),
             MinHostVersion = MarketIndex.NormalizeVersion(MinHostVersion, nameof(MinHostVersion), sourceName),
-            DownloadUrl = MarketIndex.RequireValue(DownloadUrl, nameof(DownloadUrl), sourceName),
+            DownloadUrl = MarketIndex.NormalizeUrl(DownloadUrl, nameof(DownloadUrl), sourceName),
             Sha256 = normalizedSha,
             PackageSizeBytes = PackageSizeBytes,
-            IconUrl = MarketIndex.RequireValue(IconUrl, nameof(IconUrl), sourceName),
-            HomepageUrl = MarketIndex.RequireValue(HomepageUrl, nameof(HomepageUrl), sourceName),
-            RepositoryUrl = MarketIndex.RequireValue(RepositoryUrl, nameof(RepositoryUrl), sourceName),
+            IconUrl = MarketIndex.NormalizeUrl(IconUrl, nameof(IconUrl), sourceName),
+            ReleaseTag = normalizedReleaseTag ?? string.Empty,
+            ReleaseAssetName = normalizedReleaseAssetName ?? string.Empty,
+            ProjectUrl = MarketIndex.NormalizeGitHubRepositoryUrl(ProjectUrl, nameof(ProjectUrl), sourceName),
+            ReadmeUrl = MarketIndex.NormalizeUrl(ReadmeUrl, nameof(ReadmeUrl), sourceName),
+            HomepageUrl = MarketIndex.NormalizeUrl(HomepageUrl, nameof(HomepageUrl), sourceName),
+            RepositoryUrl = MarketIndex.NormalizeGitHubRepositoryUrl(RepositoryUrl, nameof(RepositoryUrl), sourceName),
             Tags = normalizedTags,
             PublishedAt = PublishedAt,
             UpdatedAt = UpdatedAt,

@@ -1,26 +1,51 @@
 # LanAirApp
 
-`LanAirApp` 是阑山桌面插件生态的对外发布工作区。
+## 中文
 
-这里集中放置：
-- 插件开发标准
-- 插件打包与构建工具
-- 插件开发与打包文档
-- 示例插件
+`LanAirApp` 是阑山桌面插件生态的对外工作区。这个仓库不承担宿主运行时本体职责，而是负责整理插件开发标准、示例插件、打包工具以及官方插件市场源。
 
-目录结构：
-- `docs/`：插件开发文档、打包文档
-- `releases/`：已经打包完成、可直接分享与安装的 `.laapp` 插件包
-- `samples/`：示例插件，其中 `LanMountainDesktop.SamplePlugin` 是示例开发插件
-- `standards/`：插件标准文件与模板
-- `tools/`：插件打包与构建工具
+### 目录说明
 
-面向用户的安装流程：
-1. 将插件构建或打包为 `.laapp` 文件。
-2. 打开 `设置 -> 插件`。
-3. 点击 `打开 .laapp 插件包`。
-4. 选择插件包完成安装。
+- `docs/`：插件开发与打包文档。
+- `samples/`：示例插件与参考项目。
+- `standards/`：插件清单和目录结构约定。
+- `tools/`：插件打包与辅助工具。
+- `airappmarket/`：官方插件市场索引、Schema、校验工具与静态资源。
+- `releases/`：临时分发或人工分享目录，不再作为内建市场的主分发源。
+- `LanMountainDesktop.PluginSdk/`：插件开发时需要引用的 SDK 契约。
 
-宿主侧的插件加载、安装、发现、解析与设置页接入逻辑，保留在 `LanMountainDesktop/plugins/`。
+### 与阑山桌面的关系
 
-`LanMountainDesktop.PluginSdk` 仅作为插件开发 SDK 使用，提供 `IPlugin`、`IPluginContext`、清单模型与扩展注册接口。
+- 阑山桌面程序只连接 `LanAirApp/airappmarket/index.json` 获取官方插件列表。
+- 市场索引只负责维护插件元数据和链接，不直接承载插件运行时逻辑。
+- 每个插件项目应当在自己的仓库根目录提供 `.laapp` 安装包和 `README.md`。
+- 宿主程序根据官方索引逐项列出插件，并从对应插件仓库读取安装包和说明文档。
+
+### 推荐工作流
+
+1. 从示例插件开始创建新插件项目。
+2. 完成 `plugin.json`、入口类、设置页、桌面组件和本地化资源。
+3. 打包生成根目录 `.laapp`。
+4. 将插件仓库根目录和校验信息登记到 `airappmarket/index.json`。
+5. 通过阑山桌面内建插件市场完成验证、安装和更新测试。
+
+## English
+
+`LanAirApp` is the public-facing workspace for the LanMountainDesktop plugin ecosystem. This repository does not host the desktop runtime itself. Instead, it provides plugin development standards, sample plugins, packaging tools, and the official plugin market source.
+
+### Directory overview
+
+- `docs/`: plugin development and packaging guides.
+- `samples/`: sample plugins and reference projects.
+- `standards/`: manifest and structure conventions.
+- `tools/`: packaging and helper tools.
+- `airappmarket/`: the official market index, schema, validator, and static assets.
+- `releases/`: temporary staging or manual sharing only, no longer the primary built-in market source.
+- `LanMountainDesktop.PluginSdk/`: the SDK contract consumed by plugin authors.
+
+### Relationship with LanMountainDesktop
+
+- LanMountainDesktop connects only to `LanAirApp/airappmarket/index.json` for the official plugin list.
+- The market index stores plugin metadata and links, not runtime implementation.
+- Each plugin repository should provide its `.laapp` package and `README.md` in the repository root.
+- The host app lists plugins from the official source and installs them from their own repositories.

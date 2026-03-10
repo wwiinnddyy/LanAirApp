@@ -1,11 +1,23 @@
-# 示例插件
+# 示例插件目录
 
-本目录用于存放阑山桌面的示例开发插件。
+## 中文
 
-当前示例：
-- `LanMountainDesktop.SamplePlugin`
+本目录用于存放阑山桌面的示例插件和参考实现。
 
-说明：
-- 这个插件是**示例开发插件**，用于演示插件项目结构、服务注册、设置页注册、桌面组件注册、`.laapp` 打包与安装流程。
-- 开发新插件时，建议直接从这个示例插件复制一份再修改。
-- 示例插件属于 `LanAirApp/` 对外开发工作区；宿主应用里的插件运行时与解析实现位于 `LanMountainDesktop/plugins/`。
+### 当前内容
+
+- `LanMountainDesktop.SamplePlugin`：标准示例插件，演示插件清单、设置页、桌面组件、服务注册、本地化和 `.laapp` 打包流程。
+
+### 使用建议
+
+- 新插件项目建议从示例插件复制开始。
+- 先确认插件清单、入口类和本地化资源跑通，再逐步补业务能力。
+- 如果需要对外发布，优先维护独立插件仓库，并在仓库根目录提供 `.laapp` 与 `README.md`。
+
+## English
+
+This directory stores sample plugins and reference implementations for LanMountainDesktop.
+
+### Current sample
+
+- `LanMountainDesktop.SamplePlugin`: a standard sample covering manifests, settings pages, desktop components, service registration, localization, and `.laapp` packaging.
