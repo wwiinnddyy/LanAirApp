@@ -1,35 +1,35 @@
 {
-    "schemaVersion":  "1.0.0",
-    "sourceId":  "official.lanairapp",
-    "sourceName":  "LanAirApp Official Market",
-    "generatedAt":  "2026-03-11T15:29:37.2882026+00:00",
-    "plugins":  [
-                    {
-                        "id":  "LanMountainDesktop.SamplePlugin",
-                        "name":  "LanMountain Sample Plugin",
-                        "description":  "Example plugin used to validate PluginSdk loading and isolation.",
-                        "author":  "LanMountainDesktop",
-                        "version":  "0.0.10",
-                        "apiVersion":  "1.0.0",
-                        "minHostVersion":  "0.0.1",
-                        "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.0.10.laapp",
-                        "sha256":  "4475a48c3ea76541c511407ecfe6e4ce983a8c13ddca1f3e7a8031e3f76f584f",
-                        "packageSizeBytes":  1703241,
-                        "iconUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-                        "releaseTag":  "v0.0.10",
-                        "releaseAssetName":  "LanMountainDesktop.SamplePlugin.0.0.10.laapp",
-                        "projectUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-                        "readmeUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
-                        "homepageUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-                        "repositoryUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-                        "tags":  [
-                                     "example",
-                                     "official",
-                                     "sdk"
-                                 ],
-                        "publishedAt":  "2026-03-10T10:15:00Z",
-                        "updatedAt":  "2026-03-11T15:28:17.9907262+00:00",
-                        "releaseNotes":  "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
-                    }
-                ]
+  "schemaVersion": "1.0.0",
+  "sourceId": "official.lanairapp",
+  "sourceName": "LanAirApp Official Market",
+  "generatedAt": "2026-03-11T16:38:30.9390986+00:00",
+  "plugins": [
+    {
+      "id": "LanMountainDesktop.SamplePlugin",
+      "name": "LanMountain Sample Plugin",
+      "description": "Example plugin used to validate PluginSdk loading and isolation.",
+      "author": "LanMountainDesktop",
+      "version": "0.0.12",
+      "apiVersion": "1.0.0",
+      "minHostVersion": "0.0.1",
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.0.12.laapp",
+      "sha256": "0733677b32922ca50e8f2d9552b2356a433a1f57cfd4a4092e2ab4cbca2ead4e",
+      "packageSizeBytes": 1703894,
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+      "releaseTag": "v0.0.12",
+      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.0.12.laapp",
+      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "tags": [
+        "example",
+        "official",
+        "sdk"
+      ],
+      "publishedAt": "2026-03-10T10:15:00Z",
+      "updatedAt": "2026-03-11T16:37:18.4007499+00:00",
+      "releaseNotes": "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
+    }
+  ]
 }
