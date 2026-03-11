@@ -29,6 +29,11 @@
 4. 将插件仓库根目录和校验信息登记到 `airappmarket/index.json`。
 5. 通过阑山桌面内建插件市场完成验证、安装和更新测试。
 
+### 开发入口
+
+- 仓库主入口解决方案文件为 `LanAirApp.slnx`。
+- SDK 版本由仓库根目录 `global.json` 锁定。
+
 ## English
 
 `LanAirApp` is the public-facing workspace for the LanMountainDesktop plugin ecosystem. This repository does not host the desktop runtime itself. Instead, it provides plugin development standards, sample plugins, packaging tools, and the official plugin market source.
@@ -49,3 +54,8 @@
 - The market index stores plugin metadata and links, not runtime implementation.
 - Each plugin repository should provide its `.laapp` package and `README.md` in the repository root.
 - The host app lists plugins from the official source and installs them from their own repositories.
+
+### Development entry point
+
+- The repository entry solution is `LanAirApp.slnx`.
+- The SDK version is pinned by the root `global.json`.

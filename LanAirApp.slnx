@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/LanAirApp/" />
+  <Folder Name="/LanAirApp/samples/">
+    <Project Path="LanAirApp/samples/LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.csproj" />
+  </Folder>
+  <Folder Name="/LanAirApp/tools/">
+    <Project Path="LanAirApp/tools/LanMountainDesktop.PluginPackager/LanMountainDesktop.PluginPackager.csproj" />
+  </Folder>
+  <Project Path="LanMountainDesktop.PluginSdk/LanMountainDesktop.PluginSdk.csproj" />
+</Solution>
