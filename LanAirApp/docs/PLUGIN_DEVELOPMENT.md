@@ -72,3 +72,22 @@ This guide explains how to build a LanMountainDesktop plugin with `LanMountainDe
 3. Register services, settings pages, and desktop components through `IPluginContext`.
 4. Prepare localized texts and state handling.
 5. Build and package the plugin as `.laapp`.
+
+### Host lifecycle API
+
+The host may expose `IHostApplicationLifecycle` through `IPluginContext.GetService<T>()`.
+
+```csharp
+var lifecycle = context.GetService<IHostApplicationLifecycle>();
+
+if (lifecycle?.TryExit(new HostApplicationLifecycleRequest(
+        Source: "YourPlugin.Widget",
+        Reason: "User clicked the close desktop action.")) == true)
+{
+    return;
+}
+```
+
+Use this API whenever a plugin needs to request application exit or restart instead of spawning processes or calling platform-specific shutdown logic directly.
+
+The sample plugin now includes a 2x1 `Close Desktop` widget that demonstrates this API end to end.
