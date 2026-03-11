@@ -2,22 +2,22 @@
     "schemaVersion":  "1.0.0",
     "sourceId":  "official.lanairapp",
     "sourceName":  "LanAirApp Official Market",
-    "generatedAt":  "2026-03-10T03:42:55.3947671+00:00",
+    "generatedAt":  "2026-03-11T15:29:37.2882026+00:00",
     "plugins":  [
                     {
                         "id":  "LanMountainDesktop.SamplePlugin",
                         "name":  "LanMountain Sample Plugin",
                         "description":  "Example plugin used to validate PluginSdk loading and isolation.",
                         "author":  "LanMountainDesktop",
-                        "version":  "1.0.0",
+                        "version":  "0.0.10",
                         "apiVersion":  "1.0.0",
                         "minHostVersion":  "0.0.1",
-                        "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.1.0.0.laapp",
-                        "sha256":  "c075247af2835aaafa9fc43159cabff87703c633084a7adf2ea13ea36f7677e3",
-                        "packageSizeBytes":  1702641,
+                        "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.0.10.laapp",
+                        "sha256":  "4475a48c3ea76541c511407ecfe6e4ce983a8c13ddca1f3e7a8031e3f76f584f",
+                        "packageSizeBytes":  1703241,
                         "iconUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-                        "releaseTag":  "v1.0.0",
-                        "releaseAssetName":  "LanMountainDesktop.SamplePlugin.1.0.0.laapp",
+                        "releaseTag":  "v0.0.10",
+                        "releaseAssetName":  "LanMountainDesktop.SamplePlugin.0.0.10.laapp",
                         "projectUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
                         "readmeUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
                         "homepageUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
@@ -28,7 +28,7 @@
                                      "sdk"
                                  ],
                         "publishedAt":  "2026-03-10T10:15:00Z",
-                        "updatedAt":  "2026-03-10T03:42:37.2369114+00:00",
+                        "updatedAt":  "2026-03-11T15:28:17.9907262+00:00",
                         "releaseNotes":  "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
                     }
                 ]
