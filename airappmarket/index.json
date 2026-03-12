@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-12T09:30:00Z",
+  "generatedAt": "2026-03-12T02:13:42.4366533+00:00",
   "contracts": [
     {
       "id": "LanMountainDesktop.SharedContracts.SampleClock",
@@ -19,15 +19,15 @@
       "name": "LanMountain Sample Plugin",
       "description": "Example plugin used to validate PluginSdk loading and isolation.",
       "author": "LanMountainDesktop",
-      "version": "0.0.12",
-      "apiVersion": "2.0.0",
+      "version": "0.1.0",
+      "apiVersion": "1.0.0",
       "minHostVersion": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.0.12.laapp",
-      "sha256": "005f77e64481691cf212910e7b8bcd28dcc54bea3a3a765d1c52b6d930308d4b",
-      "packageSizeBytes": 2056291,
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.1.0.laapp",
+      "sha256": "96721afc39f32903a58e54d7d75e5d9c8f73d0d21ad2fbe905bf5eb0ee59cd1b",
+      "packageSizeBytes": 2054786,
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-      "releaseTag": "v0.0.12",
-      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.0.12.laapp",
+      "releaseTag": "v0.1.0",
+      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.1.0.laapp",
       "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
       "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
       "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
@@ -38,8 +38,8 @@
         "sdk"
       ],
       "publishedAt": "2026-03-10T10:15:00Z",
-      "updatedAt": "2026-03-11T16:37:18.4007499+00:00",
-      "releaseNotes": "Reference plugin for SDK validation. API 2.0.0 uses HostBuilderContext + IServiceCollection, ships a private Humanizer dependency, and consumes the official SampleClock shared contract."
+      "updatedAt": "2026-03-12T02:12:34.08549+00:00",
+      "releaseNotes": "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
     }
   ]
 }
