@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {}
+    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {}
   },
   "projects": {
-    "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {
+    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
+        "projectUniqueName": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
         "projectName": "AirAppMarket.Validator",
-        "projectPath": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
+        "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
         "packagesPath": "C:\\Users\\USER182287\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\obj\\",
+        "outputPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER182287\\AppData\\Roaming\\NuGet\\NuGet.Config"
