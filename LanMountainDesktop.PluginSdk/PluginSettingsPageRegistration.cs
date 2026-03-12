@@ -2,6 +2,7 @@ using Avalonia.Controls;
 
 namespace LanMountainDesktop.PluginSdk;
 
+[Obsolete("Settings pages are retired. Register settings sections/options via AddPluginSettingsSection instead.")]
 public sealed class PluginSettingsPageRegistration
 {
     public PluginSettingsPageRegistration(

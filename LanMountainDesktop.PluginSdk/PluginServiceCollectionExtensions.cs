@@ -5,6 +5,7 @@ namespace LanMountainDesktop.PluginSdk;
 
 public static class PluginServiceCollectionExtensions
 {
+    [Obsolete("Settings pages are retired. Register settings sections/options via AddPluginSettingsSection instead.")]
     public static IServiceCollection AddPluginSettingsPage<TControl>(
         this IServiceCollection services,
         string id,
@@ -19,6 +20,29 @@ public static class PluginServiceCollectionExtensions
             title,
             provider => ActivatorUtilities.CreateInstance<TControl>(provider),
             sortOrder));
+        return services;
+    }
+
+    public static IServiceCollection AddPluginSettingsSection(
+        this IServiceCollection services,
+        string id,
+        string titleLocalizationKey,
+        Action<PluginSettingsSectionBuilder> configure,
+        string? descriptionLocalizationKey = null,
+        string iconKey = "PuzzlePiece",
+        int sortOrder = 0)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var builder = new PluginSettingsSectionBuilder(
+            id,
+            titleLocalizationKey,
+            descriptionLocalizationKey,
+            iconKey,
+            sortOrder);
+        configure(builder);
+        services.AddSingleton(builder.Build());
         return services;
     }
 
