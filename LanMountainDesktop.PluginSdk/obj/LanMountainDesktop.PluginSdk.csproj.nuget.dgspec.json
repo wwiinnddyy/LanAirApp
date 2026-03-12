@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj": {}
+    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj": {}
   },
   "projects": {
-    "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj": {
-      "version": "1.0.0",
+    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj": {
+      "version": "2.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
+        "projectUniqueName": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
         "projectName": "LanMountainDesktop.PluginSdk",
-        "projectPath": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
+        "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\LanMountainDesktop.PluginSdk.csproj",
         "packagesPath": "C:\\Users\\USER182287\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\obj\\",
+        "outputPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\LanMountainDesktop.PluginSdk\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER182287\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -47,6 +47,14 @@
             "Avalonia": {
               "target": "Package",
               "version": "[11.3.12, )"
+            },
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[10.0.0, )"
             }
           },
           "imports": [

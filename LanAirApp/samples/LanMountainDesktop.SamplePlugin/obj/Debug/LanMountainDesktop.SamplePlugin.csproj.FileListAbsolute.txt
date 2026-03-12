@@ -131,3 +131,12 @@ C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesk
 C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\obj\Debug\LanMountainDesktop.SamplePlugin.pdb
 C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\obj\Debug\LanMountainDesktop.SamplePlugin.genruntimeconfig.cache
 C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\obj\Debug\ref\LanMountainDesktop.SamplePlugin.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Humanizer.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Diagnostics.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.FileProviders.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Hosting.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Options.dll
+C:\Users\USER182287\Documents\GitHub\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin\bin\Debug\net10.0\content\Microsoft.Extensions.Primitives.dll

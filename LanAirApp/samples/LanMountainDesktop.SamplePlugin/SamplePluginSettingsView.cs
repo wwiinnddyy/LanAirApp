@@ -9,7 +9,7 @@ namespace LanMountainDesktop.SamplePlugin;
 
 internal sealed class SamplePluginSettingsView : UserControl
 {
-    private readonly IPluginContext _context;
+    private readonly IPluginRuntimeContext _context;
     private readonly PluginLocalizer _localizer;
     private readonly SamplePluginRuntimeStateService _stateService;
     private readonly SamplePluginClockService _clockService;
@@ -19,16 +19,17 @@ internal sealed class SamplePluginSettingsView : UserControl
     private readonly StackPanel _statusPanel = new() { Spacing = 10 };
     private readonly List<IDisposable> _subscriptions = [];
 
-    public SamplePluginSettingsView(IPluginContext context)
+    public SamplePluginSettingsView(
+        IPluginRuntimeContext context,
+        SamplePluginRuntimeStateService stateService,
+        SamplePluginClockService clockService,
+        IPluginMessageBus messageBus)
     {
         _context = context;
         _localizer = PluginLocalizer.Create(context);
-        _stateService = context.GetService<SamplePluginRuntimeStateService>()
-            ?? throw new InvalidOperationException("SamplePluginRuntimeStateService is not available.");
-        _clockService = context.GetService<SamplePluginClockService>()
-            ?? throw new InvalidOperationException("SamplePluginClockService is not available.");
-        _messageBus = context.GetService<IPluginMessageBus>()
-            ?? throw new InvalidOperationException("IPluginMessageBus is not available.");
+        _stateService = stateService;
+        _clockService = clockService;
+        _messageBus = messageBus;
 
         _stateService.MarkFrontendReady(T(
             "status.frontend.detail.settings_connected",

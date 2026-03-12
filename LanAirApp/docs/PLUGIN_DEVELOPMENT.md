@@ -69,13 +69,30 @@ This guide explains how to build a LanMountainDesktop plugin with `LanMountainDe
 
 1. Start from the sample plugin.
 2. Update the manifest and assembly names.
-3. Register services, settings pages, and desktop components through `IPluginContext`.
+3. Implement `IPlugin.Initialize(HostBuilderContext, IServiceCollection)` and register services, settings pages, and desktop components through `IServiceCollection`.
 4. Prepare localized texts and state handling.
 5. Build and package the plugin as `.laapp`.
 
+### Plugin API 2.0.0
+
+Plugins now target API `2.0.0` and use a DI-first entry model:
+
+```csharp
+public override void Initialize(HostBuilderContext context, IServiceCollection services)
+{
+    services.AddSingleton<MyPluginService>();
+    services.AddPluginSettingsPage<MySettingsView>("settings", "Settings");
+    services.AddPluginDesktopComponent<MyWidget>("widget", "My Widget");
+}
+```
+
+`IPluginRuntimeContext` becomes available through DI after the host builds the plugin service provider. Use it inside services, controls, and hosted services to read the manifest, directories, host properties, and host-provided services.
+
+Plugin packages may include managed or native NuGet dependencies that the host does not reference itself. API `2.0.0` plugins must ship their `.deps.json` and any required runtime assets inside the `.laapp` package.
+
 ### Host lifecycle API
 
-The host may expose `IHostApplicationLifecycle` through `IPluginContext.GetService<T>()`.
+The host may expose `IHostApplicationLifecycle` through `IPluginRuntimeContext.GetService<T>()`.
 
 ```csharp
 var lifecycle = context.GetService<IHostApplicationLifecycle>();

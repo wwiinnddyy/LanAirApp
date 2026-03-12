@@ -1,21 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.0.0</Version>
+    <Version>0.0.12</Version>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <OutputPath>bin\$(Configuration)\$(TargetFramework)\content\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <PluginPackageOutputDirectory>..\..\..\LanMountainDesktop\bin\$(Configuration)\$(TargetFramework)\Extensions\Plugins\</PluginPackageOutputDirectory>
-    <PluginPackagePath>$(PluginPackageOutputDirectory)$(AssemblyName).laapp</PluginPackagePath>
-    <LegacyLoosePluginOutputDirectory>..\..\..\LanMountainDesktop\bin\$(Configuration)\$(TargetFramework)\Extensions\Plugins\SamplePlugin\</LegacyLoosePluginOutputDirectory>
+    <WorkspaceRoot>$(MSBuildThisFileDirectory)..\..\..\</WorkspaceRoot>
+    <PluginSdkProjectPath>$(WorkspaceRoot)LanMountainDesktop.PluginSdk\LanMountainDesktop.PluginSdk.csproj</PluginSdkProjectPath>
+    <PluginPackageOutputDirectory>$(MSBuildThisFileDirectory)</PluginPackageOutputDirectory>
+    <PluginPackagePath>$(PluginPackageOutputDirectory)$(AssemblyName).$(Version).laapp</PluginPackagePath>
+    <LegacyLoosePluginOutputDirectory>$(WorkspaceRoot)..\LanMontainDesktop\bin\$(Configuration)\$(TargetFramework)\Extensions\Plugins\SamplePlugin\</LegacyLoosePluginOutputDirectory>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LanMountainDesktop.PluginSdk\LanMountainDesktop.PluginSdk.csproj" Private="false" />
+    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+    <ProjectReference Include="$(WorkspaceRoot)LanMountainDesktop.SharedContracts.SampleClock\LanMountainDesktop.SharedContracts.SampleClock.csproj"
+                      Private="false" />
+    <ProjectReference Include="$(PluginSdkProjectPath)" Private="false" />
     <None Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Localization\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

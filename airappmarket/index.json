@@ -2,7 +2,17 @@
   "schemaVersion": "1.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-11T16:38:30.9390986+00:00",
+  "generatedAt": "2026-03-12T09:30:00Z",
+  "contracts": [
+    {
+      "id": "LanMountainDesktop.SharedContracts.SampleClock",
+      "version": "2.0.0",
+      "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "sha256": "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
+      "packageSizeBytes": 4608
+    }
+  ],
   "plugins": [
     {
       "id": "LanMountainDesktop.SamplePlugin",
@@ -10,11 +20,11 @@
       "description": "Example plugin used to validate PluginSdk loading and isolation.",
       "author": "LanMountainDesktop",
       "version": "0.0.12",
-      "apiVersion": "1.0.0",
+      "apiVersion": "2.0.0",
       "minHostVersion": "0.0.1",
       "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.0.12.laapp",
-      "sha256": "0733677b32922ca50e8f2d9552b2356a433a1f57cfd4a4092e2ab4cbca2ead4e",
-      "packageSizeBytes": 1703894,
+      "sha256": "005f77e64481691cf212910e7b8bcd28dcc54bea3a3a765d1c52b6d930308d4b",
+      "packageSizeBytes": 2056291,
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
       "releaseTag": "v0.0.12",
       "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.0.12.laapp",
@@ -29,7 +39,7 @@
       ],
       "publishedAt": "2026-03-10T10:15:00Z",
       "updatedAt": "2026-03-11T16:37:18.4007499+00:00",
-      "releaseNotes": "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
+      "releaseNotes": "Reference plugin for SDK validation. API 2.0.0 uses HostBuilderContext + IServiceCollection, ships a private Humanizer dependency, and consumes the official SampleClock shared contract."
     }
   ]
 }

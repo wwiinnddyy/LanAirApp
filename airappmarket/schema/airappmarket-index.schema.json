@@ -9,6 +9,7 @@
     "sourceId",
     "sourceName",
     "generatedAt",
+    "contracts",
     "plugins"
   ],
   "properties": {
@@ -28,6 +29,12 @@
       "type": "string",
       "format": "date-time"
     },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
     "plugins": {
       "type": "array",
       "items": {
@@ -36,6 +43,44 @@
     }
   },
   "$defs": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "assemblyName",
+        "downloadUrl",
+        "sha256",
+        "packageSizeBytes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        },
+        "assemblyName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "downloadUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "packageSizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
     "plugin": {
       "type": "object",
       "additionalProperties": false,

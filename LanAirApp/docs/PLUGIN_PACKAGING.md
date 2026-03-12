@@ -49,5 +49,8 @@ The standard installation format for LanMountainDesktop plugins is `.laapp`. It 
 
 - Put the generated `.laapp` file in the plugin repository root.
 - Keep `README.md` in the same repository root.
+- API `2.0.0` plugins must include `plugin.json`, the main plugin assembly, the matching `.deps.json`, and any managed/native dependency files required by that dependency graph.
+- Private NuGet dependencies are supported. Package them inside the `.laapp` by zipping the full plugin output directory rather than cherry-picking files.
+- If a plugin depends on shared contract assemblies, declare them in `plugin.json.sharedContracts[]`. Those contracts are resolved and cached by the host in a version-isolated directory.
 - The official market index stores metadata and links; it no longer relies on `LanAirApp/releases/` as the primary source.
 - The host downloads the package, validates its hash, and stages the installation.

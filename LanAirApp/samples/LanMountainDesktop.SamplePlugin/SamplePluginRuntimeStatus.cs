@@ -289,7 +289,7 @@ internal sealed class SamplePluginRuntimeStateService
     }
 
     public IReadOnlyList<SamplePluginCapabilityItem> GetCapabilities(
-        IPluginContext context,
+        IPluginRuntimeContext context,
         bool hasStateService,
         bool hasClockService,
         bool hasMessageBus)
@@ -303,27 +303,27 @@ internal sealed class SamplePluginRuntimeStateService
         return
         [
             new SamplePluginCapabilityItem(
-                T("capability.manifest.title", "IPluginContext.Manifest"),
+                T("capability.manifest.title", "IPluginRuntimeContext.Manifest"),
                 Tf(
                     "capability.manifest.detail",
                     "可读取。当前插件 id：{0}；版本：{1}。",
                     context.Manifest.Id,
                     context.Manifest.Version ?? T("common.dev", "开发版"))),
             new SamplePluginCapabilityItem(
-                T("capability.directories.title", "IPluginContext.PluginDirectory / DataDirectory"),
+                T("capability.directories.title", "IPluginRuntimeContext.PluginDirectory / DataDirectory"),
                 Tf(
                     "capability.directories.detail",
                     "可读取。插件目录：{0}；数据目录：{1}。",
                     context.PluginDirectory,
                     context.DataDirectory)),
             new SamplePluginCapabilityItem(
-                T("capability.properties.title", "IPluginContext.Properties"),
+                T("capability.properties.title", "IPluginRuntimeContext.Properties"),
                 Tf(
                     "capability.properties.detail",
                     "可读取。宿主当前暴露的属性：{0}。",
                     propertyNames)),
             new SamplePluginCapabilityItem(
-                T("capability.get_service.title", "IPluginContext.GetService<T>()"),
+                T("capability.get_service.title", "IPluginRuntimeContext.GetService<T>()"),
                 Tf(
                     "capability.get_service.detail",
                     "可调用。状态服务已解析：{0}；时钟服务已解析：{1}；消息总线已解析：{2}。",
@@ -331,7 +331,7 @@ internal sealed class SamplePluginRuntimeStateService
                     FormatBoolean(hasClockService),
                     FormatBoolean(hasMessageBus))),
             new SamplePluginCapabilityItem(
-                T("capability.register_service.title", "IPluginContext.RegisterService<TService>()"),
+                T("capability.register_service.title", "IServiceCollection registrations"),
                 T(
                     "capability.register_service.detail",
                     "可在插件初始化阶段调用。这个示例插件会把 SamplePluginRuntimeStateService 和 SamplePluginClockService 注册进插件服务容器。")),
