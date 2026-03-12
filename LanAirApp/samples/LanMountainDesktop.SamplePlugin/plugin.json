@@ -3,7 +3,7 @@
   "name": "LanMountain Sample Plugin",
   "description": "Example plugin used to validate PluginSdk loading and isolation.",
   "author": "LanMountainDesktop",
-  "version": "0.0.12",
+  "version": "0.1.1",
   "apiVersion": "2.0.0",
   "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
   "sharedContracts": [
