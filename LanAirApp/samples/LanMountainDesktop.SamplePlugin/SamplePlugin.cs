@@ -44,15 +44,28 @@ public sealed class SamplePlugin : PluginBase
         services.AddSingleton<IHostedService, SamplePluginHostedService>();
         services.AddPluginExport<ISampleClockExport, SamplePluginClockExport>();
 
-        services.AddPluginSettingsPage<SamplePluginSettingsView>(
-            "status",
-            localizer.GetString("settings.page_title", "插件状态"));
+        services.AddPluginSettingsSection(
+            id: "status",
+            titleLocalizationKey: "settings.page_title",
+            configure: builder =>
+            {
+                builder.AddText(
+                    key: "status.note",
+                    titleLocalizationKey: "settings.page_title",
+                    descriptionLocalizationKey: "plugin.description",
+                    defaultValue: localizer.GetString(
+                        "settings.section.status_hint",
+                        "Use this section to verify plugin runtime status."));
+            },
+            descriptionLocalizationKey: "plugin.description",
+            iconKey: "PuzzlePiece",
+            sortOrder: 0);
 
         services.AddPluginDesktopComponent<SamplePluginStatusClockWidget>(
             "LanMountainDesktop.SamplePlugin.StatusClock",
-            localizer.GetString("widget.display_name", "示例插件状态时钟"),
+            localizer.GetString("widget.display_name", "Sample Plugin Status Clock"),
             iconKey: "PuzzlePiece",
-            category: localizer.GetString("widget.category", "插件"),
+            category: localizer.GetString("widget.category", "Plugins"),
             minWidthCells: 4,
             minHeightCells: 4,
             allowDesktopPlacement: true,
@@ -62,9 +75,9 @@ public sealed class SamplePlugin : PluginBase
 
         services.AddPluginDesktopComponent<SamplePluginCloseDesktopWidget>(
             "LanMountainDesktop.SamplePlugin.CloseDesktop",
-            localizer.GetString("widget.close_desktop.display_name", "关闭桌面"),
+            localizer.GetString("widget.close_desktop.display_name", "Close Desktop"),
             iconKey: "DismissCircle",
-            category: localizer.GetString("widget.category", "插件"),
+            category: localizer.GetString("widget.category", "Plugins"),
             minWidthCells: 2,
             minHeightCells: 1,
             allowDesktopPlacement: true,

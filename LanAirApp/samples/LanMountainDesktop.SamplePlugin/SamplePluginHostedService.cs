@@ -1,6 +1,6 @@
-using Humanizer;
 using LanMountainDesktop.PluginSdk;
 using Microsoft.Extensions.Hosting;
+using System.Globalization;
 
 namespace LanMountainDesktop.SamplePlugin;
 
@@ -25,7 +25,7 @@ internal sealed class SamplePluginHostedService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var logPath = Path.Combine(_runtimeContext.DataDirectory, "sample-plugin.log");
-        var dependencyText = TimeSpan.FromSeconds(75).Humanize(culture: System.Globalization.CultureInfo.InvariantCulture);
+        var dependencyText = TimeSpan.FromSeconds(75).ToString("c", CultureInfo.InvariantCulture);
         var initMessage =
             $"[{DateTimeOffset.UtcNow:O}] {_runtimeContext.Manifest.Name} initialized in {_runtimeContext.Manifest.Version ?? "dev"}; dependency probe={dependencyText}.";
 

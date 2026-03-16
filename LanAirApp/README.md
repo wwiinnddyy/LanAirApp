@@ -2,60 +2,48 @@
 
 ## 中文
 
-`LanAirApp` 是阑山桌面插件生态的对外工作区。这个仓库不承担宿主运行时本体职责，而是负责整理插件开发标准、示例插件、打包工具以及官方插件市场源。
+`LanAirApp` 是阑山桌面插件生态的对外仓库，负责官方插件市场、插件开发文档、打包与校验工具，以及镜像样例模板。
 
-### 目录说明
+### 本仓库负责什么
 
-- `docs/`：插件开发与打包文档。
-- `samples/`：示例插件与参考项目。
-- `standards/`：插件清单和目录结构约定。
-- `tools/`：插件打包与辅助工具。
-- `airappmarket/`：官方插件市场索引、Schema、校验工具与静态资源。
-- `releases/`：临时分发或人工分享目录，不再作为内建市场的主分发源。
-- `LanMountainDesktop.PluginSdk/`：插件开发时需要引用的 SDK 契约。
+- `airappmarket/`：官方市场索引、Schema、校验工具和静态资源
+- `docs/`：插件开发与打包文档
+- `tools/`：打包和辅助工具
+- `samples/`：镜像样例与模板
+- `LanMountainDesktop.PluginSdk/`：镜像 SDK，需与宿主仓库保持一致
 
-### 与阑山桌面的关系
+### 不负责什么
 
-- 阑山桌面程序只连接 `LanAirApp/airappmarket/index.json` 获取官方插件列表。
-- 市场索引只负责维护插件元数据和链接，不直接承载插件运行时逻辑。
-- 每个插件项目应当在自己的仓库根目录提供 `.laapp` 安装包和 `README.md`。
-- 宿主程序根据官方索引逐项列出插件，并从对应插件仓库读取安装包和说明文档。
+- 不承载桌面宿主运行时
+- 不作为插件 API 的独立权威来源
+- 不作为官方示例插件发布仓库
 
-### 推荐工作流
+### 关系约束
 
-1. 从示例插件开始创建新插件项目。
-2. 完成 `plugin.json`、入口类、设置页、桌面组件和本地化资源。
-3. 打包生成根目录 `.laapp`。
-4. 将插件仓库根目录和校验信息登记到 `airappmarket/index.json`。
-5. 通过阑山桌面内建插件市场完成验证、安装和更新测试。
-
-### 开发入口
-
-- 仓库主入口解决方案文件为 `LanAirApp.slnx`。
-- SDK 版本由仓库根目录 `global.json` 锁定。
+- 宿主应用权威仓库：`LanMontainDesktop`
+- 官方示例插件权威仓库：`LanMountainDesktop.SamplePlugin`
+- `samples/LanMountainDesktop.SamplePlugin` 是镜像模板副本，用于文档和本地联调
 
 ## English
 
-`LanAirApp` is the public-facing workspace for the LanMountainDesktop plugin ecosystem. This repository does not host the desktop runtime itself. Instead, it provides plugin development standards, sample plugins, packaging tools, and the official plugin market source.
+`LanAirApp` is the public-facing repository for the LanMountainDesktop plugin ecosystem. It owns the official plugin market, developer-facing documentation, packaging and validation tools, and mirrored sample templates.
 
-### Directory overview
+### What this repository owns
 
-- `docs/`: plugin development and packaging guides.
-- `samples/`: sample plugins and reference projects.
-- `standards/`: manifest and structure conventions.
-- `tools/`: packaging and helper tools.
-- `airappmarket/`: the official market index, schema, validator, and static assets.
-- `releases/`: temporary staging or manual sharing only, no longer the primary built-in market source.
-- `LanMountainDesktop.PluginSdk/`: the SDK contract consumed by plugin authors.
+- `airappmarket/`: the official market index, schema, validator, and static assets
+- `docs/`: plugin development and packaging guides
+- `tools/`: packaging and helper tools
+- `samples/`: mirrored samples and templates
+- `LanMountainDesktop.PluginSdk/`: the mirrored SDK copy that must stay aligned with the host repository
 
-### Relationship with LanMountainDesktop
+### What this repository does not own
 
-- LanMountainDesktop connects only to `LanAirApp/airappmarket/index.json` for the official plugin list.
-- The market index stores plugin metadata and links, not runtime implementation.
-- Each plugin repository should provide its `.laapp` package and `README.md` in the repository root.
-- The host app lists plugins from the official source and installs them from their own repositories.
+- the desktop host runtime
+- an independent plugin API baseline
+- the authoritative release repository for the official sample plugin
 
-### Development entry point
+### Relationship boundaries
 
-- The repository entry solution is `LanAirApp.slnx`.
-- The SDK version is pinned by the root `global.json`.
+- Host source of truth: `LanMontainDesktop`
+- Official sample plugin source of truth: `LanMountainDesktop.SamplePlugin`
+- `samples/LanMountainDesktop.SamplePlugin` is a mirrored template copy for docs and local integration

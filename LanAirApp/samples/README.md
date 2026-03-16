@@ -1,23 +1,29 @@
-# 示例插件目录
+# 示例插件目录 / Sample Plugins
 
 ## 中文
 
-本目录用于存放阑山桌面的示例插件和参考实现。
+本目录存放阑山桌面插件的镜像样例与参考模板。
 
 ### 当前内容
 
-- `LanMountainDesktop.SamplePlugin`：标准示例插件，演示插件清单、设置页、桌面组件、服务注册、本地化和 `.laapp` 打包流程。
+- `LanMountainDesktop.SamplePlugin`：官方示例插件的镜像副本，用于文档说明、SDK 联调和模板起步
 
-### 使用建议
+### 使用约束
 
-- 新插件项目建议从示例插件复制开始。
-- 先确认插件清单、入口类和本地化资源跑通，再逐步补业务能力。
-- 如果需要对外发布，优先维护独立插件仓库，并在仓库根目录提供 `.laapp` 与 `README.md`。
+- 这里的样例是镜像模板，不是官方发布真源
+- 官方市场引用和正式发布都以独立仓库 `LanMountainDesktop.SamplePlugin` 为准
+- 需要升级样例接口或行为时，应先更新独立示例仓库，再同步到这里
 
 ## English
 
-This directory stores sample plugins and reference implementations for LanMountainDesktop.
+This directory stores mirrored sample plugins and reference templates for LanMountainDesktop.
 
 ### Current sample
 
-- `LanMountainDesktop.SamplePlugin`: a standard sample covering manifests, settings pages, desktop components, service registration, localization, and `.laapp` packaging.
+- `LanMountainDesktop.SamplePlugin`: the mirrored copy of the official sample plugin, used for documentation, SDK integration, and template bootstrapping
+
+### Usage rules
+
+- Samples here are mirrored templates, not the authoritative release source
+- Official market references and releases always point to the standalone `LanMountainDesktop.SamplePlugin` repository
+- Interface or behavior upgrades should be made in the standalone sample first, then synced back here

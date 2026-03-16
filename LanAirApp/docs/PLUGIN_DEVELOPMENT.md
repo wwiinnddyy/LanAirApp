@@ -67,28 +67,33 @@ This guide explains how to build a LanMountainDesktop plugin with `LanMountainDe
 
 ### Recommended workflow
 
-1. Start from the sample plugin.
+1. Start from the official sample plugin repository, or from the mirrored in-repo sample template when working inside the shared workspace.
 2. Update the manifest and assembly names.
 3. Implement `IPlugin.Initialize(HostBuilderContext, IServiceCollection)` and register services, settings pages, and desktop components through `IServiceCollection`.
 4. Prepare localized texts and state handling.
 5. Build and package the plugin as `.laapp`.
 
-### Plugin API 2.0.0
+### Plugin API 3.0.0
 
-Plugins now target API `2.0.0` and use a DI-first entry model:
+Plugins now target API `3.0.0` and use a DI-first entry model:
 
 ```csharp
 public override void Initialize(HostBuilderContext context, IServiceCollection services)
 {
     services.AddSingleton<MyPluginService>();
-    services.AddPluginSettingsPage<MySettingsView>("settings", "Settings");
+    services.AddPluginSettingsSection(
+        id: "settings",
+        titleLocalizationKey: "settings.page_title",
+        configure: builder => builder.AddText("sample.note", "settings.page_title"));
     services.AddPluginDesktopComponent<MyWidget>("widget", "My Widget");
 }
 ```
 
 `IPluginRuntimeContext` becomes available through DI after the host builds the plugin service provider. Use it inside services, controls, and hosted services to read the manifest, directories, host properties, and host-provided services.
 
-Plugin packages may include managed or native NuGet dependencies that the host does not reference itself. API `2.0.0` plugins must ship their `.deps.json` and any required runtime assets inside the `.laapp` package.
+Plugin packages may include managed or native NuGet dependencies that the host does not reference itself. API `3.0.0` plugins must ship their `.deps.json` and any required runtime assets inside the `.laapp` package.
+
+The official sample plugin demonstrates the current host-facing capability set end to end: `IPluginRuntimeContext`, `IHostApplicationLifecycle`, `IPluginMessageBus`, `AddPluginExport`, `AddPluginSettingsSection`, and `AddPluginDesktopComponent`.
 
 ### Host lifecycle API
 

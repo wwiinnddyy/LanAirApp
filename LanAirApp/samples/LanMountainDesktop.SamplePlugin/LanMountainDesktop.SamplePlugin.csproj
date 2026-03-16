@@ -17,7 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <ProjectReference Include="$(WorkspaceRoot)LanMountainDesktop.SharedContracts.SampleClock\LanMountainDesktop.SharedContracts.SampleClock.csproj"
                       Private="false" />
     <ProjectReference Include="$(PluginSdkProjectPath)" Private="false" />
