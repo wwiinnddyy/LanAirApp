@@ -2,48 +2,50 @@
 
 ## 中文
 
-`LanAirApp` 是阑山桌面插件生态的对外仓库，负责官方插件市场、插件开发文档、打包与校验工具，以及镜像样例模板。
+`LanAirApp` 是 LanMountainDesktop 插件生态的对外仓库，只负责市场、文档、工具和模板，不承载桌面宿主运行时，也不作为 SDK 或官方示例的权威源码仓。
 
-### 本仓库负责什么
+### 本仓负责
 
-- `airappmarket/`：官方市场索引、Schema、校验工具和静态资源
+- `airappmarket/`：官方市场索引、Schema、校验器和静态资源
 - `docs/`：插件开发与打包文档
-- `tools/`：打包和辅助工具
+- `tools/`：打包、验证和辅助工具
 - `samples/`：镜像样例与模板
-- `LanMountainDesktop.PluginSdk/`：镜像 SDK，需与宿主仓库保持一致
+- `standards/`：插件清单和打包约定模板
+- `releases/`：临时暂存与本地调试产物
 
-### 不负责什么
+### 本仓不负责
 
-- 不承载桌面宿主运行时
-- 不作为插件 API 的独立权威来源
-- 不作为官方示例插件发布仓库
+- 桌面宿主运行时
+- 插件 SDK 的权威接口定义
+- 官方示例插件的权威发布源
 
-### 关系约束
+### 权威指向
 
-- 宿主应用权威仓库：`LanMontainDesktop`
-- 官方示例插件权威仓库：`LanMountainDesktop.SamplePlugin`
-- `samples/LanMountainDesktop.SamplePlugin` 是镜像模板副本，用于文档和本地联调
+- 宿主与 SDK 权威仓：`LanMountainDesktop`
+- 官方示例插件权威仓：`LanMountainDesktop.SamplePlugin`
+- `LanMountainDesktop.PluginSdk/`、`LanMountainDesktop.SharedContracts.SampleClock/` 与 `samples/` 仅作为镜像/模板材料
 
 ## English
 
-`LanAirApp` is the public-facing repository for the LanMountainDesktop plugin ecosystem. It owns the official plugin market, developer-facing documentation, packaging and validation tools, and mirrored sample templates.
+`LanAirApp` is the public ecosystem repository for LanMountainDesktop. It owns market metadata, documentation, tools, and templates only. It does not own the desktop runtime, the authoritative SDK surface, or the official sample release source.
 
-### What this repository owns
+### This repository owns
 
 - `airappmarket/`: the official market index, schema, validator, and static assets
-- `docs/`: plugin development and packaging guides
-- `tools/`: packaging and helper tools
+- `docs/`: plugin development and packaging documentation
+- `tools/`: packaging, validation, and helper tools
 - `samples/`: mirrored samples and templates
-- `LanMountainDesktop.PluginSdk/`: the mirrored SDK copy that must stay aligned with the host repository
+- `standards/`: manifest and packaging conventions
+- `releases/`: temporary staging and local debugging output
 
-### What this repository does not own
+### This repository does not own
 
 - the desktop host runtime
-- an independent plugin API baseline
-- the authoritative release repository for the official sample plugin
+- the authoritative plugin SDK interface definitions
+- the official sample plugin release source
 
-### Relationship boundaries
+### Authoritative pointers
 
-- Host source of truth: `LanMontainDesktop`
+- Host and SDK source of truth: `LanMountainDesktop`
 - Official sample plugin source of truth: `LanMountainDesktop.SamplePlugin`
-- `samples/LanMountainDesktop.SamplePlugin` is a mirrored template copy for docs and local integration
+- `LanMountainDesktop.PluginSdk/`, `LanMountainDesktop.SharedContracts.SampleClock/`, and `samples/` are mirrored/template material only

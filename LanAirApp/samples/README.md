@@ -1,29 +1,29 @@
-# 示例插件目录 / Sample Plugins
+# 绀轰緥鎻掍欢鐩綍 / Sample Plugins
 
 ## 中文
 
-本目录存放阑山桌面插件的镜像样例与参考模板。
+这个目录保存镜像样例与模板，只用于文档、SDK 联调和本地样板，不是权威发布源。
 
 ### 当前内容
 
-- `LanMountainDesktop.SamplePlugin`：官方示例插件的镜像副本，用于文档说明、SDK 联调和模板起步
+- `LanMountainDesktop.SamplePlugin`：官方示例插件的镜像模板副本，用于说明 v4 插件语义、开发流程和市场接入方式
 
-### 使用约束
+### 使用规则
 
-- 这里的样例是镜像模板，不是官方发布真源
+- 这里的样例是模板，不是官方发布真源
 - 官方市场引用和正式发布都以独立仓库 `LanMountainDesktop.SamplePlugin` 为准
-- 需要升级样例接口或行为时，应先更新独立示例仓库，再同步到这里
+- 组件注册、圆角能力和 `plugin.json` 语义应优先跟随官方示例仓库，再同步到这里
 
 ## English
 
-This directory stores mirrored sample plugins and reference templates for LanMountainDesktop.
+This directory stores mirrored sample plugins and templates for documentation, SDK integration, and local bootstrapping.
 
 ### Current sample
 
-- `LanMountainDesktop.SamplePlugin`: the mirrored copy of the official sample plugin, used for documentation, SDK integration, and template bootstrapping
+- `LanMountainDesktop.SamplePlugin`: mirrored template copy of the official sample plugin, used to explain v4 plugin semantics, development flow, and market integration
 
 ### Usage rules
 
-- Samples here are mirrored templates, not the authoritative release source
+- Samples here are templates, not the authoritative release source
 - Official market references and releases always point to the standalone `LanMountainDesktop.SamplePlugin` repository
-- Interface or behavior upgrades should be made in the standalone sample first, then synced back here
+- Component registration, corner radius semantics, and `plugin.json` behavior should follow the official sample repository first, then sync here

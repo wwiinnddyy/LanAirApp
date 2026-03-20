@@ -1,10 +1,10 @@
 {
   "id": "LanMountainDesktop.SamplePlugin",
   "name": "LanMountain Sample Plugin",
-  "description": "Example plugin used to validate PluginSdk loading and isolation.",
+  "description": "Mirrored sample plugin used to validate PluginSdk v4 loading, appearance, and isolation.",
   "author": "LanMountainDesktop",
   "version": "0.1.1",
-  "apiVersion": "3.0.0",
+  "apiVersion": "4.0.0",
   "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
   "sharedContracts": [
     {
