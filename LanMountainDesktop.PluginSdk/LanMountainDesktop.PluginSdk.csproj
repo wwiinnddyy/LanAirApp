@@ -4,7 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
+    <PackageId>LanMountainDesktop.PluginSdk</PackageId>
+    <Description>LanMountainDesktop plugin SDK for Plugin API 4.0.0.</Description>
   </PropertyGroup>
 
   <ItemGroup>

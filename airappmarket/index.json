@@ -1,45 +1,52 @@
 {
-  "schemaVersion": "1.0.0",
-  "sourceId": "official.lanairapp",
-  "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-16T01:59:28.9896888+00:00",
-  "contracts": [
-    {
-      "id": "LanMountainDesktop.SharedContracts.SampleClock",
-      "version": "2.0.0",
-      "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll",
-      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
-      "sha256": "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
-      "packageSizeBytes": 4608
-    }
-  ],
-  "plugins": [
-    {
-      "id": "LanMountainDesktop.SamplePlugin",
-      "name": "LanMountain Sample Plugin",
-      "description": "Example plugin used to validate PluginSdk loading and isolation.",
-      "author": "LanMountainDesktop",
-      "version": "0.2.0",
-      "apiVersion": "3.0.0",
-      "minHostVersion": "0.0.1",
-      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.2.0.laapp",
-      "sha256": "897a5d79edc7e4aa743d69d081dbc582ec41651c1f2f0550dacb8bbd16058082",
-      "packageSizeBytes": 1894217,
-      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-      "releaseTag": "v0.2.0",
-      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.2.0.laapp",
-      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
-      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "tags": [
-        "example",
-        "official",
-        "sdk"
-      ],
-      "publishedAt": "2026-03-10T10:15:00Z",
-      "updatedAt": "2026-03-16T01:58:18.866623+00:00",
-      "releaseNotes": "Reference plugin for SDK validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
-    }
-  ]
+    "schemaVersion":  "1.0.0",
+    "sourceId":  "official.lanairapp",
+    "sourceName":  "LanAirApp Official Market",
+    "generatedAt":  "2026-03-20T18:29:22.9522654+00:00",
+    "contracts":  [
+                      {
+                          "id":  "LanMountainDesktop.SharedContracts.SampleClock",
+                          "version":  "2.0.0",
+                          "assemblyName":  "LanMountainDesktop.SharedContracts.SampleClock.dll",
+                          "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
+                          "sha256":  "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
+                          "packageSizeBytes":  4608
+                      }
+                  ],
+    "plugins":  [
+                    {
+                        "id":  "LanMountainDesktop.SamplePlugin",
+                        "name":  "LanMountain Sample Plugin",
+                        "description":  "Official sample plugin used to validate PluginSdk v4 loading, appearance, and isolation.",
+                        "author":  "LanMountainDesktop",
+                        "version":  "0.1.1",
+                        "apiVersion":  "4.0.0",
+                        "sharedContracts":  [
+                                                {
+                                                    "id":  "LanMountainDesktop.SharedContracts.SampleClock",
+                                                    "version":  "2.0.0",
+                                                    "assemblyName":  "LanMountainDesktop.SharedContracts.SampleClock.dll"
+                                                }
+                                            ],
+                        "minHostVersion":  "0.0.1",
+                        "downloadUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.1.1.laapp",
+                        "sha256":  "d5dc5682d21e42314c7ebe7db730345aee757367a96cc9ba261690cc1ee47c49",
+                        "packageSizeBytes":  1705847,
+                        "iconUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+                        "releaseTag":  "v0.1.1",
+                        "releaseAssetName":  "LanMountainDesktop.SamplePlugin.0.1.1.laapp",
+                        "projectUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+                        "readmeUrl":  "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
+                        "homepageUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+                        "repositoryUrl":  "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+                        "tags":  [
+                                     "example",
+                                     "official",
+                                     "sdk"
+                                 ],
+                        "publishedAt":  "2026-03-10T10:15:00Z",
+                        "updatedAt":  "2026-03-20T18:27:46.4374458+00:00",
+                        "releaseNotes":  "Reference plugin for SDK v4 validation. The desktop app prefers the tagged GitHub Release asset and falls back to the repository root .laapp package when a Release asset cannot be resolved."
+                    }
+                ]
 }

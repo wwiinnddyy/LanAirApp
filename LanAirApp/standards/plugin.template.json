@@ -4,6 +4,7 @@
   "description": "Describe what your plugin adds to LanMountainDesktop.",
   "author": "Your Name",
   "version": "1.0.0",
-  "apiVersion": "1.0.0",
-  "entranceAssembly": "LanMountainDesktop.YourPlugin.dll"
+  "apiVersion": "4.0.0",
+  "entranceAssembly": "LanMountainDesktop.YourPlugin.dll",
+  "sharedContracts": []
 }

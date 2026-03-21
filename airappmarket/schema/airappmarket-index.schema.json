@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/airappmarket-index.schema.json",
   "title": "AirAppMarket Index",
+  "description": "Official LanMountainDesktop market index with Plugin API v4 metadata.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -81,6 +82,29 @@
         }
       }
     },
+    "sharedContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "assemblyName"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        },
+        "assemblyName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "plugin": {
       "type": "object",
       "additionalProperties": false,
@@ -137,6 +161,12 @@
         "apiVersion": {
           "type": "string",
           "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        },
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sharedContract"
+          }
         },
         "minHostVersion": {
           "type": "string",
