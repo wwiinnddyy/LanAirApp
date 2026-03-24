@@ -1,0 +1,60 @@
+name: Refresh AirAppMarket Index
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - official-plugin-released
+  push:
+    branches:
+      - main
+    paths:
+      - "airappmarket/registry/**"
+      - ".github/workflows/airappmarket-refresh.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: airappmarket-refresh-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Regenerate official market index
+        shell: pwsh
+        run: |
+          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --registry airappmarket\registry\official-plugins.json --output airappmarket\index.json
+
+      - name: Validate generated index
+        shell: pwsh
+        run: |
+          dotnet run --project airappmarket\tools\AirAppMarket.Validator\AirAppMarket.Validator.csproj -- airappmarket\index.json airappmarket\schema\airappmarket-index.schema.json
+
+      - name: Commit refreshed index
+        shell: pwsh
+        run: |
+          $status = git status --porcelain -- airappmarket/index.json
+          if ([string]::IsNullOrWhiteSpace($status)) {
+            Write-Host "Official market index is already up to date."
+            exit 0
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add airappmarket/index.json
+          git commit -m "chore: refresh official market index"
+          git push origin HEAD:main

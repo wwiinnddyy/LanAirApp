@@ -2,7 +2,7 @@
   "schemaVersion": "2.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-24T15:10:33.1379283+00:00",
+  "generatedAt": "2026-03-24T15:49:58.7778689+00:00",
   "contracts": [
     {
       "id": "LanMountainDesktop.SharedContracts.SampleClock",
@@ -90,10 +90,10 @@
       "pluginId": "VoiceHubLanDesktop",
       "manifest": {
         "id": "VoiceHubLanDesktop",
-        "name": "\u58F0\u52A8\u6821\u56ED\u6B4C\u5355",
-        "description": "\u5C55\u793A VoiceHub \u5E7F\u64AD\u7AD9\u5F53\u65E5\u6B4C\u5355\uFF0C\u6309\u64AD\u653E\u987A\u5E8F\u663E\u793A\u6B4C\u66F2\u4FE1\u606F\u3002",
+        "name": "VoiceHub Campus Playlist",
+        "description": "Shows the VoiceHub public playlist in LanMountainDesktop.",
         "author": "LaoShui",
-        "version": "0.0.3",
+        "version": "0.0.4",
         "apiVersion": "4.0.0",
         "entranceAssembly": "VoiceHubLanDesktop.dll",
         "sharedContracts": []
@@ -114,28 +114,28 @@
           "radio",
           "voicehub"
         ],
-        "releaseNotes": "# VoiceHub LanDesktop Plugin v0.0.3\r\n\r\n## Release Assets\r\n\r\n- **Package**: \u0060VoiceHubLanDesktop.0.0.3.laapp\u0060\r\n- **Version**: 0.0.3\r\n- **SHA256**: \u00605f066507b3099eb938c0c6e669291efe01af9b03de2053ad8ecdea8ca0618f38\u0060\r\n- **MD5**: \u00608e460c19896462ed16a8ae1cfaf1c2f0\u0060\r\n\r\n## Installation\r\n\r\nDownload the \u0060.laapp\u0060 package and install it through the LanMountainDesktop plugin manager.\r\n\r\n## Changes\r\n\r\nSee commit history for detailed changes in this release."
+        "releaseNotes": "VoiceHub playlist widget for LanMountainDesktop. Supports custom API URL, refresh interval, requester visibility, and max item count."
       },
       "publication": {
-        "releaseTag": "v0.0.3",
-        "releaseAssetName": "VoiceHubLanDesktop.0.0.3.laapp",
-        "publishedAt": "2026-03-24T13:38:20+00:00",
-        "updatedAt": "2026-03-24T13:38:20+00:00",
-        "packageSizeBytes": 1710416,
-        "sha256": "5f066507b3099eb938c0c6e669291efe01af9b03de2053ad8ecdea8ca0618f38",
-        "md5": "8e460c19896462ed16a8ae1cfaf1c2f0",
+        "releaseTag": "v0.0.4",
+        "releaseAssetName": "VoiceHubLanDesktop.0.0.4.laapp",
+        "publishedAt": "2026-03-24T15:17:24+00:00",
+        "updatedAt": "2026-03-24T15:17:24+00:00",
+        "packageSizeBytes": 1710375,
+        "sha256": "fe844524a9d6d7d1b41d0337a99841399b91107f87b765f675341c3b4f5b9df5",
+        "md5": "d3291c1136a1b4b3b639297b489d7322",
         "packageSources": [
           {
             "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.3/VoiceHubLanDesktop.0.0.3.laapp"
+            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.4/VoiceHubLanDesktop.0.0.4.laapp"
           },
           {
             "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.3.laapp"
+            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.4.laapp"
           },
           {
             "kind": "workspaceLocal",
-            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.3.laapp"
+            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.4.laapp"
           }
         ]
       },
