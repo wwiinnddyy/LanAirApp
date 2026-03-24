@@ -2,7 +2,7 @@
   "schemaVersion": "2.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-24T15:49:58.7778689+00:00",
+  "generatedAt": "2026-03-24T15:55:37.2559535+00:00",
   "contracts": [
     {
       "id": "LanMountainDesktop.SharedContracts.SampleClock",
