@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AirAppMarket.Validator")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+763fdaa518e4beb6b5e31c49c5c88e312c53228f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7b0047b2fe2f5807f078b6b8260299badc506b85")]
 [assembly: System.Reflection.AssemblyProductAttribute("AirAppMarket.Validator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AirAppMarket.Validator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

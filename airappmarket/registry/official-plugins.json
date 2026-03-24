@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceId": "official.lanairapp",
+  "sourceName": "LanAirApp Official Market",
+  "defaultMarketManifestAssetName": "market-manifest.json",
+  "plugins": [
+    {
+      "id": "LanMountainDesktop.SamplePlugin",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+      "defaultMinHostVersion": "0.0.1",
+      "tags": [
+        "example",
+        "official",
+        "sdk"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [],
+        "settingsSections": [],
+        "exports": [],
+        "messageTypes": []
+      }
+    },
+    {
+      "id": "VoiceHubLanDesktop",
+      "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
+      "defaultMinHostVersion": "0.7.4",
+      "tags": [
+        "voicehub",
+        "music",
+        "playlist",
+        "radio"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "VoiceHubPlaylistWidget"
+        ],
+        "settingsSections": [
+          "VoiceHubSettingsSection"
+        ],
+        "exports": [],
+        "messageTypes": []
+      }
+    }
+  ],
+  "contracts": [
+    {
+      "id": "LanMountainDesktop.SharedContracts.SampleClock",
+      "version": "2.0.0",
+      "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "sha256": "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
+      "packageSizeBytes": 4608
+    }
+  ]
+}

@@ -1,26 +1,29 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {}
+    "C:\\Users\\USER154971\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {}
   },
   "projects": {
-    "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {
+    "C:\\Users\\USER154971\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
+        "projectUniqueName": "C:\\Users\\USER154971\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
         "projectName": "AirAppMarket.Validator",
-        "projectPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
-        "packagesPath": "C:\\Users\\USER182287\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\USER182287\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\obj\\",
+        "projectPath": "C:\\Users\\USER154971\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\AirAppMarket.Validator.csproj",
+        "packagesPath": "C:\\Users\\USER154971\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\USER154971\\Documents\\GitHub\\LanAirApp\\airappmarket\\tools\\AirAppMarket.Validator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\USER182287\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\USER154971\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "https://api.nuget.org/v3/index.json": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://mirrors.cloud.tencent.com/nuget/": {},
+          "https://repo.huaweicloud.com/repository/nuget/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
@@ -38,7 +41,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -59,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/airappmarket-index.schema.json",
-  "title": "AirAppMarket Index",
-  "description": "Official LanMountainDesktop market index with Plugin API v4 metadata.",
+  "title": "AirAppMarket Index v2",
+  "description": "Official LanMountainDesktop market index generated from release market manifests.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,7 +16,7 @@
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "const": "2.0.0"
     },
     "sourceId": {
       "type": "string",
@@ -33,7 +33,7 @@
     "contracts": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/contract"
+        "$ref": "#/$defs/sharedContractPackage"
       }
     },
     "plugins": {
@@ -44,7 +44,45 @@
     }
   },
   "$defs": {
-    "contract": {
+    "versionString": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "md5": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{32}$"
+    },
+    "sharedContractRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "assemblyName"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/versionString"
+        },
+        "assemblyName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sharedContractPackage": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -61,20 +99,17 @@
           "minLength": 1
         },
         "version": {
-          "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+          "$ref": "#/$defs/versionString"
         },
         "assemblyName": {
           "type": "string",
           "minLength": 1
         },
         "downloadUrl": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/url"
         },
         "sha256": {
-          "type": "string",
-          "pattern": "^[a-fA-F0-9]{64}$"
+          "$ref": "#/$defs/sha256"
         },
         "packageSizeBytes": {
           "type": "integer",
@@ -82,40 +117,37 @@
         }
       }
     },
-    "sharedContract": {
+    "packageSource": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id",
-        "version",
-        "assemblyName"
+        "kind",
+        "url"
       ],
       "properties": {
-        "id": {
+        "kind": {
           "type": "string",
-          "minLength": 1
+          "enum": [
+            "releaseAsset",
+            "rawFallback",
+            "workspaceLocal"
+          ]
         },
-        "version": {
-          "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        "url": {
+          "$ref": "#/$defs/url"
         },
-        "assemblyName": {
-          "type": "string",
-          "minLength": 1
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packageSizeBytes": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
-    "plugin": {
+    "pluginManifest": {
       "type": "object",
       "additionalProperties": false,
-      "dependentRequired": {
-        "releaseTag": [
-          "releaseAssetName"
-        ],
-        "releaseAssetName": [
-          "releaseTag"
-        ]
-      },
       "required": [
         "id",
         "name",
@@ -123,19 +155,8 @@
         "author",
         "version",
         "apiVersion",
-        "minHostVersion",
-        "downloadUrl",
-        "sha256",
-        "packageSizeBytes",
-        "iconUrl",
-        "projectUrl",
-        "readmeUrl",
-        "homepageUrl",
-        "repositoryUrl",
-        "tags",
-        "publishedAt",
-        "updatedAt",
-        "releaseNotes"
+        "entranceAssembly",
+        "sharedContracts"
       ],
       "properties": {
         "id": {
@@ -155,62 +176,66 @@
           "minLength": 1
         },
         "version": {
-          "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+          "$ref": "#/$defs/versionString"
         },
         "apiVersion": {
+          "$ref": "#/$defs/versionString"
+        },
+        "entranceAssembly": {
           "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+          "minLength": 1
         },
         "sharedContracts": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/sharedContract"
+            "$ref": "#/$defs/sharedContractRef"
           }
-        },
+        }
+      }
+    },
+    "pluginCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minHostVersion",
+        "pluginApiVersion"
+      ],
+      "properties": {
         "minHostVersion": {
-          "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+          "$ref": "#/$defs/versionString"
         },
-        "downloadUrl": {
-          "type": "string",
-          "format": "uri"
-        },
-        "sha256": {
-          "type": "string",
-          "pattern": "^[a-fA-F0-9]{64}$"
-        },
-        "packageSizeBytes": {
-          "type": "integer",
-          "minimum": 1
-        },
+        "pluginApiVersion": {
+          "$ref": "#/$defs/versionString"
+        }
+      }
+    },
+    "pluginRepository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iconUrl",
+        "projectUrl",
+        "readmeUrl",
+        "homepageUrl",
+        "repositoryUrl",
+        "tags",
+        "releaseNotes"
+      ],
+      "properties": {
         "iconUrl": {
-          "type": "string",
-          "format": "uri"
-        },
-        "releaseTag": {
-          "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
-        },
-        "releaseAssetName": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/url"
         },
         "projectUrl": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/url"
         },
         "readmeUrl": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/url"
         },
         "homepageUrl": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/url"
         },
         "repositoryUrl": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/url"
         },
         "tags": {
           "type": "array",
@@ -220,6 +245,34 @@
           },
           "uniqueItems": true
         },
+        "releaseNotes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pluginPublication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "releaseTag",
+        "releaseAssetName",
+        "publishedAt",
+        "updatedAt",
+        "packageSizeBytes",
+        "sha256",
+        "md5",
+        "packageSources"
+      ],
+      "properties": {
+        "releaseTag": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
+        },
+        "releaseAssetName": {
+          "type": "string",
+          "minLength": 1
+        },
         "publishedAt": {
           "type": "string",
           "format": "date-time"
@@ -228,9 +281,145 @@
           "type": "string",
           "format": "date-time"
         },
-        "releaseNotes": {
+        "packageSizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "md5": {
+          "$ref": "#/$defs/md5"
+        },
+        "packageSources": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/packageSource"
+                },
+                {
+                  "properties": {
+                    "kind": {
+                      "const": "releaseAsset"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/packageSource"
+                },
+                {
+                  "properties": {
+                    "kind": {
+                      "const": "rawFallback"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/packageSource"
+                },
+                {
+                  "properties": {
+                    "kind": {
+                      "const": "workspaceLocal"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        }
+      }
+    },
+    "pluginCapabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sharedContracts",
+        "desktopComponents",
+        "settingsSections",
+        "exports",
+        "messageTypes"
+      ],
+      "properties": {
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sharedContractRef"
+          }
+        },
+        "desktopComponents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "settingsSections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "messageTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "plugin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pluginId",
+        "manifest",
+        "compatibility",
+        "repository",
+        "publication",
+        "capabilities"
+      ],
+      "properties": {
+        "pluginId": {
           "type": "string",
           "minLength": 1
+        },
+        "manifest": {
+          "$ref": "#/$defs/pluginManifest"
+        },
+        "compatibility": {
+          "$ref": "#/$defs/pluginCompatibility"
+        },
+        "repository": {
+          "$ref": "#/$defs/pluginRepository"
+        },
+        "publication": {
+          "$ref": "#/$defs/pluginPublication"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/pluginCapabilities"
         }
       }
     }
