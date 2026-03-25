@@ -1,62 +1,19 @@
 {
-  "schemaVersion": "2.0.0",
+  "schemaVersion": "3.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-24T15:55:37.2559535+00:00",
-  "contracts": [
-    {
-      "id": "LanMountainDesktop.SharedContracts.SampleClock",
-      "version": "2.0.0",
-      "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll",
-      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
-      "sha256": "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
-      "packageSizeBytes": 4608
-    }
-  ],
+  "generatedAt": "2026-03-25T01:36:37.4330575+00:00",
   "plugins": [
     {
       "pluginId": "LanMountainDesktop.SamplePlugin",
-      "manifest": {
-        "id": "LanMountainDesktop.SamplePlugin",
-        "name": "LanMountain Sample Plugin",
-        "description": "Official sample plugin used to validate PluginSdk v4 loading, appearance, and isolation.",
-        "author": "LanMountainDesktop",
-        "version": "0.3.1",
-        "apiVersion": "4.0.0",
-        "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
-        "sharedContracts": [
-          {
-            "id": "LanMountainDesktop.SharedContracts.SampleClock",
-            "version": "2.0.0",
-            "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
-          }
-        ]
-      },
-      "compatibility": {
-        "minHostVersion": "0.0.1",
-        "pluginApiVersion": "4.0.0"
-      },
       "repository": {
         "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
         "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
         "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
         "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-        "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-        "tags": [
-          "example",
-          "official",
-          "sdk"
-        ],
-        "releaseNotes": "# LanMountainDesktop Sample Plugin v0.3.1\r\n\r\n## English\r\n\r\n- Package: LanMountainDesktop.SamplePlugin.0.3.1.laapp\r\n- Canonical distribution: GitHub Release asset\r\n- The repository-root .laapp remains the local fallback artifact\r\n- README.md in the repository root remains the canonical plugin introduction\r\n\r\n\u003C!-- LANAIRAPP_PKG_MD5 {\u0022LanMountainDesktop.SamplePlugin.0.3.1.laapp\u0022:\u002245c0edb34488d49ad021c2a08003f41f\u0022} --\u003E\r\n\u003C!-- LANAIRAPP_PKG_SHA256 {\u0022LanMountainDesktop.SamplePlugin.0.3.1.laapp\u0022:\u0022b41eb265c6497718dd5cb5ab6753ca52f81413d49276dacbdada5038266d8103\u0022} --\u003E"
+        "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin"
       },
       "publication": {
-        "releaseTag": "v0.3.1",
-        "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.3.1.laapp",
-        "publishedAt": "2026-03-21T05:51:27+00:00",
-        "updatedAt": "2026-03-21T05:51:27+00:00",
-        "packageSizeBytes": 1705762,
-        "sha256": "b41eb265c6497718dd5cb5ab6753ca52f81413d49276dacbdada5038266d8103",
-        "md5": "45c0edb34488d49ad021c2a08003f41f",
         "packageSources": [
           {
             "kind": "releaseAsset",
@@ -71,84 +28,32 @@
             "url": "workspace://LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
           }
         ]
-      },
-      "capabilities": {
-        "sharedContracts": [
-          {
-            "id": "LanMountainDesktop.SharedContracts.SampleClock",
-            "version": "2.0.0",
-            "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
-          }
-        ],
-        "desktopComponents": [],
-        "settingsSections": [],
-        "exports": [],
-        "messageTypes": []
       }
     },
     {
       "pluginId": "VoiceHubLanDesktop",
-      "manifest": {
-        "id": "VoiceHubLanDesktop",
-        "name": "VoiceHub Campus Playlist",
-        "description": "Shows the VoiceHub public playlist in LanMountainDesktop.",
-        "author": "LaoShui",
-        "version": "0.0.4",
-        "apiVersion": "4.0.0",
-        "entranceAssembly": "VoiceHubLanDesktop.dll",
-        "sharedContracts": []
-      },
-      "compatibility": {
-        "minHostVersion": "0.7.4",
-        "pluginApiVersion": "4.0.0"
-      },
       "repository": {
         "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
         "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
         "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
         "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
-        "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
-        "tags": [
-          "music",
-          "playlist",
-          "radio",
-          "voicehub"
-        ],
-        "releaseNotes": "VoiceHub playlist widget for LanMountainDesktop. Supports custom API URL, refresh interval, requester visibility, and max item count."
+        "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop"
       },
       "publication": {
-        "releaseTag": "v0.0.4",
-        "releaseAssetName": "VoiceHubLanDesktop.0.0.4.laapp",
-        "publishedAt": "2026-03-24T15:17:24+00:00",
-        "updatedAt": "2026-03-24T15:17:24+00:00",
-        "packageSizeBytes": 1710375,
-        "sha256": "fe844524a9d6d7d1b41d0337a99841399b91107f87b765f675341c3b4f5b9df5",
-        "md5": "d3291c1136a1b4b3b639297b489d7322",
         "packageSources": [
           {
             "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.4/VoiceHubLanDesktop.0.0.4.laapp"
+            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.5/VoiceHubLanDesktop.0.0.5.laapp"
           },
           {
             "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.4.laapp"
+            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.5.laapp"
           },
           {
             "kind": "workspaceLocal",
-            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.4.laapp"
+            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.5.laapp"
           }
         ]
-      },
-      "capabilities": {
-        "sharedContracts": [],
-        "desktopComponents": [
-          "VoiceHubPlaylistWidget"
-        ],
-        "settingsSections": [
-          "VoiceHubSettingsSection"
-        ],
-        "exports": [],
-        "messageTypes": []
       }
     }
   ]

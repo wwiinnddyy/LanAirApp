@@ -25,13 +25,29 @@ static Task<int> RunAsync(string[] args)
         }
 
         JsonDocument.Parse(File.ReadAllText(schemaPath));
-        var document = MarketIndexV2.Load(File.ReadAllText(indexPath), indexPath);
+        var indexJson = File.ReadAllText(indexPath);
+        var schemaVersion = ReadSchemaVersion(indexJson, indexPath);
+        object document = schemaVersion switch
+        {
+            "3.0.0" => MarketIndexIndexV3.Load(indexJson, indexPath),
+            "2.0.0" => MarketIndexV2.Load(indexJson, indexPath),
+            _ => throw new InvalidOperationException($"Market index '{indexPath}' uses unsupported schemaVersion '{schemaVersion}'.")
+        };
 
         Console.WriteLine($"Validated '{indexPath}'.");
-        Console.WriteLine($"SchemaVersion: {document.SchemaVersion}");
-        Console.WriteLine($"Source: {document.SourceName} ({document.SourceId})");
-        Console.WriteLine($"Contracts: {document.Contracts.Count}");
-        Console.WriteLine($"Plugins: {document.Plugins.Count}");
+        if (document is MarketIndexIndexV3 pureIndex)
+        {
+            Console.WriteLine($"SchemaVersion: {pureIndex.SchemaVersion}");
+            Console.WriteLine($"Source: {pureIndex.SourceName} ({pureIndex.SourceId})");
+            Console.WriteLine($"Plugins: {pureIndex.Plugins.Count}");
+        }
+        else if (document is MarketIndexV2 snapshot)
+        {
+            Console.WriteLine($"SchemaVersion: {snapshot.SchemaVersion}");
+            Console.WriteLine($"Source: {snapshot.SourceName} ({snapshot.SourceId})");
+            Console.WriteLine($"Contracts: {snapshot.Contracts.Count}");
+            Console.WriteLine($"Plugins: {snapshot.Plugins.Count}");
+        }
         return Task.FromResult(0);
     }
     catch (Exception ex)
@@ -39,6 +55,29 @@ static Task<int> RunAsync(string[] args)
         Console.Error.WriteLine(ex.Message);
         return Task.FromResult(1);
     }
+}
+
+static string ReadSchemaVersion(string json, string sourceName)
+{
+    using var document = JsonDocument.Parse(json, new JsonDocumentOptions
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip
+    });
+
+    if (!document.RootElement.TryGetProperty("schemaVersion", out var schemaVersionElement) ||
+        schemaVersionElement.ValueKind != JsonValueKind.String)
+    {
+        throw new InvalidOperationException($"Market index '{sourceName}' is missing schemaVersion.");
+    }
+
+    var schemaVersion = schemaVersionElement.GetString();
+    if (string.IsNullOrWhiteSpace(schemaVersion))
+    {
+        throw new InvalidOperationException($"Market index '{sourceName}' is missing schemaVersion.");
+    }
+
+    return schemaVersion.Trim();
 }
 
 internal static class MarketValidation
@@ -160,6 +199,182 @@ internal static class MarketValidation
         return true;
     }
 
+}
+
+internal sealed class MarketIndexIndexV3
+{
+    [JsonPropertyName("schemaVersion")]
+    public string SchemaVersion { get; init; } = string.Empty;
+
+    [JsonPropertyName("sourceId")]
+    public string SourceId { get; init; } = string.Empty;
+
+    [JsonPropertyName("sourceName")]
+    public string SourceName { get; init; } = string.Empty;
+
+    [JsonPropertyName("generatedAt")]
+    public DateTimeOffset GeneratedAt { get; init; }
+
+    [JsonPropertyName("plugins")]
+    public List<MarketPluginIndexV3> Plugins { get; init; } = [];
+
+    public static MarketIndexIndexV3 Load(string json, string sourceName)
+    {
+        var document = JsonSerializer.Deserialize<MarketIndexIndexV3>(
+            json.TrimStart('\uFEFF'),
+            MarketValidation.JsonOptions) ?? throw new InvalidOperationException($"Failed to parse market index '{sourceName}'.");
+
+        return document.ValidateAndNormalize(sourceName);
+    }
+
+    private MarketIndexIndexV3 ValidateAndNormalize(string sourceName)
+    {
+        if (!string.Equals(MarketValidation.Require(SchemaVersion, nameof(SchemaVersion), sourceName), "3.0.0", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Market index '{sourceName}' must use schemaVersion '3.0.0'.");
+        }
+
+        var normalizedPlugins = ValidatePlugins(sourceName);
+
+        return new MarketIndexIndexV3
+        {
+            SchemaVersion = "3.0.0",
+            SourceId = MarketValidation.Require(SourceId, nameof(SourceId), sourceName),
+            SourceName = MarketValidation.Require(SourceName, nameof(SourceName), sourceName),
+            GeneratedAt = GeneratedAt == default
+                ? throw new InvalidOperationException($"Market index '{sourceName}' is missing a valid generatedAt timestamp.")
+                : GeneratedAt,
+            Plugins = normalizedPlugins
+        };
+    }
+
+    private List<MarketPluginIndexV3> ValidatePlugins(string sourceName)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var normalized = new List<MarketPluginIndexV3>(Plugins.Count);
+
+        foreach (var plugin in Plugins)
+        {
+            var normalizedPlugin = plugin.ValidateAndNormalize(sourceName);
+            if (!seen.Add(normalizedPlugin.PluginId))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' contains duplicate plugin id '{normalizedPlugin.PluginId}'.");
+            }
+            normalized.Add(normalizedPlugin);
+        }
+
+        return normalized;
+    }
+}
+
+internal sealed class MarketPluginIndexV3
+{
+    [JsonPropertyName("pluginId")]
+    public string PluginId { get; init; } = string.Empty;
+
+    [JsonPropertyName("repository")]
+    public MarketPluginRepositoryIndexV3 Repository { get; init; } = new();
+
+    [JsonPropertyName("publication")]
+    public MarketPluginPublicationIndexV3 Publication { get; init; } = new();
+
+    public MarketPluginIndexV3 ValidateAndNormalize(string sourceName)
+    {
+        var pluginId = MarketValidation.Require(PluginId, nameof(PluginId), sourceName);
+
+        return new MarketPluginIndexV3
+        {
+            PluginId = pluginId,
+            Repository = Repository.ValidateAndNormalize(sourceName, pluginId),
+            Publication = Publication.ValidateAndNormalize(sourceName, pluginId)
+        };
+    }
+}
+
+internal sealed class MarketPluginRepositoryIndexV3
+{
+    [JsonPropertyName("iconUrl")]
+    public string IconUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("projectUrl")]
+    public string ProjectUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("readmeUrl")]
+    public string ReadmeUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("homepageUrl")]
+    public string HomepageUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("repositoryUrl")]
+    public string RepositoryUrl { get; init; } = string.Empty;
+
+    public MarketPluginRepositoryIndexV3 ValidateAndNormalize(string sourceName, string pluginId)
+    {
+        return new MarketPluginRepositoryIndexV3
+        {
+            IconUrl = NormalizeOptionalUrl(IconUrl, nameof(IconUrl), sourceName),
+            ProjectUrl = NormalizeOptionalUrl(ProjectUrl, nameof(ProjectUrl), sourceName),
+            ReadmeUrl = NormalizeOptionalUrl(ReadmeUrl, nameof(ReadmeUrl), sourceName),
+            HomepageUrl = NormalizeOptionalUrl(HomepageUrl, nameof(HomepageUrl), sourceName),
+            RepositoryUrl = MarketValidation.NormalizeUrl(RepositoryUrl, nameof(RepositoryUrl), sourceName)
+        };
+    }
+
+    private static string NormalizeOptionalUrl(string? value, string propertyName, string sourceName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return MarketValidation.NormalizeUrl(value, propertyName, sourceName);
+    }
+}
+
+internal sealed class MarketPluginPublicationIndexV3
+{
+    [JsonPropertyName("packageSources")]
+    public List<MarketPackageSourceV2> PackageSources { get; init; } = [];
+
+    public MarketPluginPublicationIndexV3 ValidateAndNormalize(string sourceName, string pluginId)
+    {
+        var normalizedSources = new List<MarketPackageSourceV2>(PackageSources.Count);
+        var seenKinds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var source in PackageSources)
+        {
+            var normalizedSource = source.ValidateAndNormalize(sourceName, pluginId);
+            if (!seenKinds.Add(normalizedSource.Kind))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' plugin '{pluginId}' contains duplicate package source kind '{normalizedSource.Kind}'.");
+            }
+
+            normalizedSources.Add(normalizedSource);
+        }
+
+        var requiredOrder = new[] { "releaseAsset", "rawFallback", "workspaceLocal" };
+        if (normalizedSources.Count != requiredOrder.Length)
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' plugin '{pluginId}' must provide exactly these package sources in order: {string.Join(", ", requiredOrder)}.");
+        }
+
+        for (var i = 0; i < requiredOrder.Length; i++)
+        {
+            if (!string.Equals(normalizedSources[i].Kind, requiredOrder[i], StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' plugin '{pluginId}' packageSources[{i}] must be '{requiredOrder[i]}'.");
+            }
+        }
+
+        return new MarketPluginPublicationIndexV3
+        {
+            PackageSources = normalizedSources
+        };
+    }
 }
 
 internal sealed class MarketIndexV2

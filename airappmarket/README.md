@@ -24,20 +24,19 @@
 
 ## English
 
-`airappmarket/` is the official plugin market source for LanMountainDesktop. The host reads `index.json` here and resolves plugins, shared contracts, and download URLs from the metadata.
+`airappmarket/` is the official plugin market source for LanMountainDesktop. The host reads `index.json` here and resolves plugin entry links from the metadata. Version, dependency, and package truth stay in the plugin repository itself.
 
 ### Conventions
 
 - keep `schema`, `validator`, and `index.json` in sync
-- use `4.0.0` for `plugins[].apiVersion`
-- keep `plugins[].sharedContracts` aligned with the host `SharedContracts` model
-- the official sample plugin entry uses the sample repo state: `LanMountainDesktop.SamplePlugin v0.1.1`
+- default market output is a pure index of repository and package links
+- use snapshot mode only when you explicitly need a cached market view
 
 ### Responsibilities
 
 - maintain the official market index
 - maintain the schema, validator, and static market assets
-- keep market entries aligned with release metadata
+- keep market entries as link pointers, not as the source of version truth
 
 ### Relationship with the sample plugin
 

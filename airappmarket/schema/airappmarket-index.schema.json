@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/airappmarket-index.schema.json",
-  "title": "AirAppMarket Index v2",
-  "description": "Official LanMountainDesktop market index generated from release market manifests.",
+  "title": "AirAppMarket Index v3",
+  "description": "Official LanMountainDesktop market link index. Version and dependency truth stay in the plugin repository itself.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -10,13 +10,12 @@
     "sourceId",
     "sourceName",
     "generatedAt",
-    "contracts",
     "plugins"
   ],
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "2.0.0"
+      "const": "3.0.0"
     },
     "sourceId": {
       "type": "string",
@@ -30,12 +29,6 @@
       "type": "string",
       "format": "date-time"
     },
-    "contracts": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/sharedContractPackage"
-      }
-    },
     "plugins": {
       "type": "array",
       "items": {
@@ -44,78 +37,9 @@
     }
   },
   "$defs": {
-    "versionString": {
-      "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
-    },
     "url": {
       "type": "string",
       "format": "uri"
-    },
-    "sha256": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{64}$"
-    },
-    "md5": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{32}$"
-    },
-    "sharedContractRef": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "version",
-        "assemblyName"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "version": {
-          "$ref": "#/$defs/versionString"
-        },
-        "assemblyName": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    },
-    "sharedContractPackage": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "version",
-        "assemblyName",
-        "downloadUrl",
-        "sha256",
-        "packageSizeBytes"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "version": {
-          "$ref": "#/$defs/versionString"
-        },
-        "assemblyName": {
-          "type": "string",
-          "minLength": 1
-        },
-        "downloadUrl": {
-          "$ref": "#/$defs/url"
-        },
-        "sha256": {
-          "$ref": "#/$defs/sha256"
-        },
-        "packageSizeBytes": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
     },
     "packageSource": {
       "type": "object",
@@ -135,91 +59,14 @@
         },
         "url": {
           "$ref": "#/$defs/url"
-        },
-        "sha256": {
-          "$ref": "#/$defs/sha256"
-        },
-        "packageSizeBytes": {
-          "type": "integer",
-          "minimum": 1
         }
       }
     },
-    "pluginManifest": {
+    "repository": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id",
-        "name",
-        "description",
-        "author",
-        "version",
-        "apiVersion",
-        "entranceAssembly",
-        "sharedContracts"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "name": {
-          "type": "string",
-          "minLength": 1
-        },
-        "description": {
-          "type": "string",
-          "minLength": 1
-        },
-        "author": {
-          "type": "string",
-          "minLength": 1
-        },
-        "version": {
-          "$ref": "#/$defs/versionString"
-        },
-        "apiVersion": {
-          "$ref": "#/$defs/versionString"
-        },
-        "entranceAssembly": {
-          "type": "string",
-          "minLength": 1
-        },
-        "sharedContracts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/sharedContractRef"
-          }
-        }
-      }
-    },
-    "pluginCompatibility": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "minHostVersion",
-        "pluginApiVersion"
-      ],
-      "properties": {
-        "minHostVersion": {
-          "$ref": "#/$defs/versionString"
-        },
-        "pluginApiVersion": {
-          "$ref": "#/$defs/versionString"
-        }
-      }
-    },
-    "pluginRepository": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "iconUrl",
-        "projectUrl",
-        "readmeUrl",
-        "homepageUrl",
-        "repositoryUrl",
-        "tags",
-        "releaseNotes"
+        "repositoryUrl"
       ],
       "properties": {
         "iconUrl": {
@@ -236,61 +83,16 @@
         },
         "repositoryUrl": {
           "$ref": "#/$defs/url"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "uniqueItems": true
-        },
-        "releaseNotes": {
-          "type": "string",
-          "minLength": 1
         }
       }
     },
-    "pluginPublication": {
+    "publication": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "releaseTag",
-        "releaseAssetName",
-        "publishedAt",
-        "updatedAt",
-        "packageSizeBytes",
-        "sha256",
-        "md5",
         "packageSources"
       ],
       "properties": {
-        "releaseTag": {
-          "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+ ][A-Za-z0-9.-]+)?$"
-        },
-        "releaseAssetName": {
-          "type": "string",
-          "minLength": 1
-        },
-        "publishedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "packageSizeBytes": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "sha256": {
-          "$ref": "#/$defs/sha256"
-        },
-        "md5": {
-          "$ref": "#/$defs/md5"
-        },
         "packageSources": {
           "type": "array",
           "minItems": 3,
@@ -343,83 +145,24 @@
         }
       }
     },
-    "pluginCapabilities": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sharedContracts",
-        "desktopComponents",
-        "settingsSections",
-        "exports",
-        "messageTypes"
-      ],
-      "properties": {
-        "sharedContracts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/sharedContractRef"
-          }
-        },
-        "desktopComponents": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "settingsSections": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "exports": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "messageTypes": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        }
-      }
-    },
     "plugin": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "pluginId",
-        "manifest",
-        "compatibility",
         "repository",
-        "publication",
-        "capabilities"
+        "publication"
       ],
       "properties": {
         "pluginId": {
           "type": "string",
           "minLength": 1
         },
-        "manifest": {
-          "$ref": "#/$defs/pluginManifest"
-        },
-        "compatibility": {
-          "$ref": "#/$defs/pluginCompatibility"
-        },
         "repository": {
-          "$ref": "#/$defs/pluginRepository"
+          "$ref": "#/$defs/repository"
         },
         "publication": {
-          "$ref": "#/$defs/pluginPublication"
-        },
-        "capabilities": {
-          "$ref": "#/$defs/pluginCapabilities"
+          "$ref": "#/$defs/publication"
         }
       }
     }

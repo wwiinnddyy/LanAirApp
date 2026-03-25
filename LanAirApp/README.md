@@ -31,7 +31,7 @@
 
 ### This repository owns
 
-- `airappmarket/`: the official market index, schema, validator, and static assets
+- `airappmarket/`: the official market link index, schema, validator, and static assets
 - `docs/`: plugin development and packaging documentation
 - `tools/`: packaging, validation, and helper tools
 - `samples/`: mirrored samples and templates
