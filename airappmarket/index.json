@@ -2,8 +2,34 @@
   "schemaVersion": "3.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-03-25T01:36:37.4330575+00:00",
+  "generatedAt": "2026-04-13T12:50:57.5500009+00:00",
   "plugins": [
+    {
+      "pluginId": "Elysia.LanDesktopConnect",
+      "repository": {
+        "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
+        "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+        "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
+        "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+        "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect"
+      },
+      "publication": {
+        "packageSources": [
+          {
+            "kind": "releaseAsset",
+            "url": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect/releases/download/v0.0.1/Elysia.LanDesktopConnect.0.0.1.laapp"
+          },
+          {
+            "kind": "rawFallback",
+            "url": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/Elysia.LanDesktopConnect.0.0.1.laapp"
+          },
+          {
+            "kind": "workspaceLocal",
+            "url": "workspace://elysia.LanDesktopConnect/Elysia.LanDesktopConnect.0.0.1.laapp"
+          }
+        ]
+      }
+    },
     {
       "pluginId": "LanMountainDesktop.SamplePlugin",
       "repository": {
@@ -43,15 +69,15 @@
         "packageSources": [
           {
             "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.5/VoiceHubLanDesktop.0.0.5.laapp"
+            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.8/VoiceHubLanDesktop.0.0.8.laapp"
           },
           {
             "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.5.laapp"
+            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.8.laapp"
           },
           {
             "kind": "workspaceLocal",
-            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.5.laapp"
+            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.8.laapp"
           }
         ]
       }
