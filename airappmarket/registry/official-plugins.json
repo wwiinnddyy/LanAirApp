@@ -50,6 +50,34 @@
         "exports": [],
         "messageTypes": []
       }
+    },
+    {
+      "id": "Elysia.LanDesktopConnect",
+      "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
+      "defaultMinHostVersion": "0.7.4",
+      "tags": [
+        "ipc",
+        "bridge",
+        "websocket",
+        "gateway",
+        "elysia"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [],
+        "settingsSections": [
+          "IpcBridgeSettingsSection"
+        ],
+        "exports": [],
+        "messageTypes": [
+          "BunStatusChangedEvent",
+          "IpcMessage"
+        ]
+      }
     }
   ],
   "contracts": [

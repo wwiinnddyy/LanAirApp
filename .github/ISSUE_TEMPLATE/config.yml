@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 插件开发文档 / Plugin Development Docs
+    url: https://github.com/wwiinnddyy/LanAirApp/tree/main/docs
+    about: 查阅插件开发、打包和收录的完整文档
+  - name: 插件开发指引 / Plugin Development Guide
+    url: https://github.com/wwiinnddyy/LanAirApp/blob/main/LanAirApp/docs/PLUGIN_DEVELOPMENT.md
+    about: v4 插件开发指引（清单、组件注册、外观能力）
+  - name: 插件打包指引 / Plugin Packaging Guide
+    url: https://github.com/wwiinnddyy/LanAirApp/blob/main/LanAirApp/docs/PLUGIN_PACKAGING.md
+    about: .laapp 打包格式和发布链路说明
