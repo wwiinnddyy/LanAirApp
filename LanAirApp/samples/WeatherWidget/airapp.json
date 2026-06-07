@@ -1,0 +1,22 @@
+{
+  "id": "com.lanmountain.weather",
+  "name": "天气",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "author": "LanMountainDesktop Team",
+  "description": "显示当前天气和温度信息",
+  "entranceAssembly": "WeatherWidget.dll",
+  "runtime": {
+    "mode": "in-process",
+    "capabilities": ["desktop-component"]
+  },
+  "components": [
+    {
+      "id": "weather",
+      "name": "天气",
+      "defaultWidth": 2,
+      "defaultHeight": 2,
+      "description": "显示当前天气和温度"
+    }
+  ]
+}

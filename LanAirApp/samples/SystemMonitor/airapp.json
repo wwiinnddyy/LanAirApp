@@ -1,0 +1,22 @@
+{
+  "id": "com.lanmountain.systemmonitor",
+  "name": "系统监控",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "author": "LanMountainDesktop Team",
+  "description": "显示 CPU 和内存使用率",
+  "entranceAssembly": "SystemMonitor.dll",
+  "runtime": {
+    "mode": "in-process",
+    "capabilities": ["desktop-component"]
+  },
+  "components": [
+    {
+      "id": "system-monitor",
+      "name": "系统监控",
+      "defaultWidth": 3,
+      "defaultHeight": 2,
+      "description": "显示 CPU 和内存使用率"
+    }
+  ]
+}

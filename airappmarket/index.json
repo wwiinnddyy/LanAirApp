@@ -3,9 +3,16 @@
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
   "generatedAt": "2026-04-13T12:50:57.5500009+00:00",
-  "plugins": [
+  "airApps": [
     {
-      "pluginId": "Elysia.LanDesktopConnect",
+      "airAppId": "Elysia.LanDesktopConnect",
+      "name": "Elysia LanDesktop Connect",
+      "version": "1.0.0",
+      "apiVersion": "1.0.0",
+      "author": "wwiinnddyy",
+      "description": "连接 Elysia 服务的 AirApp",
+      "category": "tools",
+      "capabilities": ["desktop-component"],
       "repository": {
         "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
         "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
@@ -31,7 +38,15 @@
       }
     },
     {
-      "pluginId": "LanMountainDesktop.SamplePlugin",
+      "airAppId": "LanMountainDesktop.SamplePlugin",
+      "name": "示例时钟",
+      "version": "1.0.0",
+      "apiVersion": "1.0.0",
+      "author": "LanMountainDesktop Team",
+      "description": "官方示例 AirApp，展示时钟组件开发",
+      "category": "tools",
+      "capabilities": ["desktop-component"],
+      "tags": ["示例", "时钟", "教程"],
       "repository": {
         "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
         "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
@@ -57,7 +72,15 @@
       }
     },
     {
-      "pluginId": "VoiceHubLanDesktop",
+      "airAppId": "VoiceHubLanDesktop",
+      "name": "VoiceHub",
+      "version": "1.0.0",
+      "apiVersion": "1.0.0",
+      "author": "wwiinnddyy",
+      "description": "语音助手集成 AirApp",
+      "category": "tools",
+      "capabilities": ["desktop-component", "window"],
+      "tags": ["语音", "助手"],
       "repository": {
         "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
         "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",

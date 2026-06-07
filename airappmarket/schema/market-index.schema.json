@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AirApp Market Index",
+  "description": "阑山桌面 AirApp 市场索引格式",
+  "type": "object",
+  "required": ["version", "airApps"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "索引格式版本",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "airApps": {
+      "type": "array",
+      "description": "AirApp 列表",
+      "items": {
+        "$ref": "#/definitions/airApp"
+      }
+    },
+    "categories": {
+      "type": "array",
+      "description": "分类列表",
+      "items": {
+        "$ref": "#/definitions/category"
+      }
+    },
+    "featured": {
+      "type": "array",
+      "description": "精选 AirApp ID 列表",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "airApp": {
+      "type": "object",
+      "required": ["id", "name", "author", "description", "version", "apiVersion", "downloadUrl"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "唯一标识符（反向域名格式）",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "显示名称",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "author": {
+          "type": "string",
+          "description": "作者名称",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "简短描述",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "type": "string",
+          "description": "版本号",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "apiVersion": {
+          "type": "string",
+          "description": "API 版本",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "tags": {
+          "type": "array",
+          "description": "标签列表",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10
+        },
+        "category": {
+          "type": "string",
+          "description": "分类",
+          "enum": ["tools", "info", "system", "entertainment", "productivity", "other"]
+        },
+        "downloadUrl": {
+          "type": "string",
+          "description": "下载地址（.laapp 文件）",
+          "format": "uri"
+        },
+        "icon": {
+          "type": "string",
+          "description": "图标 URL",
+          "format": "uri"
+        },
+        "screenshots": {
+          "type": "array",
+          "description": "截图 URL 列表",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 5
+        },
+        "capabilities": {
+          "type": "array",
+          "description": "能力列表",
+          "items": {
+            "type": "string",
+            "enum": ["desktop-component", "window", "background", "settings"]
+          }
+        },
+        "minHostVersion": {
+          "type": "string",
+          "description": "最低宿主版本要求",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "releaseDate": {
+          "type": "string",
+          "description": "发布日期",
+          "format": "date"
+        },
+        "downloads": {
+          "type": "integer",
+          "description": "下载次数",
+          "minimum": 0
+        },
+        "rating": {
+          "type": "number",
+          "description": "评分（0-5）",
+          "minimum": 0,
+          "maximum": 5
+        }
+      }
+    },
+    "category": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "分类 ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "分类名称"
+        },
+        "description": {
+          "type": "string",
+          "description": "分类描述"
+        },
+        "icon": {
+          "type": "string",
+          "description": "分类图标"
+        }
+      }
+    }
+  }
+}

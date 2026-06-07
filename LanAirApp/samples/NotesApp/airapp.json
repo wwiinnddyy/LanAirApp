@@ -1,0 +1,31 @@
+{
+  "id": "com.lanmountain.notes",
+  "name": "笔记",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "author": "LanMountainDesktop Team",
+  "description": "简单的笔记应用",
+  "entranceAssembly": "NotesApp.dll",
+  "runtime": {
+    "mode": "in-process",
+    "capabilities": ["desktop-component", "window"]
+  },
+  "components": [
+    {
+      "id": "notes-widget",
+      "name": "笔记",
+      "defaultWidth": 2,
+      "defaultHeight": 1,
+      "description": "快速打开笔记应用"
+    }
+  ],
+  "windows": [
+    {
+      "id": "notes-window",
+      "name": "笔记",
+      "defaultWidth": 600,
+      "defaultHeight": 400,
+      "description": "笔记编辑窗口"
+    }
+  ]
+}
