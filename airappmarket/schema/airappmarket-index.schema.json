@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/airappmarket-index.schema.json",
-  "title": "AirAppMarket Index v3",
-  "description": "Official LanMountainDesktop market link index. Version and dependency truth stay in the plugin repository itself.",
+  "title": "AirAppMarket Index v3 (self-contained flat)",
+  "description": "Official LanMountainDesktop market index. Every plugin entry is self-contained: all display and acquisition metadata lives inline, so the host never calls back to GitHub to enrich entries.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -29,6 +29,12 @@
       "type": "string",
       "format": "date-time"
     },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
     "plugins": {
       "type": "array",
       "items": {
@@ -40,6 +46,75 @@
     "url": {
       "type": "string",
       "format": "uri"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "releaseTag": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "hex64": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "assemblyName",
+        "downloadUrl",
+        "sha256",
+        "packageSizeBytes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "assemblyName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "downloadUrl": {
+          "$ref": "#/$defs/url"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hex64"
+        },
+        "packageSizeBytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "assemblyName"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "assemblyName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "packageSource": {
       "type": "object",
@@ -58,90 +133,7 @@
           ]
         },
         "url": {
-          "$ref": "#/$defs/url"
-        }
-      }
-    },
-    "repository": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "repositoryUrl"
-      ],
-      "properties": {
-        "iconUrl": {
-          "$ref": "#/$defs/url"
-        },
-        "projectUrl": {
-          "$ref": "#/$defs/url"
-        },
-        "readmeUrl": {
-          "$ref": "#/$defs/url"
-        },
-        "homepageUrl": {
-          "$ref": "#/$defs/url"
-        },
-        "repositoryUrl": {
-          "$ref": "#/$defs/url"
-        }
-      }
-    },
-    "publication": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "packageSources"
-      ],
-      "properties": {
-        "packageSources": {
-          "type": "array",
-          "minItems": 3,
-          "maxItems": 3,
-          "prefixItems": [
-            {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/packageSource"
-                },
-                {
-                  "properties": {
-                    "kind": {
-                      "const": "releaseAsset"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/packageSource"
-                },
-                {
-                  "properties": {
-                    "kind": {
-                      "const": "rawFallback"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/packageSource"
-                },
-                {
-                  "properties": {
-                    "kind": {
-                      "const": "workspaceLocal"
-                    }
-                  }
-                }
-              ]
-            }
-          ],
-          "items": false
+          "type": "string"
         }
       }
     },
@@ -150,19 +142,128 @@
       "additionalProperties": false,
       "required": [
         "pluginId",
-        "repository",
-        "publication"
+        "name",
+        "description",
+        "author",
+        "version",
+        "apiVersion",
+        "repositoryUrl",
+        "packageSources"
       ],
       "properties": {
         "pluginId": {
           "type": "string",
           "minLength": 1
         },
-        "repository": {
-          "$ref": "#/$defs/repository"
+        "name": {
+          "type": "string",
+          "minLength": 1
         },
-        "publication": {
-          "$ref": "#/$defs/publication"
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "apiVersion": {
+          "$ref": "#/$defs/version"
+        },
+        "minHostVersion": {
+          "$ref": "#/$defs/version"
+        },
+        "entranceAssembly": {
+          "type": "string"
+        },
+        "iconUrl": {
+          "type": "string"
+        },
+        "readmeUrl": {
+          "type": "string"
+        },
+        "projectUrl": {
+          "type": "string"
+        },
+        "homepageUrl": {
+          "type": "string"
+        },
+        "repositoryUrl": {
+          "$ref": "#/$defs/url"
+        },
+        "releaseTag": {
+          "$ref": "#/$defs/releaseTag"
+        },
+        "releaseAssetName": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hex64"
+        },
+        "md5": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{32}$"
+        },
+        "packageSizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "releaseNotes": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+        "packageSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/packageSource"
+          }
+        },
+        "desktopComponents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "settingsSections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "messageTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

@@ -100,7 +100,6 @@ public class ClockWidget : AirAppWidgetBase
 |------|------|
 | [快速开始](./docs/QUICK_START.md) | 15分钟上手指南 |
 | [API 参考](./docs/API_REFERENCE.md) | 完整的 API 文档 |
-| [迁移指南](./docs/MIGRATION_GUIDE.md) | 从 Plugin SDK v5 迁移 |
 | [设计文档](./docs/AIR_APP_SDK_DESIGN.md) | 架构设计和规划 |
 | [实现总结](./docs/IMPLEMENTATION_SUMMARY.md) | 项目完成情况 |
 
@@ -112,18 +111,6 @@ public class ClockWidget : AirAppWidgetBase
 - **天气小部件** - 获取并显示天气信息（即将推出）
 - **笔记应用** - 窗口化的笔记应用（即将推出）
 - **系统监控** - 显示 CPU、内存等信息（即将推出）
-
-## 🔄 从 Plugin SDK v5 迁移
-
-如果你已经有基于 Plugin SDK v5 的项目，迁移到 AirApp SDK v6 非常简单：
-
-1. 更新包引用：`PluginSdk` → `AirAppSdk`
-2. 重命名清单文件：`plugin.json` → `airapp.json`
-3. 更新命名空间和类名
-4. 更新 API 版本：`5.0.0` → `6.0.0`
-
-**迁移时间**: 15-30 分钟  
-**详细指南**: [MIGRATION_GUIDE.md](./docs/MIGRATION_GUIDE.md)
 
 ## 🛠️ 技术栈
 

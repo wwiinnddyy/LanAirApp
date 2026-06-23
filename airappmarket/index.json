@@ -2,108 +2,125 @@
   "schemaVersion": "3.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-04-13T12:50:57.5500009+00:00",
-  "airApps": [
+  "generatedAt": "2026-06-15T00:00:00Z",
+  "contracts": [
     {
-      "airAppId": "Elysia.LanDesktopConnect",
+      "id": "LanMountainDesktop.SharedContracts.SampleClock",
+      "version": "2.0.0",
+      "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "downloadUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/contracts/LanMountainDesktop.SharedContracts.SampleClock/2.0.0/LanMountainDesktop.SharedContracts.SampleClock.dll",
+      "sha256": "0b0d31c904e78a22aa982170a626e032bbfc986288fb52ddf3d195a05e782104",
+      "packageSizeBytes": 4608
+    }
+  ],
+  "plugins": [
+    {
+      "pluginId": "Elysia.LanDesktopConnect",
       "name": "Elysia LanDesktop Connect",
-      "version": "1.0.0",
-      "apiVersion": "1.0.0",
+      "description": "连接 Elysia 服务的 AirApp，提供 IPC 桥接与 WebSocket 网关能力。",
       "author": "wwiinnddyy",
-      "description": "连接 Elysia 服务的 AirApp",
-      "category": "tools",
-      "capabilities": ["desktop-component"],
-      "repository": {
-        "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
-        "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
-        "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
-        "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
-        "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect"
-      },
-      "publication": {
-        "packageSources": [
-          {
-            "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect/releases/download/v0.0.1/Elysia.LanDesktopConnect.0.0.1.laapp"
-          },
-          {
-            "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/Elysia.LanDesktopConnect.0.0.1.laapp"
-          },
-          {
-            "kind": "workspaceLocal",
-            "url": "workspace://elysia.LanDesktopConnect/Elysia.LanDesktopConnect.0.0.1.laapp"
-          }
-        ]
-      }
+      "version": "0.0.1",
+      "apiVersion": "5.0.0",
+      "minHostVersion": "0.7.4",
+      "entranceAssembly": "Elysia.LanDesktopConnect.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "releaseTag": "v0.0.1",
+      "releaseAssetName": "Elysia.LanDesktopConnect.0.0.1.laapp",
+      "tags": ["ipc", "bridge", "websocket", "gateway", "elysia"],
+      "settingsSections": ["IpcBridgeSettingsSection"],
+      "messageTypes": ["BunStatusChangedEvent", "IpcMessage"],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect/releases/download/v0.0.1/Elysia.LanDesktopConnect.0.0.1.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/Elysia.LanDesktopConnect.0.0.1.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://elysia.LanDesktopConnect/Elysia.LanDesktopConnect.0.0.1.laapp"
+        }
+      ]
     },
     {
-      "airAppId": "LanMountainDesktop.SamplePlugin",
+      "pluginId": "LanMountainDesktop.SamplePlugin",
       "name": "示例时钟",
-      "version": "1.0.0",
-      "apiVersion": "1.0.0",
+      "description": "官方示例 AirApp，展示时钟组件开发。",
       "author": "LanMountainDesktop Team",
-      "description": "官方示例 AirApp，展示时钟组件开发",
-      "category": "tools",
-      "capabilities": ["desktop-component"],
-      "tags": ["示例", "时钟", "教程"],
-      "repository": {
-        "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-        "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-        "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
-        "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-        "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin"
-      },
-      "publication": {
-        "packageSources": [
-          {
-            "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/releases/download/v0.3.1/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-          },
-          {
-            "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-          },
-          {
-            "kind": "workspaceLocal",
-            "url": "workspace://LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-          }
-        ]
-      }
+      "version": "0.3.1",
+      "apiVersion": "5.0.0",
+      "minHostVersion": "0.0.1",
+      "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "releaseTag": "v0.3.1",
+      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.3.1.laapp",
+      "tags": ["示例", "时钟", "教程", "example", "official", "sdk"],
+      "sharedContracts": [
+        {
+          "id": "LanMountainDesktop.SharedContracts.SampleClock",
+          "version": "2.0.0",
+          "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
+        }
+      ],
+      "desktopComponents": ["SampleClockWidget"],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/releases/download/v0.3.1/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
+        }
+      ]
     },
     {
-      "airAppId": "VoiceHubLanDesktop",
+      "pluginId": "VoiceHubLanDesktop",
       "name": "VoiceHub",
-      "version": "1.0.0",
-      "apiVersion": "1.0.0",
+      "description": "校园广播电台公开歌单 AirApp，支持实时更新与自定义刷新。",
       "author": "wwiinnddyy",
-      "description": "语音助手集成 AirApp",
-      "category": "tools",
-      "capabilities": ["desktop-component", "window"],
-      "tags": ["语音", "助手"],
-      "repository": {
-        "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
-        "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
-        "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
-        "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
-        "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop"
-      },
-      "publication": {
-        "packageSources": [
-          {
-            "kind": "releaseAsset",
-            "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.8/VoiceHubLanDesktop.0.0.8.laapp"
-          },
-          {
-            "kind": "rawFallback",
-            "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.8.laapp"
-          },
-          {
-            "kind": "workspaceLocal",
-            "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.8.laapp"
-          }
-        ]
-      }
+      "version": "0.0.8",
+      "apiVersion": "5.0.0",
+      "minHostVersion": "0.7.4",
+      "entranceAssembly": "VoiceHubLanDesktop.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "releaseTag": "v0.0.8",
+      "releaseAssetName": "VoiceHubLanDesktop.0.0.8.laapp",
+      "tags": ["语音", "助手", "voicehub", "music", "playlist", "radio"],
+      "desktopComponents": ["VoiceHubPlaylistWidget"],
+      "settingsSections": ["VoiceHubSettingsSection"],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.8/VoiceHubLanDesktop.0.0.8.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.8.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.8.laapp"
+        }
+      ]
     }
   ]
 }

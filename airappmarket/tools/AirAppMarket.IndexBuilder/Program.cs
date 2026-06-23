@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -30,12 +29,7 @@ static async Task<int> RunAsync(string[] args)
 
         using var httpClient = CreateHttpClient();
         var builder = new MarketIndexBuilder(httpClient);
-        object index = options.Mode switch
-        {
-            MarketIndexMode.Index => await builder.BuildIndexAsync(registry, CancellationToken.None),
-            MarketIndexMode.Snapshot => await builder.BuildSnapshotAsync(registry, options.RequireMarketManifest, CancellationToken.None),
-            _ => throw new InvalidOperationException($"Unsupported market index mode '{options.Mode}'.")
-        };
+        var index = await builder.BuildIndexAsync(registry, options.RequireMarketManifest, CancellationToken.None);
 
         var outputDirectory = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrWhiteSpace(outputDirectory))
@@ -45,16 +39,9 @@ static async Task<int> RunAsync(string[] args)
 
         await WriteJsonAsync(outputPath, index, CancellationToken.None);
 
-        Console.WriteLine($"Generated market index at '{outputPath}'.");
-        if (index is MarketIndexIndexV3 pureIndex)
-        {
-            Console.WriteLine($"Plugins: {pureIndex.Plugins.Count}");
-        }
-        else if (index is MarketIndexV2 snapshot)
-        {
-            Console.WriteLine($"Plugins: {snapshot.Plugins.Count}");
-            Console.WriteLine($"Contracts: {snapshot.Contracts.Count}");
-        }
+        Console.WriteLine($"Generated self-contained market index at '{outputPath}'.");
+        Console.WriteLine($"Plugins: {index.Plugins.Count}");
+        Console.WriteLine($"Contracts: {index.Contracts.Count}");
         return 0;
     }
     catch (Exception ex)
@@ -70,7 +57,7 @@ static HttpClient CreateHttpClient()
     {
         Timeout = TimeSpan.FromSeconds(60)
     };
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("LanAirApp-IndexBuilder/2.0");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("LanAirApp-IndexBuilder/3.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
     return client;
 }
@@ -80,7 +67,8 @@ static async Task WriteJsonAsync<T>(string path, T index, CancellationToken canc
     var serializerOptions = new JsonSerializerOptions
     {
         WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
     var json = JsonSerializer.Serialize(index, serializerOptions) + Environment.NewLine;
     var encoding = new UTF8Encoding(false);
@@ -91,7 +79,8 @@ static void PrintHelp()
 {
     Console.WriteLine("AirAppMarket.IndexBuilder");
     Console.WriteLine();
-    Console.WriteLine("Builds airappmarket/index.json from the official plugin registry.");
+    Console.WriteLine("Builds a self-contained airappmarket/index.json (schemaVersion 3.0.0).");
+    Console.WriteLine("Each plugin entry carries all display and acquisition metadata inline.");
     Console.WriteLine();
     Console.WriteLine("Usage:");
     Console.WriteLine("  dotnet run --project airappmarket/tools/AirAppMarket.IndexBuilder -- [options]");
@@ -101,17 +90,8 @@ static void PrintHelp()
     Console.WriteLine("                                    Default: airappmarket/registry/official-plugins.json");
     Console.WriteLine("  --output <path>                   Path to generated market index JSON.");
     Console.WriteLine("                                    Default: airappmarket/index.json");
-    Console.WriteLine("  --mode <index|snapshot>           Build a pure index or a snapshot index.");
-    Console.WriteLine("                                    Default: index");
-    Console.WriteLine("  --snapshot                        Shortcut for --mode snapshot.");
     Console.WriteLine("  --require-market-manifest         Fail when market-manifest.json release asset is missing.");
     Console.WriteLine("  --help                            Show help.");
-}
-
-enum MarketIndexMode
-{
-    Index,
-    Snapshot
 }
 
 internal sealed class CliOptions
@@ -120,7 +100,6 @@ internal sealed class CliOptions
     public string OutputPath { get; private set; } = Path.Combine("airappmarket", "index.json");
     public bool RequireMarketManifest { get; private set; }
     public bool ShowHelp { get; private set; }
-    public MarketIndexMode Mode { get; private set; } = MarketIndexMode.Index;
 
     public static CliOptions Parse(string[] args)
     {
@@ -136,12 +115,6 @@ internal sealed class CliOptions
                 case "--output":
                     options.OutputPath = ReadValue(args, ref i, "--output");
                     break;
-                case "--mode":
-                    options.Mode = ParseMode(ReadValue(args, ref i, "--mode"));
-                    break;
-                case "--snapshot":
-                    options.Mode = MarketIndexMode.Snapshot;
-                    break;
                 case "--require-market-manifest":
                     options.RequireMarketManifest = true;
                     break;
@@ -155,16 +128,6 @@ internal sealed class CliOptions
         }
 
         return options;
-    }
-
-    private static MarketIndexMode ParseMode(string value)
-    {
-        return value.Trim().ToLowerInvariant() switch
-        {
-            "index" => MarketIndexMode.Index,
-            "snapshot" => MarketIndexMode.Snapshot,
-            _ => throw new InvalidOperationException($"Unknown market index mode '{value}'.")
-        };
     }
 
     private static string ReadValue(string[] args, ref int index, string option)
@@ -189,45 +152,22 @@ internal sealed class MarketIndexBuilder
         _httpClient = httpClient;
     }
 
-    public async Task<MarketIndexIndexV3> BuildIndexAsync(
-        RegistryDocument registry,
-        CancellationToken cancellationToken)
-    {
-        var plugins = new List<MarketPluginIndexV3>();
-        foreach (var plugin in registry.Plugins)
-        {
-            var built = await BuildPluginIndexAsync(plugin, cancellationToken);
-            plugins.Add(built);
-        }
-
-        return new MarketIndexIndexV3
-        {
-            SchemaVersion = "3.0.0",
-            SourceId = registry.SourceId.Trim(),
-            SourceName = registry.SourceName.Trim(),
-            GeneratedAt = DateTimeOffset.UtcNow,
-            Plugins = plugins
-                .OrderBy(plugin => plugin.PluginId, StringComparer.OrdinalIgnoreCase)
-                .ToList()
-        };
-    }
-
-    public async Task<MarketIndexV2> BuildSnapshotAsync(
+    public async Task<MarketIndexDocument> BuildIndexAsync(
         RegistryDocument registry,
         bool requireMarketManifest,
         CancellationToken cancellationToken)
     {
-        var plugins = new List<MarketPluginV2>();
+        var plugins = new List<MarketPluginEntry>();
         foreach (var plugin in registry.Plugins)
         {
-            var built = await BuildPluginAsync(registry, plugin, requireMarketManifest, cancellationToken);
+            var built = await BuildPluginEntryAsync(registry, plugin, requireMarketManifest, cancellationToken);
             plugins.Add(built);
         }
 
         var contracts = registry.Contracts
             .OrderBy(contract => contract.Id, StringComparer.OrdinalIgnoreCase)
             .ThenBy(contract => contract.Version, StringComparer.OrdinalIgnoreCase)
-            .Select(contract => new MarketContractV2
+            .Select(contract => new MarketContract
             {
                 Id = contract.Id.Trim(),
                 Version = contract.Version.Trim(),
@@ -238,48 +178,21 @@ internal sealed class MarketIndexBuilder
             })
             .ToList();
 
-        return new MarketIndexV2
+        return new MarketIndexDocument
         {
-            SchemaVersion = "2.0.0",
+            SchemaVersion = "3.0.0",
             SourceId = registry.SourceId.Trim(),
             SourceName = registry.SourceName.Trim(),
             GeneratedAt = DateTimeOffset.UtcNow,
             Contracts = contracts,
             Plugins = plugins
-                .OrderBy(plugin => plugin.Manifest.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(plugin => plugin.Name, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(plugin => plugin.PluginId, StringComparer.OrdinalIgnoreCase)
                 .ToList()
         };
     }
 
-    private async Task<MarketPluginIndexV3> BuildPluginIndexAsync(
-        RegistryPlugin plugin,
-        CancellationToken cancellationToken)
-    {
-        var repo = GitHubRepositoryIdentity.Parse(plugin.RepositoryUrl);
-        var release = await GetLatestReleaseAsync(repo, cancellationToken);
-        var packageAsset = SelectPackageAsset(plugin, release);
-        var packageSources = BuildPackageSources(repo, packageAsset.Name, packageAsset.BrowserDownloadUrl);
-
-        return new MarketPluginIndexV3
-        {
-            PluginId = plugin.Id.Trim(),
-            Repository = new MarketPluginRepositoryIndexV3
-            {
-                IconUrl = FirstNonEmpty(plugin.IconUrl) ?? string.Empty,
-                ProjectUrl = FirstNonEmpty(plugin.ProjectUrl, plugin.RepositoryUrl) ?? string.Empty,
-                ReadmeUrl = FirstNonEmpty(plugin.ReadmeUrl) ?? string.Empty,
-                HomepageUrl = FirstNonEmpty(plugin.HomepageUrl, plugin.ProjectUrl, plugin.RepositoryUrl) ?? string.Empty,
-                RepositoryUrl = FirstNonEmpty(plugin.RepositoryUrl) ?? string.Empty
-            },
-            Publication = new MarketPluginPublicationIndexV3
-            {
-                PackageSources = packageSources
-            }
-        };
-    }
-
-    private async Task<MarketPluginV2> BuildPluginAsync(
+    private async Task<MarketPluginEntry> BuildPluginEntryAsync(
         RegistryDocument registry,
         RegistryPlugin plugin,
         bool requireMarketManifest,
@@ -329,10 +242,7 @@ internal sealed class MarketIndexBuilder
                 marketMetadata?.MinHostVersion,
                 plugin.DefaultMinHostVersion,
                 "0.0.1")!;
-            var tags = MergeTags(
-                plugin.Tags,
-                marketMetadata?.Tags);
-
+            var tags = MergeTags(plugin.Tags, marketMetadata?.Tags);
             var capabilityHints = MarketCapabilityHints.Merge(plugin.CapabilityHints, marketMetadata?.Capabilities);
 
             var releaseNotes = FirstNonEmpty(
@@ -340,19 +250,7 @@ internal sealed class MarketIndexBuilder
                 release.Body,
                 $"Release {release.TagName}")!;
 
-            var repository = new MarketPluginRepositoryV2
-            {
-                IconUrl = FirstNonEmpty(marketMetadata?.IconUrl, plugin.IconUrl)!,
-                ProjectUrl = FirstNonEmpty(marketMetadata?.ProjectUrl, plugin.ProjectUrl, plugin.RepositoryUrl)!,
-                ReadmeUrl = FirstNonEmpty(marketMetadata?.ReadmeUrl, plugin.ReadmeUrl)!,
-                HomepageUrl = FirstNonEmpty(marketMetadata?.HomepageUrl, plugin.HomepageUrl, plugin.ProjectUrl, plugin.RepositoryUrl)!,
-                RepositoryUrl = FirstNonEmpty(marketMetadata?.RepositoryUrl, plugin.RepositoryUrl)!,
-                Tags = tags,
-                ReleaseNotes = releaseNotes
-            };
-
             var publishedAt = release.PublishedAt ?? release.CreatedAt ?? DateTimeOffset.UtcNow;
-            var updatedAt = release.PublishedAt ?? release.CreatedAt ?? DateTimeOffset.UtcNow;
             var releaseTag = release.TagName.Trim();
             if (!releaseTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
@@ -360,61 +258,44 @@ internal sealed class MarketIndexBuilder
             }
 
             var packageSources = BuildPackageSources(repo, packageAsset.Name, packageAsset.BrowserDownloadUrl);
-            var publication = new MarketPluginPublicationV2
+
+            return new MarketPluginEntry
             {
+                PluginId = packageManifest.Id,
+                Name = FirstNonEmpty(marketMetadata?.Name, packageManifest.Name)!,
+                Description = FirstNonEmpty(marketMetadata?.Description, packageManifest.Description)!,
+                Author = FirstNonEmpty(marketMetadata?.Author, packageManifest.Author)!,
+                Version = packageManifest.Version,
+                ApiVersion = packageManifest.ApiVersion,
+                MinHostVersion = minHostVersion,
+                EntranceAssembly = packageManifest.EntranceAssembly,
+                IconUrl = FirstNonEmpty(marketMetadata?.IconUrl, plugin.IconUrl) ?? string.Empty,
+                ReadmeUrl = FirstNonEmpty(marketMetadata?.ReadmeUrl, plugin.ReadmeUrl) ?? string.Empty,
+                ProjectUrl = FirstNonEmpty(marketMetadata?.ProjectUrl, plugin.ProjectUrl, plugin.RepositoryUrl) ?? string.Empty,
+                HomepageUrl = FirstNonEmpty(marketMetadata?.HomepageUrl, plugin.HomepageUrl, plugin.ProjectUrl, plugin.RepositoryUrl) ?? string.Empty,
+                RepositoryUrl = FirstNonEmpty(marketMetadata?.RepositoryUrl, plugin.RepositoryUrl)!,
                 ReleaseTag = releaseTag,
                 ReleaseAssetName = packageAsset.Name,
                 PublishedAt = publishedAt,
-                UpdatedAt = updatedAt,
+                UpdatedAt = publishedAt,
                 PackageSizeBytes = packageInfo.PackageSizeBytes,
                 Sha256 = packageInfo.Sha256,
                 Md5 = packageInfo.Md5,
+                ReleaseNotes = releaseNotes,
+                Tags = tags,
+                SharedContracts = packageManifest.SharedContracts
+                    .Select(contract => new MarketSharedContract
+                    {
+                        Id = contract.Id,
+                        Version = contract.Version,
+                        AssemblyName = contract.AssemblyName
+                    })
+                    .ToList(),
+                DesktopComponents = capabilityHints.DesktopComponents,
+                SettingsSections = capabilityHints.SettingsSections,
+                Exports = capabilityHints.Exports,
+                MessageTypes = capabilityHints.MessageTypes,
                 PackageSources = packageSources
-            };
-
-            return new MarketPluginV2
-            {
-                PluginId = packageManifest.Id,
-                Manifest = new MarketPluginManifestV2
-                {
-                    Id = packageManifest.Id,
-                    Name = FirstNonEmpty(marketMetadata?.Name, packageManifest.Name)!,
-                    Description = FirstNonEmpty(marketMetadata?.Description, packageManifest.Description)!,
-                    Author = FirstNonEmpty(marketMetadata?.Author, packageManifest.Author)!,
-                    Version = packageManifest.Version,
-                    ApiVersion = packageManifest.ApiVersion,
-                    EntranceAssembly = packageManifest.EntranceAssembly,
-                    SharedContracts = packageManifest.SharedContracts
-                        .Select(contract => new MarketSharedContractV2
-                        {
-                            Id = contract.Id,
-                            Version = contract.Version,
-                            AssemblyName = contract.AssemblyName
-                        })
-                        .ToList()
-                },
-                Compatibility = new MarketPluginCompatibilityV2
-                {
-                    MinHostVersion = minHostVersion,
-                    PluginApiVersion = packageManifest.ApiVersion
-                },
-                Capabilities = new MarketPluginCapabilitiesV2
-                {
-                    SharedContracts = packageManifest.SharedContracts
-                        .Select(contract => new MarketSharedContractV2
-                        {
-                            Id = contract.Id,
-                            Version = contract.Version,
-                            AssemblyName = contract.AssemblyName
-                        })
-                        .ToList(),
-                    DesktopComponents = capabilityHints.DesktopComponents,
-                    SettingsSections = capabilityHints.SettingsSections,
-                    Exports = capabilityHints.Exports,
-                    MessageTypes = capabilityHints.MessageTypes
-                },
-                Repository = repository,
-                Publication = publication
             };
         }
         finally
@@ -448,7 +329,7 @@ internal sealed class MarketIndexBuilder
         return set.OrderBy(tag => tag, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    private static List<MarketPluginPackageSourceV2> BuildPackageSources(
+    private static List<MarketPackageSource> BuildPackageSources(
         GitHubRepositoryIdentity repository,
         string releaseAssetName,
         string releaseDownloadUrl)
@@ -456,17 +337,17 @@ internal sealed class MarketIndexBuilder
         var encodedAssetName = Uri.EscapeDataString(releaseAssetName);
         return
         [
-            new MarketPluginPackageSourceV2
+            new MarketPackageSource
             {
                 Kind = "releaseAsset",
                 Url = releaseDownloadUrl
             },
-            new MarketPluginPackageSourceV2
+            new MarketPackageSource
             {
                 Kind = "rawFallback",
                 Url = $"https://raw.githubusercontent.com/{repository.Owner}/{repository.Name}/main/{encodedAssetName}"
             },
-            new MarketPluginPackageSourceV2
+            new MarketPackageSource
             {
                 Kind = "workspaceLocal",
                 Url = $"workspace://{repository.Name}/{encodedAssetName}"
@@ -955,7 +836,7 @@ internal sealed class MarketPluginManifestData
     public string Version { get; init; } = string.Empty;
     public string ApiVersion { get; init; } = string.Empty;
     public string EntranceAssembly { get; init; } = string.Empty;
-    public List<MarketSharedContractV2> SharedContracts { get; init; } = [];
+    public List<MarketSharedContract> SharedContracts { get; init; } = [];
 
     public void Validate(string packagePath)
     {
@@ -977,61 +858,9 @@ internal sealed class MarketPluginManifestData
     }
 }
 
-internal sealed class MarketIndexIndexV3
-{
-    [JsonPropertyName("schemaVersion")]
-    public string SchemaVersion { get; init; } = string.Empty;
+// ---- Self-contained v3 index output models ----
 
-    [JsonPropertyName("sourceId")]
-    public string SourceId { get; init; } = string.Empty;
-
-    [JsonPropertyName("sourceName")]
-    public string SourceName { get; init; } = string.Empty;
-
-    [JsonPropertyName("generatedAt")]
-    public DateTimeOffset GeneratedAt { get; init; }
-
-    [JsonPropertyName("plugins")]
-    public List<MarketPluginIndexV3> Plugins { get; init; } = [];
-}
-
-internal sealed class MarketPluginIndexV3
-{
-    [JsonPropertyName("pluginId")]
-    public string PluginId { get; init; } = string.Empty;
-
-    [JsonPropertyName("repository")]
-    public MarketPluginRepositoryIndexV3 Repository { get; init; } = new();
-
-    [JsonPropertyName("publication")]
-    public MarketPluginPublicationIndexV3 Publication { get; init; } = new();
-}
-
-internal sealed class MarketPluginRepositoryIndexV3
-{
-    [JsonPropertyName("iconUrl")]
-    public string IconUrl { get; init; } = string.Empty;
-
-    [JsonPropertyName("projectUrl")]
-    public string ProjectUrl { get; init; } = string.Empty;
-
-    [JsonPropertyName("readmeUrl")]
-    public string ReadmeUrl { get; init; } = string.Empty;
-
-    [JsonPropertyName("homepageUrl")]
-    public string HomepageUrl { get; init; } = string.Empty;
-
-    [JsonPropertyName("repositoryUrl")]
-    public string RepositoryUrl { get; init; } = string.Empty;
-}
-
-internal sealed class MarketPluginPublicationIndexV3
-{
-    [JsonPropertyName("packageSources")]
-    public List<MarketPluginPackageSourceV2> PackageSources { get; init; } = [];
-}
-
-internal sealed class MarketIndexV2
+internal sealed class MarketIndexDocument
 {
     [JsonPropertyName("schemaVersion")]
     public string SchemaVersion { get; init; } = string.Empty;
@@ -1046,13 +875,13 @@ internal sealed class MarketIndexV2
     public DateTimeOffset GeneratedAt { get; init; }
 
     [JsonPropertyName("contracts")]
-    public List<MarketContractV2> Contracts { get; init; } = [];
+    public List<MarketContract> Contracts { get; init; } = [];
 
     [JsonPropertyName("plugins")]
-    public List<MarketPluginV2> Plugins { get; init; } = [];
+    public List<MarketPluginEntry> Plugins { get; init; } = [];
 }
 
-internal sealed class MarketContractV2
+internal sealed class MarketContract
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = string.Empty;
@@ -1073,31 +902,10 @@ internal sealed class MarketContractV2
     public long PackageSizeBytes { get; init; }
 }
 
-internal sealed class MarketPluginV2
+internal sealed class MarketPluginEntry
 {
     [JsonPropertyName("pluginId")]
     public string PluginId { get; init; } = string.Empty;
-
-    [JsonPropertyName("manifest")]
-    public MarketPluginManifestV2 Manifest { get; init; } = new();
-
-    [JsonPropertyName("compatibility")]
-    public MarketPluginCompatibilityV2 Compatibility { get; init; } = new();
-
-    [JsonPropertyName("repository")]
-    public MarketPluginRepositoryV2 Repository { get; init; } = new();
-
-    [JsonPropertyName("publication")]
-    public MarketPluginPublicationV2 Publication { get; init; } = new();
-
-    [JsonPropertyName("capabilities")]
-    public MarketPluginCapabilitiesV2 Capabilities { get; init; } = new();
-}
-
-internal sealed class MarketPluginManifestV2
-{
-    [JsonPropertyName("id")]
-    public string Id { get; init; } = string.Empty;
 
     [JsonPropertyName("name")]
     public string Name { get; init; } = string.Empty;
@@ -1114,32 +922,20 @@ internal sealed class MarketPluginManifestV2
     [JsonPropertyName("apiVersion")]
     public string ApiVersion { get; init; } = string.Empty;
 
-    [JsonPropertyName("entranceAssembly")]
-    public string EntranceAssembly { get; init; } = string.Empty;
-
-    [JsonPropertyName("sharedContracts")]
-    public List<MarketSharedContractV2> SharedContracts { get; init; } = [];
-}
-
-internal sealed class MarketPluginCompatibilityV2
-{
     [JsonPropertyName("minHostVersion")]
     public string MinHostVersion { get; init; } = string.Empty;
 
-    [JsonPropertyName("pluginApiVersion")]
-    public string PluginApiVersion { get; init; } = string.Empty;
-}
+    [JsonPropertyName("entranceAssembly")]
+    public string EntranceAssembly { get; init; } = string.Empty;
 
-internal sealed class MarketPluginRepositoryV2
-{
     [JsonPropertyName("iconUrl")]
     public string IconUrl { get; init; } = string.Empty;
 
-    [JsonPropertyName("projectUrl")]
-    public string ProjectUrl { get; init; } = string.Empty;
-
     [JsonPropertyName("readmeUrl")]
     public string ReadmeUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("projectUrl")]
+    public string ProjectUrl { get; init; } = string.Empty;
 
     [JsonPropertyName("homepageUrl")]
     public string HomepageUrl { get; init; } = string.Empty;
@@ -1147,29 +943,11 @@ internal sealed class MarketPluginRepositoryV2
     [JsonPropertyName("repositoryUrl")]
     public string RepositoryUrl { get; init; } = string.Empty;
 
-    [JsonPropertyName("tags")]
-    public List<string> Tags { get; init; } = [];
-
-    [JsonPropertyName("releaseNotes")]
-    public string ReleaseNotes { get; init; } = string.Empty;
-}
-
-internal sealed class MarketPluginPublicationV2
-{
     [JsonPropertyName("releaseTag")]
     public string ReleaseTag { get; init; } = string.Empty;
 
     [JsonPropertyName("releaseAssetName")]
     public string ReleaseAssetName { get; init; } = string.Empty;
-
-    [JsonPropertyName("publishedAt")]
-    public DateTimeOffset PublishedAt { get; init; }
-
-    [JsonPropertyName("updatedAt")]
-    public DateTimeOffset UpdatedAt { get; init; }
-
-    [JsonPropertyName("packageSizeBytes")]
-    public long PackageSizeBytes { get; init; }
 
     [JsonPropertyName("sha256")]
     public string Sha256 { get; init; } = string.Empty;
@@ -1177,14 +955,23 @@ internal sealed class MarketPluginPublicationV2
     [JsonPropertyName("md5")]
     public string Md5 { get; init; } = string.Empty;
 
-    [JsonPropertyName("packageSources")]
-    public List<MarketPluginPackageSourceV2> PackageSources { get; init; } = [];
-}
+    [JsonPropertyName("packageSizeBytes")]
+    public long PackageSizeBytes { get; init; }
 
-internal sealed class MarketPluginCapabilitiesV2
-{
+    [JsonPropertyName("publishedAt")]
+    public DateTimeOffset PublishedAt { get; init; }
+
+    [JsonPropertyName("updatedAt")]
+    public DateTimeOffset UpdatedAt { get; init; }
+
+    [JsonPropertyName("releaseNotes")]
+    public string ReleaseNotes { get; init; } = string.Empty;
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; init; } = [];
+
     [JsonPropertyName("sharedContracts")]
-    public List<MarketSharedContractV2> SharedContracts { get; init; } = [];
+    public List<MarketSharedContract> SharedContracts { get; init; } = [];
 
     [JsonPropertyName("desktopComponents")]
     public List<string> DesktopComponents { get; init; } = [];
@@ -1197,18 +984,12 @@ internal sealed class MarketPluginCapabilitiesV2
 
     [JsonPropertyName("messageTypes")]
     public List<string> MessageTypes { get; init; } = [];
+
+    [JsonPropertyName("packageSources")]
+    public List<MarketPackageSource> PackageSources { get; init; } = [];
 }
 
-internal sealed class MarketPluginPackageSourceV2
-{
-    [JsonPropertyName("kind")]
-    public string Kind { get; init; } = string.Empty;
-
-    [JsonPropertyName("url")]
-    public string Url { get; init; } = string.Empty;
-}
-
-internal sealed class MarketSharedContractV2
+internal sealed class MarketSharedContract
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = string.Empty;
@@ -1218,4 +999,13 @@ internal sealed class MarketSharedContractV2
 
     [JsonPropertyName("assemblyName")]
     public string AssemblyName { get; init; } = string.Empty;
+}
+
+internal sealed class MarketPackageSource
+{
+    [JsonPropertyName("kind")]
+    public string Kind { get; init; } = string.Empty;
+
+    [JsonPropertyName("url")]
+    public string Url { get; init; } = string.Empty;
 }
