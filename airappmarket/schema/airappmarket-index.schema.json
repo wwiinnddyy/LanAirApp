@@ -37,6 +37,7 @@
     },
     "plugins": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/plugin"
       }
@@ -45,7 +46,18 @@
   "$defs": {
     "url": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "optionalUrl": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/url"
+        },
+        {
+          "const": ""
+        }
+      ]
     },
     "version": {
       "type": "string",
@@ -133,7 +145,8 @@
           ]
         },
         "url": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -147,13 +160,19 @@
         "author",
         "version",
         "apiVersion",
+        "minHostVersion",
+        "entranceAssembly",
         "repositoryUrl",
+        "releaseTag",
+        "releaseAssetName",
+        "sha256",
+        "packageSizeBytes",
         "packageSources"
       ],
       "properties": {
         "pluginId": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
         },
         "name": {
           "type": "string",
@@ -177,19 +196,20 @@
           "$ref": "#/$defs/version"
         },
         "entranceAssembly": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^/\\\\]+\\.dll$"
         },
         "iconUrl": {
-          "type": "string"
+          "$ref": "#/$defs/optionalUrl"
         },
         "readmeUrl": {
-          "type": "string"
+          "$ref": "#/$defs/optionalUrl"
         },
         "projectUrl": {
-          "type": "string"
+          "$ref": "#/$defs/optionalUrl"
         },
         "homepageUrl": {
-          "type": "string"
+          "$ref": "#/$defs/optionalUrl"
         },
         "repositoryUrl": {
           "$ref": "#/$defs/url"
@@ -198,7 +218,8 @@
           "$ref": "#/$defs/releaseTag"
         },
         "releaseAssetName": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^/\\\\]+\\.laapp$"
         },
         "sha256": {
           "$ref": "#/$defs/hex64"
@@ -209,7 +230,7 @@
         },
         "packageSizeBytes": {
           "type": "integer",
-          "minimum": 0
+          "exclusiveMinimum": 0
         },
         "publishedAt": {
           "type": "string",
@@ -237,6 +258,7 @@
         "packageSources": {
           "type": "array",
           "minItems": 1,
+          "maxItems": 3,
           "items": {
             "$ref": "#/$defs/packageSource"
           }

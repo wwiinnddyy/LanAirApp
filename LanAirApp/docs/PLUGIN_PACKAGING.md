@@ -12,7 +12,7 @@ LanMountainDesktop 插件的标准交付格式是 `.laapp`。本仓只维护打�
 - `Localization/zh-CN.json`
 - `Localization/en-US.json`
 - 插件运行所需的其他资源文件
-- `sharedContracts` 对应的契约程序集（如有）
+- `sharedContracts` 只在清单中声明；契约程序集由市场 `contracts` 索引独立发布、校验和下发，不应重复打进插件包
 
 ### 目录约定
 
@@ -21,10 +21,12 @@ LanMountainDesktop 插件的标准交付格式是 `.laapp`。本仓只维护打�
 - 官方市场只消费 `airappmarket/index.json` 中的链接指针
 - `LanAirApp/releases/` 仅用于暂存或本地调试，不是权威发布源
 
-### 与 v4 对齐
+### 与 v5 对齐
 
-- `plugin.json.apiVersion` 使用 `4.0.0`
+- `plugin.json.apiVersion` 使用 `5.0.0`
+- `runtime.mode` 使用 `in-proc`、`isolated-background` 或 `isolated-window`
 - `sharedContracts` 需要与宿主 `SharedContracts` 模型保持一致
+- 不要私带 `sharedContracts` 契约 DLL，避免与市场下发的权威程序集重复或冲突
 - 组件注册应采用 `PluginDesktopComponentOptions`
 - 外观和圆角信息应通过 `IPluginAppearanceContext` / `PluginAppearanceSnapshot` 消费
 - 圆角预设使用 `PluginCornerRadiusPreset`
@@ -62,7 +64,7 @@ The standard delivery format for LanMountainDesktop plugins is `.laapp`. This re
 - `Localization/zh-CN.json`
 - `Localization/en-US.json`
 - other runtime assets required by the plugin
-- contract assemblies referenced by `sharedContracts`, if any
+- `sharedContracts` declarations only; contract assemblies are published, verified, and delivered separately through the market `contracts` index and should not be duplicated in the plugin package
 
 ### Directory conventions
 
@@ -71,10 +73,12 @@ The standard delivery format for LanMountainDesktop plugins is `.laapp`. This re
 - the official market only consumes link pointers from `airappmarket/index.json`
 - `LanAirApp/releases/` is only for staging or local debugging, not the authoritative release source
 
-### v4 alignment
+### v5 alignment
 
-- `plugin.json.apiVersion` uses `4.0.0`
+- `plugin.json.apiVersion` uses `5.0.0`
+- `runtime.mode` uses `in-proc`, `isolated-background`, or `isolated-window`
 - `sharedContracts` should stay aligned with the host `SharedContracts` model
+- do not bundle shared-contract DLLs; the market-delivered contract is the authoritative copy
 - component registration should use `PluginDesktopComponentOptions`
 - appearance and corner radius data should be consumed through `IPluginAppearanceContext` / `PluginAppearanceSnapshot`
 - corner radius presets use `PluginCornerRadiusPreset`

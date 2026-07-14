@@ -18,6 +18,9 @@
 **/obj/
 **/_build_verify_*/
 **/*.binlog
+.nuget/
+packages/*
+!packages/.gitkeep
 
 # Local temp and logs
 .env

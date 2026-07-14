@@ -62,28 +62,10 @@ public sealed class SamplePlugin : PluginBase
             sortOrder: 0);
 
         services.AddPluginDesktopComponent<SamplePluginStatusClockWidget>(
-            "LanMountainDesktop.SamplePlugin.StatusClock",
-            localizer.GetString("widget.display_name", "Sample Plugin Status Clock"),
-            iconKey: "PuzzlePiece",
-            category: localizer.GetString("widget.category", "Plugins"),
-            minWidthCells: 4,
-            minHeightCells: 4,
-            allowDesktopPlacement: true,
-            allowStatusBarPlacement: false,
-            resizeMode: PluginDesktopComponentResizeMode.Proportional,
-            cornerRadiusResolver: cellSize => Math.Clamp(cellSize * 0.34, 18, 34));
+            CreateStatusClockComponentOptions(localizer));
 
         services.AddPluginDesktopComponent<SamplePluginCloseDesktopWidget>(
-            "LanMountainDesktop.SamplePlugin.CloseDesktop",
-            localizer.GetString("widget.close_desktop.display_name", "Close Desktop"),
-            iconKey: "DismissCircle",
-            category: localizer.GetString("widget.category", "Plugins"),
-            minWidthCells: 2,
-            minHeightCells: 1,
-            allowDesktopPlacement: true,
-            allowStatusBarPlacement: false,
-            resizeMode: PluginDesktopComponentResizeMode.Free,
-            cornerRadiusResolver: cellSize => Math.Clamp(cellSize * 0.28, 14, 22));
+            CreateCloseDesktopComponentOptions(localizer));
     }
 
     private static PluginLocalizer CreateLocalizer(HostBuilderContext context)
@@ -106,5 +88,41 @@ public sealed class SamplePlugin : PluginBase
         return context.TryGetProperty<string>(key, out var value) && !string.IsNullOrWhiteSpace(value)
             ? value
             : fallback;
+    }
+
+    private static PluginDesktopComponentOptions CreateStatusClockComponentOptions(PluginLocalizer localizer)
+    {
+        return new PluginDesktopComponentOptions
+        {
+            ComponentId = "LanMountainDesktop.SamplePlugin.StatusClock",
+            DisplayName = localizer.GetString("widget.display_name", "Sample Plugin Status Clock"),
+            DisplayNameLocalizationKey = "widget.display_name",
+            IconKey = "PuzzlePiece",
+            Category = localizer.GetString("widget.category", "Plugins"),
+            MinWidthCells = 4,
+            MinHeightCells = 4,
+            AllowDesktopPlacement = true,
+            AllowStatusBarPlacement = false,
+            ResizeMode = PluginDesktopComponentResizeMode.Proportional,
+            CornerRadiusPreset = PluginCornerRadiusPreset.Default
+        };
+    }
+
+    private static PluginDesktopComponentOptions CreateCloseDesktopComponentOptions(PluginLocalizer localizer)
+    {
+        return new PluginDesktopComponentOptions
+        {
+            ComponentId = "LanMountainDesktop.SamplePlugin.CloseDesktop",
+            DisplayName = localizer.GetString("widget.close_desktop.display_name", "Close Desktop"),
+            DisplayNameLocalizationKey = "widget.close_desktop.display_name",
+            IconKey = "DismissCircle",
+            Category = localizer.GetString("widget.category", "Plugins"),
+            MinWidthCells = 2,
+            MinHeightCells = 1,
+            AllowDesktopPlacement = true,
+            AllowStatusBarPlacement = false,
+            ResizeMode = PluginDesktopComponentResizeMode.Free,
+            CornerRadiusPreset = PluginCornerRadiusPreset.Default
+        };
     }
 }

@@ -1,0 +1,18 @@
+{
+  "id": "LanMountainDesktop.YourPlugin",
+  "enabled": true,
+  "repositoryUrl": "https://github.com/owner/YourPlugin",
+  "marketManifestAssetName": "market-manifest.json",
+  "projectUrl": "https://github.com/owner/YourPlugin",
+  "readmeUrl": "https://raw.githubusercontent.com/owner/YourPlugin/main/README.md",
+  "homepageUrl": "https://github.com/owner/YourPlugin",
+  "iconUrl": "https://raw.githubusercontent.com/owner/YourPlugin/main/Assets/icon.png",
+  "defaultMinHostVersion": "0.8.6",
+  "tags": ["example"],
+  "capabilityHints": {
+    "desktopComponents": [],
+    "settingsSections": [],
+    "exports": [],
+    "messageTypes": []
+  }
+}

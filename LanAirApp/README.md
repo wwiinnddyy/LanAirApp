@@ -23,7 +23,20 @@
 
 - 宿主与 SDK 权威仓：`LanMountainDesktop`
 - 官方示例插件权威仓：`LanMountainDesktop.SamplePlugin`
-- `LanMountainDesktop.PluginSdk/`、`LanMountainDesktop.SharedContracts.SampleClock/` 与 `samples/` 仅作为镜像/模板材料
+- `LanMountainDesktop.PluginSdk/` 是不参与解决方案构建的历史 v4 快照，不得作为 v5 依赖
+- v5 示例、打包器和兼容测试统一消费由宿主仓源码生成的 `LanMountainDesktop.PluginSdk 5.0.0` 本地包
+- `LanMountainDesktop.SharedContracts.SampleClock/` 与 `samples/` 仅作为契约/模板材料
+
+### 构建 v5 示例与工具
+
+PluginSdk 5.0.0 尚未发布到 NuGet.org。首次还原前必须从相邻的宿主仓生成本地包：
+
+```powershell
+.\scripts\Initialize-PluginSdkFeed.ps1
+dotnet restore .\LanAirApp.slnx --configfile .\NuGet.Config --force --no-cache
+dotnet build .\LanAirApp.slnx -c Release --no-restore
+dotnet test .\LanMountainDesktop.PluginSdk.Tests\LanMountainDesktop.PluginSdk.Tests.csproj -c Release --no-build
+```
 
 ## English
 
@@ -48,4 +61,17 @@
 
 - Host and SDK source of truth: `LanMountainDesktop`
 - Official sample plugin source of truth: `LanMountainDesktop.SamplePlugin`
-- `LanMountainDesktop.PluginSdk/`, `LanMountainDesktop.SharedContracts.SampleClock/`, and `samples/` are mirrored/template material only
+- `LanMountainDesktop.PluginSdk/` is a historical v4 snapshot excluded from the solution and must not be used as a v5 dependency
+- v5 samples, tooling, and compatibility tests consume the local `LanMountainDesktop.PluginSdk 5.0.0` package built from the host repository
+- `LanMountainDesktop.SharedContracts.SampleClock/` and `samples/` remain contract/template material
+
+### Building the v5 sample and tooling
+
+PluginSdk 5.0.0 is not published on NuGet.org yet. Generate the local feed from a sibling host checkout before the first restore:
+
+```powershell
+.\scripts\Initialize-PluginSdkFeed.ps1
+dotnet restore .\LanAirApp.slnx --configfile .\NuGet.Config --force --no-cache
+dotnet build .\LanAirApp.slnx -c Release --no-restore
+dotnet test .\LanMountainDesktop.PluginSdk.Tests\LanMountainDesktop.PluginSdk.Tests.csproj -c Release --no-build
+```

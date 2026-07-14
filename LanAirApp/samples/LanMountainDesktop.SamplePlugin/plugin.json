@@ -1,10 +1,10 @@
 {
   "id": "LanMountainDesktop.SamplePlugin",
   "name": "LanMountain Sample Plugin",
-  "description": "Mirrored sample plugin used to validate PluginSdk v4 loading, appearance, and isolation.",
+  "description": "Mirrored sample plugin used to validate PluginSdk v5 loading, appearance, settings, and packaging.",
   "author": "LanMountainDesktop",
-  "version": "0.1.1",
-  "apiVersion": "4.0.0",
+  "version": "0.4.0",
+  "apiVersion": "5.0.0",
   "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
   "sharedContracts": [
     {
@@ -12,5 +12,8 @@
       "version": "2.0.0",
       "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
     }
-  ]
+  ],
+  "runtime": {
+    "mode": "in-proc"
+  }
 }

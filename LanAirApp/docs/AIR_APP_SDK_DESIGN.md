@@ -1,5 +1,8 @@
 # Air App SDK 设计文档
 
+> [!WARNING]
+> 本文是 AirApp SDK 的设计草案，不是当前生产能力说明。当前生产宿主不能发现、安装或加载第三方 `airapp.json` AirApp；`NotesApp`、`SystemMonitor` 和 `WeatherWidget` 仅为历史 API 1.0.0 原型，未迁移到 API 6.0.0，也不进入解决方案、CI 或市场。具体阻塞与后续验收条件见 [`LEGACY_AIRAPP_SAMPLES.md`](../samples/LEGACY_AIRAPP_SAMPLES.md)。当前可构建、可打包并接入市场的示例是 [`LanMountainDesktop.SamplePlugin`](../samples/LanMountainDesktop.SamplePlugin/README.md)，使用 Plugin SDK 5.0.0 和 `plugin.json`。
+
 ## 概述
 
 Air App SDK 是阑山桌面的下一代应用开发框架，将原有的 Plugin SDK 全面升级为统一的轻应用开发体系。通过 Air App SDK，开发者可以：

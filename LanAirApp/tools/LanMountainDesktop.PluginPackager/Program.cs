@@ -1,7 +1,15 @@
 using System.IO.Compression;
 using LanMountainDesktop.PluginSdk;
 
-return await RunAsync(args);
+try
+{
+    return await RunAsync(args);
+}
+catch (Exception exception)
+{
+    Console.Error.WriteLine($"Error: {exception.Message}");
+    return 1;
+}
 
 static async Task<int> RunAsync(string[] args)
 {
@@ -54,6 +62,12 @@ static async Task<int> RunAsync(string[] args)
 
     var manifest = PluginManifest.Load(manifestPath);
     var entranceAssemblyPath = manifest.ResolveEntranceAssemblyPath(manifestPath);
+    if (!IsPathWithinDirectory(entranceAssemblyPath, fullInputDirectory))
+    {
+        throw new InvalidOperationException(
+            $"The entrance assembly declared by '{PluginSdkInfo.ManifestFileName}' must be inside the plugin build directory.");
+    }
+
     if (!File.Exists(entranceAssemblyPath))
     {
         throw new FileNotFoundException(
@@ -63,11 +77,19 @@ static async Task<int> RunAsync(string[] args)
 
     outputPath ??= Path.Combine(
         Path.GetDirectoryName(fullInputDirectory) ?? fullInputDirectory,
-        BuildPackageFileName(manifest.Id));
+        BuildPackageFileName(manifest.Id, manifest.Version));
 
     var fullOutputPath = Path.GetFullPath(outputPath);
-    var inputDirectoryWithSeparator = EnsureTrailingSeparator(fullInputDirectory);
-    if (fullOutputPath.StartsWith(inputDirectoryWithSeparator, StringComparison.OrdinalIgnoreCase))
+    if (!string.Equals(
+            Path.GetExtension(fullOutputPath),
+            PluginSdkInfo.PackageFileExtension,
+            StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException(
+            $"The output package must use the '{PluginSdkInfo.PackageFileExtension}' extension.");
+    }
+
+    if (IsPathWithinDirectory(fullOutputPath, fullInputDirectory))
     {
         throw new InvalidOperationException("The output .laapp path cannot be placed inside the source directory.");
     }
@@ -79,22 +101,31 @@ static async Task<int> RunAsync(string[] args)
     }
 
     Directory.CreateDirectory(destinationDirectory);
-    if (File.Exists(fullOutputPath))
+    if (File.Exists(fullOutputPath) && !overwrite)
     {
-        if (!overwrite)
-        {
-            throw new InvalidOperationException(
-                $"The output package '{fullOutputPath}' already exists. Pass '--overwrite' to replace it.");
-        }
-
-        File.Delete(fullOutputPath);
+        throw new InvalidOperationException(
+            $"The output package '{fullOutputPath}' already exists. Pass '--overwrite' to replace it.");
     }
 
-    await Task.Run(() => ZipFile.CreateFromDirectory(
-        fullInputDirectory,
-        fullOutputPath,
-        CompressionLevel.Optimal,
-        includeBaseDirectory: false));
+    var temporaryOutputPath = Path.Combine(
+        destinationDirectory,
+        $".{Path.GetFileName(fullOutputPath)}.{Guid.NewGuid():N}.tmp");
+    try
+    {
+        await Task.Run(() => ZipFile.CreateFromDirectory(
+            fullInputDirectory,
+            temporaryOutputPath,
+            CompressionLevel.Optimal,
+            includeBaseDirectory: false));
+        File.Move(temporaryOutputPath, fullOutputPath, overwrite);
+    }
+    finally
+    {
+        if (File.Exists(temporaryOutputPath))
+        {
+            File.Delete(temporaryOutputPath);
+        }
+    }
 
     Console.WriteLine($"Packaged '{manifest.Name}' to '{fullOutputPath}'.");
     return 0;
@@ -112,18 +143,25 @@ static string ReadValue(IReadOnlyList<string> args, ref int index, string option
     return args[nextIndex];
 }
 
-static string BuildPackageFileName(string pluginId)
+static string BuildPackageFileName(string pluginId, string? pluginVersion)
 {
     var invalidChars = Path.GetInvalidFileNameChars();
     var safeName = new string(pluginId.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
-    return safeName + PluginSdkInfo.PackageFileExtension;
+    var safeVersion = string.IsNullOrWhiteSpace(pluginVersion)
+        ? null
+        : new string(pluginVersion.Trim().Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
+    return safeName +
+           (string.IsNullOrWhiteSpace(safeVersion) ? string.Empty : $".{safeVersion}") +
+           PluginSdkInfo.PackageFileExtension;
 }
 
-static string EnsureTrailingSeparator(string path)
+static bool IsPathWithinDirectory(string path, string directory)
 {
-    return path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
-        ? path
-        : path + Path.DirectorySeparatorChar;
+    var relativePath = Path.GetRelativePath(directory, path);
+    return !Path.IsPathRooted(relativePath) &&
+           !string.Equals(relativePath, "..", StringComparison.Ordinal) &&
+           !relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal) &&
+           !relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal);
 }
 
 static void PrintUsage()
@@ -131,6 +169,6 @@ static void PrintUsage()
     Console.WriteLine("LanMountainDesktop.PluginPackager");
     Console.WriteLine("Usage:");
     Console.WriteLine("  --input <plugin build directory>   Required");
-    Console.WriteLine("  --output <path to .laapp>          Optional");
+    Console.WriteLine("  --output <path to .laapp>          Optional; defaults to <id>.<version>.laapp");
     Console.WriteLine("  --overwrite                        Optional");
 }

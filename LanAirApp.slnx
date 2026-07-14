@@ -6,6 +6,6 @@
   <Folder Name="/LanAirApp/tools/">
     <Project Path="LanAirApp/tools/LanMountainDesktop.PluginPackager/LanMountainDesktop.PluginPackager.csproj" />
   </Folder>
-  <Project Path="LanMountainDesktop.PluginSdk/LanMountainDesktop.PluginSdk.csproj" />
+  <Project Path="LanMountainDesktop.PluginSdk.Tests/LanMountainDesktop.PluginSdk.Tests.csproj" />
   <Project Path="LanMountainDesktop.SharedContracts.SampleClock/LanMountainDesktop.SharedContracts.SampleClock.csproj" />
 </Solution>

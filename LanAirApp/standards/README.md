@@ -8,12 +8,15 @@
 
 - 安装包扩展名：`.laapp`
 - 插件清单文件：`plugin.json`
-- 清单 API 版本：`4.x`
+- 清单 API 版本：`5.0.0`
+- 默认运行模式：`runtime.mode = in-proc`
+- UI 兼容基线：Avalonia `12.1.0`
 - 本地化目录：`Localization/`
 - 推荐语言文件：`zh-CN.json` 和 `en-US.json`
 - 组件注册方式：`PluginDesktopComponentOptions`
 - 圆角与外观语义：`IPluginAppearanceContext`、`PluginAppearanceSnapshot`、`PluginCornerRadiusPreset`
 - 仓库根目录交付物：`.laapp` 和 `README.md`
+- `sharedContracts` 仅声明引用，契约 DLL 由市场 contracts 索引下发
 
 ### 建议
 
@@ -30,12 +33,15 @@ This directory stores the baseline conventions and template files for LanMountai
 
 - Package extension: `.laapp`
 - Manifest file: `plugin.json`
-- Manifest API version: `4.x`
+- Manifest API version: `5.0.0`
+- Default runtime mode: `runtime.mode = in-proc`
+- UI compatibility baseline: Avalonia `12.1.0`
 - Localization directory: `Localization/`
 - Recommended languages: `zh-CN.json` and `en-US.json`
 - Component registration: `PluginDesktopComponentOptions`
 - Appearance and corner radius semantics: `IPluginAppearanceContext`, `PluginAppearanceSnapshot`, and `PluginCornerRadiusPreset`
 - Repository root deliverables: `.laapp` and `README.md`
+- `sharedContracts` only declares references; contract DLLs are delivered through the market contracts index
 
 ### Suggestions
 

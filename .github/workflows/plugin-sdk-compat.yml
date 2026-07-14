@@ -1,0 +1,80 @@
+name: Plugin SDK compatibility
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  DOTNET_VERSION: "10.0.x"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout LanAirApp
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          path: LanAirApp
+
+      - name: Checkout authoritative host SDK
+        uses: actions/checkout@v7
+        with:
+          repository: wwiinnddyy/LanMountainDesktop
+          fetch-depth: 0
+          path: LanMountainDesktop
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Initialize authoritative local package feed
+        shell: pwsh
+        run: |
+          .\LanAirApp\scripts\Initialize-PluginSdkFeed.ps1 `
+            -FeedPath (Join-Path (Resolve-Path ".\LanAirApp").Path "packages") `
+            -HostRepositoryPath (Resolve-Path ".\LanMountainDesktop").Path
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore .\LanAirApp\LanAirApp.slnx --configfile .\LanAirApp\NuGet.Config --force --no-cache
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build .\LanAirApp\LanAirApp.slnx -c Release --no-restore
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test .\LanAirApp\LanMountainDesktop.PluginSdk.Tests\LanMountainDesktop.PluginSdk.Tests.csproj -c Release --no-build
+
+      - name: Validate package targets and packager CLI
+        shell: pwsh
+        run: |
+          $sampleRoot = Resolve-Path ".\LanAirApp\LanAirApp\samples\LanMountainDesktop.SamplePlugin"
+          $samplePackage = Join-Path $sampleRoot "LanMountainDesktop.SamplePlugin.0.4.0.laapp"
+          .\LanAirApp\scripts\Test-PluginPackage.ps1 -PackagePath $samplePackage -RequireCanonicalFileName
+
+          $tool = Resolve-Path ".\LanAirApp\LanAirApp\tools\LanMountainDesktop.PluginPackager\bin\Release\net10.0\LanMountainDesktop.PluginPackager.dll"
+          $input = Join-Path $sampleRoot "bin\Release\net10.0\content"
+          $artifacts = Join-Path (Resolve-Path ".\LanAirApp").Path "artifacts"
+          New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
+          $smokePackage = Join-Path $artifacts "packager-smoke.laapp"
+
+          dotnet $tool --input $input --output $smokePackage --overwrite
+          if ($LASTEXITCODE -ne 0) {
+            throw "PluginPackager smoke test failed with exit code $LASTEXITCODE."
+          }
+          .\LanAirApp\scripts\Test-PluginPackage.ps1 -PackagePath $smokePackage
+
+          dotnet $tool --input $input --output (Join-Path $artifacts "invalid.zip") --overwrite
+          if ($LASTEXITCODE -ne 1) {
+            throw "PluginPackager must reject non-.laapp output with exit code 1."
+          }
+          $global:LASTEXITCODE = 0

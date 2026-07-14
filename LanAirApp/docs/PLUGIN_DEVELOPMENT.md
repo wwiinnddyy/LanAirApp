@@ -2,7 +2,7 @@
 
 ## 中文
 
-本指引面向 LanMountainDesktop 插件作者，说明 v4 语义下的插件清单、组件注册、外观能力和发布组织方式。权威 API 形状始终以主仓 `LanMountainDesktop` 为准，本仓只提供文档、模板和镜像样例。
+本指引面向 LanMountainDesktop 插件作者，说明 v5 语义下的插件清单、组件注册、外观能力和发布组织方式。权威 API 形状始终以主仓 `LanMountainDesktop` 为准，本仓只提供文档、模板和镜像样例。
 
 ### 必要文件
 
@@ -11,9 +11,10 @@
 - 入口类：标记为插件入口，并实现 `IPlugin` 或继承 `PluginBase`
 - 本地化资源：建议提供 `Localization/zh-CN.json` 和 `Localization/en-US.json`
 
-### v4 开发要点
+### v5 开发要点
 
-- `plugin.json.apiVersion` 使用 `4.x`
+- `plugin.json.apiVersion` 使用 `5.0.0`
+- 建议显式声明 `runtime.mode`；普通插件使用 `in-proc`，隔离插件可选 `isolated-background` 或 `isolated-window`
 - 插件入口仍然使用 `Initialize(HostBuilderContext, IServiceCollection)`
 - 组件注册改用 `PluginDesktopComponentOptions`
 - 圆角和外观信息通过 `IPluginAppearanceContext` 与 `PluginAppearanceSnapshot` 获取
@@ -23,7 +24,7 @@
 ### 推荐流程
 
 1. 先以官方示例插件仓 `LanMountainDesktop.SamplePlugin` 为模板
-2. 按 v4 语义填写 `plugin.json`
+2. 按 v5 语义填写 `plugin.json`，并明确运行模式
 3. 使用 `IServiceCollection` 注册设置页、桌面组件、导出契约和 hosted service
 4. 在控制和服务中读取 `IPluginRuntimeContext` 与外观快照
 5. 打包为 `.laapp`
@@ -44,7 +45,7 @@
 
 ## English
 
-This guide is for LanMountainDesktop plugin authors and describes plugin manifests, component registration, appearance APIs, and packaging flow under the v4 semantic model. The authoritative API shape always lives in the host repository `LanMountainDesktop`; this repository provides documentation, templates, and mirrored sample material only.
+This guide is for LanMountainDesktop plugin authors and describes plugin manifests, component registration, appearance APIs, and packaging flow under the v5 semantic model. The authoritative API shape always lives in the host repository `LanMountainDesktop`; this repository provides documentation, templates, and mirrored sample material only.
 
 ### Required files
 
@@ -53,9 +54,10 @@ This guide is for LanMountainDesktop plugin authors and describes plugin manifes
 - Entry class marked as the plugin entrance, implementing `IPlugin` or inheriting from `PluginBase`
 - Localization resources, preferably `Localization/zh-CN.json` and `Localization/en-US.json`
 
-### v4 highlights
+### v5 highlights
 
-- `plugin.json.apiVersion` uses `4.x`
+- `plugin.json.apiVersion` uses `5.0.0`
+- Declare `runtime.mode` explicitly when possible: use `in-proc` for regular plugins, or `isolated-background` / `isolated-window` for isolated workers
 - The plugin entry point remains `Initialize(HostBuilderContext, IServiceCollection)`
 - Desktop components are registered with `PluginDesktopComponentOptions`
 - Corner radius and appearance state come from `IPluginAppearanceContext` and `PluginAppearanceSnapshot`
@@ -65,7 +67,7 @@ This guide is for LanMountainDesktop plugin authors and describes plugin manifes
 ### Recommended workflow
 
 1. Start from the official sample plugin repository `LanMountainDesktop.SamplePlugin`
-2. Fill in the manifest with v4 semantics
+2. Fill in the manifest with v5 semantics and an explicit runtime mode
 3. Register settings pages, desktop components, exports, and hosted services via `IServiceCollection`
 4. Read `IPluginRuntimeContext` and appearance snapshots inside controls and services
 5. Package the plugin as `.laapp`

@@ -6,13 +6,15 @@
   "plugins": [
     {
       "id": "LanMountainDesktop.SamplePlugin",
+      "enabled": false,
+      "disabledReason": "Published v0.4.0 package bundles host-owned Avalonia DLLs; re-enable only after a trimmed .laapp and matching market-manifest.json are published in a GitHub Release.",
       "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
       "marketManifestAssetName": "market-manifest.json",
       "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
       "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
       "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-      "defaultMinHostVersion": "0.0.1",
+      "defaultMinHostVersion": "0.8.6",
       "tags": [
         "example",
         "official",
@@ -33,7 +35,7 @@
       "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
       "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
-      "defaultMinHostVersion": "0.7.4",
+      "defaultMinHostVersion": "0.8.6",
       "tags": [
         "voicehub",
         "music",
@@ -53,13 +55,15 @@
     },
     {
       "id": "Elysia.LanDesktopConnect",
+      "enabled": false,
+      "disabledReason": "Latest published package v0.0.1 still targets PluginSdk API 4.0.0; re-enable after a verified API 5.0.0 release is published.",
       "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
       "marketManifestAssetName": "market-manifest.json",
       "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
       "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
       "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
-      "defaultMinHostVersion": "0.7.4",
+      "defaultMinHostVersion": "0.8.6",
       "tags": [
         "ipc",
         "bridge",
@@ -77,6 +81,147 @@
           "BunStatusChangedEvent",
           "IpcMessage"
         ]
+      }
+    },
+    {
+      "id": "Classworks4LanDesktop",
+      "enabled": false,
+      "disabledReason": "PluginSdk 5.0.0 package v0.2.0 is validated locally; enable after the matching GitHub Release and market-manifest.json assets are published.",
+      "repositoryUrl": "https://github.com/wwiinnddyy/Classworks4LanDesktop",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/Classworks4LanDesktop",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/Classworks4LanDesktop/main/README.md",
+      "homepageUrl": "https://github.com/ZeroCatDev/Classworks",
+      "defaultMinHostVersion": "0.8.6",
+      "tags": [
+        "classworks",
+        "homework",
+        "education",
+        "desktop-widget"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "Classworks4LanDesktop.Homework"
+        ],
+        "settingsSections": [
+          "connection"
+        ],
+        "exports": [],
+        "messageTypes": []
+      }
+    },
+    {
+      "id": "LanMountainDesktop.SchedulePlugin",
+      "enabled": false,
+      "disabledReason": "PluginSdk 5.0.0 package v0.1.0 is validated locally; enable after the matching GitHub Release and market-manifest.json assets are published.",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
+      "defaultMinHostVersion": "0.8.6",
+      "tags": [
+        "schedule",
+        "planner",
+        "timeline",
+        "desktop-widget"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "LanMountainDesktop.SchedulePlugin.NextPlan",
+          "LanMountainDesktop.SchedulePlugin.TodayTimeline",
+          "LanMountainDesktop.SchedulePlugin.TodayBoard"
+        ],
+        "settingsSections": [
+          "schedule"
+        ],
+        "exports": [],
+        "messageTypes": []
+      }
+    },
+    {
+      "id": "lanword.lookup",
+      "enabled": false,
+      "disabledReason": "PluginSdk 5.0.0 package v1.0.0 is validated locally; enable after the matching GitHub Release and market-manifest.json assets are published.",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanWordPluginRepo",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/LanWordPluginRepo",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanWordPluginRepo/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanWordPluginRepo",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/plugin-marketplace.svg",
+      "defaultMinHostVersion": "0.8.6",
+      "tags": [
+        "lanword",
+        "dictionary",
+        "word",
+        "learning",
+        "widget"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "lanword.lookup.word-card"
+        ],
+        "settingsSections": [
+          "global"
+        ],
+        "exports": [],
+        "messageTypes": []
+      }
+    },
+    {
+      "id": "LanDesktopHot",
+      "enabled": false,
+      "disabledReason": "PluginSdk 5.0.0 package v0.2.0 is validated locally; enable after the matching GitHub Release and market-manifest.json assets are published.",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanDesktopHot/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/plugin-marketplace.svg",
+      "defaultMinHostVersion": "0.8.6",
+      "tags": [
+        "hot-list",
+        "zhihu",
+        "trending",
+        "news",
+        "desktop-widget"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "zhihu-hotlist"
+        ],
+        "settingsSections": [],
+        "exports": [],
+        "messageTypes": []
+      }
+    },
+    {
+      "id": "LanExamAwarePlugin",
+      "enabled": false,
+      "disabledReason": "PluginSdk 5.0.0 package v0.1.0 is validated locally; enable after the matching GitHub Release and market-manifest.json assets are published.",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanExamAwarePluginRepo",
+      "marketManifestAssetName": "market-manifest.json",
+      "projectUrl": "https://github.com/wwiinnddyy/LanExamAwarePluginRepo",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanExamAwarePluginRepo/main/README.md",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanExamAwarePluginRepo",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/plugin-marketplace.svg",
+      "defaultMinHostVersion": "0.8.6",
+      "tags": [
+        "exam",
+        "schedule",
+        "examaware",
+        "education",
+        "desktop-widget"
+      ],
+      "capabilityHints": {
+        "desktopComponents": [
+          "lanexamaware.exam-widget"
+        ],
+        "settingsSections": [
+          "examaware"
+        ],
+        "exports": [],
+        "messageTypes": []
       }
     }
   ],

@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 return await RunAsync(args);
@@ -17,6 +18,45 @@ static async Task<int> RunAsync(string[] args)
             return 0;
         }
 
+        if (options.RunSelfTest)
+        {
+            MarketIndexBuilder.RunPackageSecuritySelfTests();
+            return 0;
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.StandaloneMarketManifestPath))
+        {
+            var manifestPath = Path.GetFullPath(options.StandaloneMarketManifestPath);
+            if (!File.Exists(manifestPath))
+            {
+                throw new FileNotFoundException($"Market manifest '{manifestPath}' was not found.", manifestPath);
+            }
+
+            var metadata = MarketManifestMetadata.Parse(File.ReadAllText(manifestPath));
+            metadata.ValidateStandalone();
+            Console.WriteLine($"Validated market manifest '{manifestPath}'.");
+            Console.WriteLine($"PluginId: {metadata.PluginId}");
+            Console.WriteLine($"Version: {metadata.Version}");
+            Console.WriteLine($"ApiVersion: {metadata.ApiVersion}");
+            Console.WriteLine($"PackageSources: {string.Join(", ", metadata.PackageSources.Select(source => source.Kind))}");
+            return 0;
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.ReleasePackagePath))
+        {
+            if (string.IsNullOrWhiteSpace(options.MarketManifestPath))
+            {
+                throw new InvalidOperationException(
+                    "--validate-release-package requires --market-manifest <path>.");
+            }
+
+            MarketIndexBuilder.ValidateLocalReleasePackage(
+                Path.GetFullPath(options.ReleasePackagePath),
+                Path.GetFullPath(options.MarketManifestPath),
+                options.ExpectedPluginId);
+            return 0;
+        }
+
         var registryPath = Path.GetFullPath(options.RegistryPath);
         var outputPath = Path.GetFullPath(options.OutputPath);
 
@@ -27,9 +67,19 @@ static async Task<int> RunAsync(string[] args)
 
         var registry = await RegistryDocument.LoadAsync(registryPath, CancellationToken.None);
 
+        if (options.ValidateRegistryOnly)
+        {
+            Console.WriteLine($"Validated registry '{registryPath}'.");
+            Console.WriteLine($"Registered plugins: {registry.Plugins.Count}");
+            Console.WriteLine($"Enabled plugins: {registry.Plugins.Count(plugin => plugin.Enabled)}");
+            Console.WriteLine($"Contracts: {registry.Contracts.Count}");
+            return 0;
+        }
+
         using var httpClient = CreateHttpClient();
         var builder = new MarketIndexBuilder(httpClient);
         var index = await builder.BuildIndexAsync(registry, options.RequireMarketManifest, CancellationToken.None);
+        PreserveGeneratedAtWhenContentIsUnchanged(outputPath, index);
 
         var outputDirectory = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrWhiteSpace(outputDirectory))
@@ -59,6 +109,15 @@ static HttpClient CreateHttpClient()
     };
     client.DefaultRequestHeaders.UserAgent.ParseAdd("LanAirApp-IndexBuilder/3.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+
+    var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+    if (!string.IsNullOrWhiteSpace(githubToken))
+    {
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", githubToken.Trim());
+    }
+
     return client;
 }
 
@@ -73,6 +132,38 @@ static async Task WriteJsonAsync<T>(string path, T index, CancellationToken canc
     var json = JsonSerializer.Serialize(index, serializerOptions) + Environment.NewLine;
     var encoding = new UTF8Encoding(false);
     await File.WriteAllTextAsync(path, json, encoding, cancellationToken);
+}
+
+static void PreserveGeneratedAtWhenContentIsUnchanged(string outputPath, MarketIndexDocument index)
+{
+    if (!File.Exists(outputPath))
+    {
+        return;
+    }
+
+    try
+    {
+        var existing = JsonNode.Parse(File.ReadAllText(outputPath))?.AsObject();
+        var candidate = JsonSerializer.SerializeToNode(index)?.AsObject();
+        if (existing is null || candidate is null)
+        {
+            return;
+        }
+
+        var existingGeneratedAtText = existing["generatedAt"]?.GetValue<string>();
+        existing.Remove("generatedAt");
+        candidate.Remove("generatedAt");
+        if (JsonNode.DeepEquals(existing, candidate) &&
+            DateTimeOffset.TryParse(existingGeneratedAtText, out var existingGeneratedAt))
+        {
+            index.GeneratedAt = existingGeneratedAt;
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(
+            $"Warning: Could not compare existing market index timestamp at '{outputPath}': {ex.Message}");
+    }
 }
 
 static void PrintHelp()
@@ -91,6 +182,12 @@ static void PrintHelp()
     Console.WriteLine("  --output <path>                   Path to generated market index JSON.");
     Console.WriteLine("                                    Default: airappmarket/index.json");
     Console.WriteLine("  --require-market-manifest         Fail when market-manifest.json release asset is missing.");
+    Console.WriteLine("  --validate-registry-only          Validate registry structure without GitHub/network access.");
+    Console.WriteLine("  --validate-release-package <path> Validate a local .laapp and market-manifest.json pair.");
+    Console.WriteLine("  --validate-market-manifest <path> Validate standalone market-manifest.json fields.");
+    Console.WriteLine("  --market-manifest <path>          Release manifest used with --validate-release-package.");
+    Console.WriteLine("  --plugin-id <id>                  Optional expected id for local release validation.");
+    Console.WriteLine("  --self-test                       Run built-in package security regressions.");
     Console.WriteLine("  --help                            Show help.");
 }
 
@@ -99,6 +196,12 @@ internal sealed class CliOptions
     public string RegistryPath { get; private set; } = Path.Combine("airappmarket", "registry", "official-plugins.json");
     public string OutputPath { get; private set; } = Path.Combine("airappmarket", "index.json");
     public bool RequireMarketManifest { get; private set; }
+    public bool ValidateRegistryOnly { get; private set; }
+    public string? ReleasePackagePath { get; private set; }
+    public string? StandaloneMarketManifestPath { get; private set; }
+    public string? MarketManifestPath { get; private set; }
+    public string? ExpectedPluginId { get; private set; }
+    public bool RunSelfTest { get; private set; }
     public bool ShowHelp { get; private set; }
 
     public static CliOptions Parse(string[] args)
@@ -117,6 +220,24 @@ internal sealed class CliOptions
                     break;
                 case "--require-market-manifest":
                     options.RequireMarketManifest = true;
+                    break;
+                case "--validate-registry-only":
+                    options.ValidateRegistryOnly = true;
+                    break;
+                case "--validate-release-package":
+                    options.ReleasePackagePath = ReadValue(args, ref i, "--validate-release-package");
+                    break;
+                case "--validate-market-manifest":
+                    options.StandaloneMarketManifestPath = ReadValue(args, ref i, "--validate-market-manifest");
+                    break;
+                case "--market-manifest":
+                    options.MarketManifestPath = ReadValue(args, ref i, "--market-manifest");
+                    break;
+                case "--plugin-id":
+                    options.ExpectedPluginId = ReadValue(args, ref i, "--plugin-id");
+                    break;
+                case "--self-test":
+                    options.RunSelfTest = true;
                     break;
                 case "--help":
                 case "-h":
@@ -152,22 +273,225 @@ internal sealed class MarketIndexBuilder
         _httpClient = httpClient;
     }
 
+    public static void RunPackageSecuritySelfTests()
+    {
+        var temporaryDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "LanAirApp",
+            "AirAppMarket.IndexBuilder.SelfTest",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporaryDirectory);
+
+        try
+        {
+            var validPackagePath = Path.Combine(temporaryDirectory, "valid.laapp");
+            WriteTestPackage(validPackagePath, CreateTestPluginManifest());
+            _ = ReadPackageManifest(validPackagePath);
+
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "parent-path-traversal",
+                CreateTestPluginManifest(),
+                "unsafe entry path",
+                ("../escape.txt", "escape"));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "windows-absolute-path",
+                CreateTestPluginManifest(),
+                "unsafe entry path",
+                ("C:/escape.txt", "escape"));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "duplicate-root-plugin-manifest",
+                CreateTestPluginManifest(),
+                "duplicate entry",
+                ("PLUGIN.JSON", CreateTestPluginManifest()));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "ambiguous-entry-assembly",
+                CreateTestPluginManifest(),
+                "ambiguous entry assembly",
+                ("nested/Test.Plugin.dll", "nested duplicate"));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "bundled-plugin-sdk",
+                CreateTestPluginManifest(),
+                "host-owned assemblies",
+                ("lib/LanMountainDesktop.PluginSdk.dll", "host sdk"));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "bundled-avalonia",
+                CreateTestPluginManifest(),
+                "host-owned assemblies",
+                ("Avalonia.Controls.dll", "host ui framework"));
+            ExpectPackageValidationFailure(
+                temporaryDirectory,
+                "bundled-shared-contract",
+                CreateTestPluginManifest("Test.SharedContract.dll"),
+                "host-owned assemblies",
+                ("contracts/Test.SharedContract.dll", "host shared contract"));
+
+            Console.WriteLine(
+                "AirAppMarket.IndexBuilder package security self-tests passed (1 valid + 7 invalid cases).");
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(temporaryDirectory, recursive: true);
+            }
+            catch
+            {
+                // Ignore temporary self-test cleanup failures.
+            }
+        }
+    }
+
+    private static void ExpectPackageValidationFailure(
+        string temporaryDirectory,
+        string testName,
+        string manifestJson,
+        string expectedMessageFragment,
+        params (string Path, string Content)[] extraEntries)
+    {
+        var packagePath = Path.Combine(temporaryDirectory, $"{testName}.laapp");
+        WriteTestPackage(packagePath, manifestJson, extraEntries);
+
+        try
+        {
+            _ = ReadPackageManifest(packagePath);
+        }
+        catch (InvalidOperationException ex) when (
+            ex.Message.Contains(expectedMessageFragment, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"IndexBuilder package security self-test '{testName}' unexpectedly succeeded or returned the wrong failure.");
+    }
+
+    private static void WriteTestPackage(
+        string packagePath,
+        string manifestJson,
+        params (string Path, string Content)[] extraEntries)
+    {
+        using var archive = ZipFile.Open(packagePath, ZipArchiveMode.Create);
+        WriteTestArchiveEntry(archive, "plugin.json", manifestJson);
+        WriteTestArchiveEntry(archive, "Test.Plugin.dll", "test plugin assembly");
+        foreach (var extraEntry in extraEntries)
+        {
+            WriteTestArchiveEntry(archive, extraEntry.Path, extraEntry.Content);
+        }
+    }
+
+    private static void WriteTestArchiveEntry(ZipArchive archive, string path, string content)
+    {
+        var entry = archive.CreateEntry(path);
+        using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));
+        writer.Write(content);
+    }
+
+    private static string CreateTestPluginManifest(string? sharedContractAssemblyName = null)
+    {
+        var sharedContracts = new JsonArray();
+        if (!string.IsNullOrWhiteSpace(sharedContractAssemblyName))
+        {
+            sharedContracts.Add(new JsonObject
+            {
+                ["id"] = "Test.SharedContract",
+                ["version"] = "1.0.0",
+                ["assemblyName"] = sharedContractAssemblyName
+            });
+        }
+
+        return new JsonObject
+        {
+            ["id"] = "Test.Plugin",
+            ["name"] = "Test Plugin",
+            ["description"] = "IndexBuilder package security regression fixture.",
+            ["author"] = "LanAirApp",
+            ["version"] = "1.0.0",
+            ["apiVersion"] = "5.0.0",
+            ["entranceAssembly"] = "Test.Plugin.dll",
+            ["sharedContracts"] = sharedContracts
+        }.ToJsonString();
+    }
+
+    public static void ValidateLocalReleasePackage(
+        string packagePath,
+        string marketManifestPath,
+        string? expectedPluginId)
+    {
+        if (!File.Exists(packagePath))
+        {
+            throw new FileNotFoundException($"Plugin package '{packagePath}' was not found.", packagePath);
+        }
+
+        if (!packagePath.EndsWith(".laapp", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"Plugin package '{packagePath}' must use the .laapp extension.");
+        }
+
+        if (!File.Exists(marketManifestPath))
+        {
+            throw new FileNotFoundException(
+                $"Market manifest '{marketManifestPath}' was not found.",
+                marketManifestPath);
+        }
+
+        var packageManifest = ReadPackageManifest(packagePath);
+        var packageInfo = ComputePackageInfo(packagePath);
+        var marketMetadata = MarketManifestMetadata.Parse(File.ReadAllText(marketManifestPath));
+        marketMetadata.ValidateStandalone();
+
+        if (!string.IsNullOrWhiteSpace(expectedPluginId) &&
+            !string.Equals(expectedPluginId.Trim(), packageManifest.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Expected plugin id '{expectedPluginId}', but package '{packagePath}' declares '{packageManifest.Id}'.");
+        }
+
+        var releaseTag = $"v{packageManifest.Version}";
+        var releaseAssetName = Path.GetFileName(packagePath);
+        marketMetadata.ValidateAgainst(packageManifest, releaseTag, releaseAssetName, packageInfo);
+
+        Console.WriteLine($"Validated local release package '{packagePath}'.");
+        Console.WriteLine($"PluginId: {packageManifest.Id}");
+        Console.WriteLine($"Version: {packageManifest.Version}");
+        Console.WriteLine($"ApiVersion: {packageManifest.ApiVersion}");
+        Console.WriteLine($"ReleaseTag: {releaseTag}");
+        Console.WriteLine($"ReleaseAssetName: {releaseAssetName}");
+        Console.WriteLine($"SHA256: {packageInfo.Sha256}");
+        Console.WriteLine($"PackageSizeBytes: {packageInfo.PackageSizeBytes}");
+        Console.WriteLine($"PackageSources: {string.Join(", ", marketMetadata.PackageSources.Select(source => source.Kind))}");
+    }
+
     public async Task<MarketIndexDocument> BuildIndexAsync(
         RegistryDocument registry,
         bool requireMarketManifest,
         CancellationToken cancellationToken)
     {
         var plugins = new List<MarketPluginEntry>();
-        foreach (var plugin in registry.Plugins)
+        foreach (var disabledPlugin in registry.Plugins.Where(plugin => !plugin.Enabled))
+        {
+            Console.Error.WriteLine(
+                $"Skipping disabled plugin '{disabledPlugin.Id}': {disabledPlugin.DisabledReason}");
+        }
+
+        foreach (var plugin in registry.Plugins.Where(plugin => plugin.Enabled))
         {
             var built = await BuildPluginEntryAsync(registry, plugin, requireMarketManifest, cancellationToken);
             plugins.Add(built);
         }
 
-        var contracts = registry.Contracts
-            .OrderBy(contract => contract.Id, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(contract => contract.Version, StringComparer.OrdinalIgnoreCase)
-            .Select(contract => new MarketContract
+        var contracts = new List<MarketContract>(registry.Contracts.Count);
+        foreach (var contract in registry.Contracts
+                     .OrderBy(contract => contract.Id, StringComparer.OrdinalIgnoreCase)
+                     .ThenBy(contract => contract.Version, StringComparer.OrdinalIgnoreCase))
+        {
+            await ValidatePublishedContractAsync(contract, cancellationToken);
+            contracts.Add(new MarketContract
             {
                 Id = contract.Id.Trim(),
                 Version = contract.Version.Trim(),
@@ -175,8 +499,8 @@ internal sealed class MarketIndexBuilder
                 DownloadUrl = contract.DownloadUrl.Trim(),
                 Sha256 = contract.Sha256.Trim().ToLowerInvariant(),
                 PackageSizeBytes = contract.PackageSizeBytes
-            })
-            .ToList();
+            });
+        }
 
         return new MarketIndexDocument
         {
@@ -237,11 +561,19 @@ internal sealed class MarketIndexBuilder
             await DownloadFileAsync(packageAsset.BrowserDownloadUrl, temporaryPackagePath, cancellationToken);
             var packageManifest = ReadPackageManifest(temporaryPackagePath);
             var packageInfo = ComputePackageInfo(temporaryPackagePath);
+            ValidateReleaseContract(
+                plugin,
+                registry.Contracts,
+                release,
+                packageAsset,
+                packageManifest,
+                packageInfo,
+                marketMetadata);
 
-            var minHostVersion = FirstNonEmpty(
+            var minHostVersion = ResolveMinimumHostVersion(
                 marketMetadata?.MinHostVersion,
                 plugin.DefaultMinHostVersion,
-                "0.0.1")!;
+                "0.8.6");
             var tags = MergeTags(plugin.Tags, marketMetadata?.Tags);
             var capabilityHints = MarketCapabilityHints.Merge(plugin.CapabilityHints, marketMetadata?.Capabilities);
 
@@ -251,6 +583,7 @@ internal sealed class MarketIndexBuilder
                 $"Release {release.TagName}")!;
 
             var publishedAt = release.PublishedAt ?? release.CreatedAt ?? DateTimeOffset.UtcNow;
+            var updatedAt = release.UpdatedAt ?? publishedAt;
             var releaseTag = release.TagName.Trim();
             if (!releaseTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
@@ -277,7 +610,7 @@ internal sealed class MarketIndexBuilder
                 ReleaseTag = releaseTag,
                 ReleaseAssetName = packageAsset.Name,
                 PublishedAt = publishedAt,
-                UpdatedAt = publishedAt,
+                UpdatedAt = updatedAt,
                 PackageSizeBytes = packageInfo.PackageSizeBytes,
                 Sha256 = packageInfo.Sha256,
                 Md5 = packageInfo.Md5,
@@ -367,23 +700,207 @@ internal sealed class MarketIndexBuilder
         return null;
     }
 
+    private static string ResolveMinimumHostVersion(params string?[] values)
+    {
+        Version? resolved = null;
+        foreach (var value in values)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                continue;
+            }
+
+            var normalized = value.Trim();
+            var parts = normalized.Split('.');
+            if (parts.Length != 3 || !Version.TryParse(normalized, out var parsed))
+            {
+                throw new InvalidOperationException(
+                    $"Minimum host version '{value}' must use major.minor.patch format.");
+            }
+
+            if (resolved is null || parsed > resolved)
+            {
+                resolved = parsed;
+            }
+        }
+
+        return (resolved ?? new Version(0, 8, 6)).ToString(3);
+    }
+
     private static MarketPluginManifestData ReadPackageManifest(string packagePath)
     {
         using var archive = ZipFile.OpenRead(packagePath);
-        var entry = archive.Entries.FirstOrDefault(candidate =>
-            string.Equals(candidate.FullName, "plugin.json", StringComparison.OrdinalIgnoreCase));
-        if (entry is null)
+        var seenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var candidate in archive.Entries)
+        {
+            var normalizedPath = candidate.FullName.Replace('\\', '/');
+            if (IsUnsafeArchivePath(normalizedPath))
+            {
+                throw new InvalidOperationException(
+                    $"Package '{packagePath}' contains unsafe entry path '{candidate.FullName}'.");
+            }
+
+            if (!seenEntries.Add(normalizedPath))
+            {
+                throw new InvalidOperationException(
+                    $"Package '{packagePath}' contains duplicate entry '{candidate.FullName}'.");
+            }
+        }
+
+        var manifestEntries = archive.Entries
+            .Where(candidate => string.Equals(candidate.FullName.Replace('\\', '/'), "plugin.json", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (manifestEntries.Length == 0)
         {
             throw new InvalidOperationException($"Package '{packagePath}' does not contain plugin.json.");
         }
 
-        using var stream = entry.Open();
+        if (manifestEntries.Length > 1)
+        {
+            throw new InvalidOperationException($"Package '{packagePath}' contains multiple plugin.json files.");
+        }
+
+        using var stream = manifestEntries[0].Open();
         using var reader = new StreamReader(stream, Encoding.UTF8, true);
         var text = reader.ReadToEnd();
         var model = JsonSerializer.Deserialize<MarketPluginManifestData>(text, JsonSerializerOptionsProvider.CaseInsensitive)
             ?? throw new InvalidOperationException($"Package '{packagePath}' contains an invalid plugin.json.");
         model.Validate(packagePath);
+
+        var rootEntranceAssemblyEntries = archive.Entries.Count(candidate =>
+            string.Equals(
+                candidate.FullName.Replace('\\', '/'),
+                model.EntranceAssembly,
+                StringComparison.OrdinalIgnoreCase));
+        if (rootEntranceAssemblyEntries != 1)
+        {
+            throw new InvalidOperationException(
+                $"Package '{packagePath}' must contain exactly one root entry assembly '{model.EntranceAssembly}'.");
+        }
+
+        var entranceAssemblyEntries = archive.Entries
+            .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Name))
+            .Where(candidate => string.Equals(
+                GetArchiveLeafName(candidate.FullName),
+                model.EntranceAssembly,
+                StringComparison.OrdinalIgnoreCase))
+            .Select(candidate => candidate.FullName.Replace('\\', '/'))
+            .ToArray();
+        if (entranceAssemblyEntries.Length != 1)
+        {
+            throw new InvalidOperationException(
+                $"Package '{packagePath}' contains an ambiguous entry assembly '{model.EntranceAssembly}': " +
+                string.Join(", ", entranceAssemblyEntries));
+        }
+
+        var sharedContractAssemblyNames = model.SharedContracts
+            .Select(contract => contract.AssemblyName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var forbiddenHostOwnedEntries = archive.Entries
+            .Where(candidate => !string.IsNullOrWhiteSpace(candidate.Name))
+            .Select(candidate => new
+            {
+                Path = candidate.FullName.Replace('\\', '/'),
+                LeafName = GetArchiveLeafName(candidate.FullName)
+            })
+            .Where(candidate =>
+                string.Equals(
+                    candidate.LeafName,
+                    "LanMountainDesktop.PluginSdk.dll",
+                    StringComparison.OrdinalIgnoreCase) ||
+                (candidate.LeafName.StartsWith("Avalonia", StringComparison.OrdinalIgnoreCase) &&
+                 candidate.LeafName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) ||
+                sharedContractAssemblyNames.Contains(candidate.LeafName))
+            .Select(candidate => candidate.Path)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (forbiddenHostOwnedEntries.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Package '{packagePath}' contains host-owned assemblies: " +
+                string.Join(", ", forbiddenHostOwnedEntries));
+        }
+
         return model;
+    }
+
+    private static bool IsUnsafeArchivePath(string normalizedPath)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedPath) ||
+            normalizedPath.StartsWith("/", StringComparison.Ordinal) ||
+            Path.IsPathRooted(normalizedPath) ||
+            (normalizedPath.Length >= 2 &&
+             char.IsAsciiLetter(normalizedPath[0]) &&
+             normalizedPath[1] == ':'))
+        {
+            return true;
+        }
+
+        var segments = normalizedPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        return segments.Any(segment => segment is "." or "..");
+    }
+
+    private static string GetArchiveLeafName(string archivePath)
+    {
+        var normalizedPath = archivePath.Replace('\\', '/').TrimEnd('/');
+        var separatorIndex = normalizedPath.LastIndexOf('/');
+        return separatorIndex < 0 ? normalizedPath : normalizedPath[(separatorIndex + 1)..];
+    }
+
+    private static void ValidateReleaseContract(
+        RegistryPlugin registryPlugin,
+        IReadOnlyCollection<RegistryContract> registryContracts,
+        GitHubRelease release,
+        MarketReleaseAsset packageAsset,
+        MarketPluginManifestData packageManifest,
+        PackageInfo packageInfo,
+        MarketManifestMetadata? marketMetadata)
+    {
+        if (!string.Equals(registryPlugin.Id.Trim(), packageManifest.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Registry plugin id '{registryPlugin.Id}' does not match package manifest id '{packageManifest.Id}'.");
+        }
+
+        foreach (var contract in packageManifest.SharedContracts)
+        {
+            if (!registryContracts.Any(candidate =>
+                    string.Equals(candidate.Id, contract.Id, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(candidate.Version, contract.Version, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(candidate.AssemblyName, contract.AssemblyName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException(
+                    $"Package '{packageManifest.Id}' references shared contract '{contract.Id}@{contract.Version}' that is not published by the market registry.");
+            }
+        }
+
+        var expectedReleaseTag = $"v{packageManifest.Version}";
+        var normalizedReleaseTag = release.TagName.Trim();
+        if (!string.Equals(normalizedReleaseTag, expectedReleaseTag, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Release tag '{release.TagName}' for '{packageManifest.Id}' must match package version '{packageManifest.Version}' as '{expectedReleaseTag}'.");
+        }
+
+        var expectedAssetName = $"{packageManifest.Id}.{packageManifest.Version}.laapp";
+        if (!string.Equals(packageAsset.Name, expectedAssetName, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Release asset for '{packageManifest.Id}' must be named '{expectedAssetName}', but found '{packageAsset.Name}'.");
+        }
+
+        if (packageAsset.Size > 0 && packageAsset.Size != packageInfo.PackageSizeBytes)
+        {
+            throw new InvalidOperationException(
+                $"GitHub reports {packageAsset.Size} bytes for '{packageAsset.Name}', but the downloaded package contains {packageInfo.PackageSizeBytes} bytes.");
+        }
+
+        marketMetadata?.ValidateAgainst(
+            packageManifest,
+            normalizedReleaseTag,
+            packageAsset.Name,
+            packageInfo);
     }
 
     private static PackageInfo ComputePackageInfo(string packagePath)
@@ -461,6 +978,29 @@ internal sealed class MarketIndexBuilder
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
+    private async Task ValidatePublishedContractAsync(
+        RegistryContract contract,
+        CancellationToken cancellationToken)
+    {
+        using var response = await _httpClient.GetAsync(
+            contract.DownloadUrl,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var actualSha256 = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+        if (bytes.LongLength != contract.PackageSizeBytes ||
+            !string.Equals(actualSha256, contract.Sha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Published shared contract '{contract.Id}@{contract.Version}' does not match registry integrity metadata. " +
+                $"Expected size/hash '{contract.PackageSizeBytes}/{contract.Sha256}', actual '{bytes.LongLength}/{actualSha256}'.");
+        }
+
+        Console.WriteLine(
+            $"Verified shared contract '{contract.Id}@{contract.Version}' ({bytes.LongLength} bytes, SHA-256 {actualSha256}).");
+    }
+
     private async Task DownloadFileAsync(string url, string destinationPath, CancellationToken cancellationToken)
     {
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -480,6 +1020,14 @@ internal static class JsonSerializerOptionsProvider
         ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true
     };
+
+    public static readonly JsonSerializerOptions StrictRegistry = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow
+    };
 }
 
 internal sealed record PackageInfo(long PackageSizeBytes, string Sha256, string Md5);
@@ -496,7 +1044,7 @@ internal sealed class RegistryDocument
     public static async Task<RegistryDocument> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var json = await File.ReadAllTextAsync(path, cancellationToken);
-        var model = JsonSerializer.Deserialize<RegistryDocument>(json, JsonSerializerOptionsProvider.CaseInsensitive)
+        var model = JsonSerializer.Deserialize<RegistryDocument>(json, JsonSerializerOptionsProvider.StrictRegistry)
             ?? throw new InvalidOperationException($"Failed to parse registry '{path}'.");
         model.Validate(path);
         return model;
@@ -504,9 +1052,9 @@ internal sealed class RegistryDocument
 
     private void Validate(string sourceName)
     {
-        if (string.IsNullOrWhiteSpace(SchemaVersion))
+        if (!string.Equals(SchemaVersion?.Trim(), "1.0.0", StringComparison.Ordinal))
         {
-            throw new InvalidOperationException($"Registry '{sourceName}' is missing schemaVersion.");
+            throw new InvalidOperationException($"Registry '{sourceName}' must use schemaVersion '1.0.0'.");
         }
 
         if (string.IsNullOrWhiteSpace(SourceId) || string.IsNullOrWhiteSpace(SourceName))
@@ -517,6 +1065,19 @@ internal sealed class RegistryDocument
         if (Plugins.Count == 0)
         {
             throw new InvalidOperationException($"Registry '{sourceName}' does not declare plugins.");
+        }
+
+        if (!Plugins.Any(plugin => plugin.Enabled))
+        {
+            throw new InvalidOperationException($"Registry '{sourceName}' does not enable any plugins.");
+        }
+
+        if (string.IsNullOrWhiteSpace(DefaultMarketManifestAssetName) ||
+            !string.Equals(Path.GetFileName(DefaultMarketManifestAssetName), DefaultMarketManifestAssetName, StringComparison.Ordinal) ||
+            !DefaultMarketManifestAssetName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' declares invalid defaultMarketManifestAssetName '{DefaultMarketManifestAssetName}'.");
         }
 
         var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -545,6 +1106,8 @@ internal sealed class RegistryDocument
 internal sealed class RegistryPlugin
 {
     public string Id { get; init; } = string.Empty;
+    public bool Enabled { get; init; } = true;
+    public string? DisabledReason { get; init; }
     public string RepositoryUrl { get; init; } = string.Empty;
     public string? ProjectUrl { get; init; }
     public string? ReadmeUrl { get; init; }
@@ -569,6 +1132,84 @@ internal sealed class RegistryPlugin
         }
 
         _ = GitHubRepositoryIdentity.Parse(RepositoryUrl);
+
+        if (!Enabled && string.IsNullOrWhiteSpace(DisabledReason))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' disabled plugin '{Id}' must declare disabledReason.");
+        }
+
+        if (Id.Any(character => !(char.IsLetterOrDigit(character) || character is '.' or '_' or '-')) ||
+            Id.Contains("..", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Registry '{sourceName}' has invalid plugin id '{Id}'.");
+        }
+
+        ValidateOptionalHttpsUrl(ProjectUrl, nameof(ProjectUrl), sourceName);
+        ValidateOptionalHttpsUrl(ReadmeUrl, nameof(ReadmeUrl), sourceName);
+        ValidateOptionalHttpsUrl(HomepageUrl, nameof(HomepageUrl), sourceName);
+        ValidateOptionalHttpsUrl(IconUrl, nameof(IconUrl), sourceName);
+
+        if (!string.IsNullOrWhiteSpace(DefaultMinHostVersion) && !IsThreePartVersion(DefaultMinHostVersion))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' plugin '{Id}' declares invalid defaultMinHostVersion '{DefaultMinHostVersion}'.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(MarketManifestAssetName) &&
+            (!string.Equals(Path.GetFileName(MarketManifestAssetName), MarketManifestAssetName, StringComparison.Ordinal) ||
+             !MarketManifestAssetName.EndsWith(".json", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' plugin '{Id}' declares invalid marketManifestAssetName '{MarketManifestAssetName}'.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(ReleaseAssetName) &&
+            (!string.Equals(Path.GetFileName(ReleaseAssetName), ReleaseAssetName, StringComparison.Ordinal) ||
+             !ReleaseAssetName.EndsWith(".laapp", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' plugin '{Id}' declares invalid releaseAssetName '{ReleaseAssetName}'.");
+        }
+
+        ValidateDistinctValues(Tags, nameof(Tags), sourceName);
+        ValidateDistinctValues(CapabilityHints.DesktopComponents, "capabilityHints.desktopComponents", sourceName);
+        ValidateDistinctValues(CapabilityHints.SettingsSections, "capabilityHints.settingsSections", sourceName);
+        ValidateDistinctValues(CapabilityHints.Exports, "capabilityHints.exports", sourceName);
+        ValidateDistinctValues(CapabilityHints.MessageTypes, "capabilityHints.messageTypes", sourceName);
+    }
+
+    private void ValidateOptionalHttpsUrl(string? value, string propertyName, string sourceName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' plugin '{Id}' declares invalid HTTPS URL '{value}' for '{propertyName}'.");
+        }
+    }
+
+    private void ValidateDistinctValues(IReadOnlyCollection<string> values, string propertyName, string sourceName)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var value in values)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !seen.Add(value.Trim()))
+            {
+                throw new InvalidOperationException(
+                    $"Registry '{sourceName}' plugin '{Id}' contains a blank or duplicate value in '{propertyName}'.");
+            }
+        }
+    }
+
+    private static bool IsThreePartVersion(string value)
+    {
+        var parts = value.Trim().Split('.');
+        return parts.Length == 3 && parts.All(part => int.TryParse(part, out var number) && number >= 0);
     }
 }
 
@@ -596,6 +1237,33 @@ internal sealed class RegistryContract
         {
             throw new InvalidOperationException(
                 $"Registry '{sourceName}' declares invalid packageSizeBytes for contract '{Id}@{Version}'.");
+        }
+
+        var versionParts = Version.Split('.');
+        if (versionParts.Length != 3 || versionParts.Any(part => !int.TryParse(part, out var number) || number < 0))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' declares invalid version '{Version}' for contract '{Id}'.");
+        }
+
+        if (!string.Equals(Path.GetFileName(AssemblyName), AssemblyName, StringComparison.Ordinal) ||
+            !AssemblyName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' declares invalid assemblyName '{AssemblyName}' for contract '{Id}'.");
+        }
+
+        if (!Uri.TryCreate(DownloadUrl, UriKind.Absolute, out var downloadUri) ||
+            downloadUri.Scheme != Uri.UriSchemeHttps)
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' declares invalid HTTPS downloadUrl for contract '{Id}@{Version}'.");
+        }
+
+        if (Sha256.Length != 64 || Sha256.Any(character => !Uri.IsHexDigit(character)))
+        {
+            throw new InvalidOperationException(
+                $"Registry '{sourceName}' declares invalid SHA-256 for contract '{Id}@{Version}'.");
         }
     }
 }
@@ -648,9 +1316,14 @@ internal sealed class MarketCapabilityHints
 
 internal sealed class MarketManifestMetadata
 {
+    public string? SchemaVersion { get; init; }
+    public string? PluginId { get; init; }
     public string? Name { get; init; }
     public string? Description { get; init; }
     public string? Author { get; init; }
+    public string? Version { get; init; }
+    public string? ApiVersion { get; init; }
+    public string? EntranceAssembly { get; init; }
     public string? MinHostVersion { get; init; }
     public string? IconUrl { get; init; }
     public string? ProjectUrl { get; init; }
@@ -658,13 +1331,26 @@ internal sealed class MarketManifestMetadata
     public string? HomepageUrl { get; init; }
     public string? RepositoryUrl { get; init; }
     public string? ReleaseNotes { get; init; }
+    public string? ReleaseTag { get; init; }
+    public string? ReleaseAssetName { get; init; }
+    public string? Sha256 { get; init; }
+    public long? PackageSizeBytes { get; init; }
     public List<string> Tags { get; init; } = [];
     public MarketCapabilityHints Capabilities { get; init; } = new();
+    public List<MarketManifestPackageSource> PackageSources { get; init; } = [];
 
     public static MarketManifestMetadata Parse(string json)
     {
-        using var doc = JsonDocument.Parse(json);
+        using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true,
+            CommentHandling = JsonCommentHandling.Skip
+        });
         var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidOperationException("market-manifest.json must contain a JSON object.");
+        }
 
         var manifestElement = TryGetObject(root, "manifest");
         var compatibilityElement = TryGetObject(root, "compatibility");
@@ -674,9 +1360,20 @@ internal sealed class MarketManifestMetadata
 
         return new MarketManifestMetadata
         {
-            Name = FirstString(manifestElement, "name") ?? FirstString(root, "name"),
+            SchemaVersion = FirstString(root, "schemaVersion"),
+            PluginId = FirstString(manifestElement, "id") ?? FirstString(root, "pluginId"),
+            Name = FirstString(manifestElement, "name")
+                ?? FirstString(root, "displayName")
+                ?? FirstString(root, "name"),
             Description = FirstString(manifestElement, "description") ?? FirstString(root, "description"),
             Author = FirstString(manifestElement, "author") ?? FirstString(root, "author"),
+            Version = FirstString(manifestElement, "version") ?? FirstString(root, "version"),
+            ApiVersion = FirstString(manifestElement, "apiVersion")
+                ?? FirstString(compatibilityElement, "apiVersion")
+                ?? FirstString(compatibilityElement, "pluginApiVersion")
+                ?? FirstString(root, "apiVersion"),
+            EntranceAssembly = FirstString(manifestElement, "entranceAssembly")
+                ?? FirstString(root, "entranceAssembly"),
             MinHostVersion = FirstString(compatibilityElement, "minHostVersion") ?? FirstString(root, "minHostVersion"),
             IconUrl = FirstString(repositoryElement, "iconUrl") ?? FirstString(root, "iconUrl"),
             ProjectUrl = FirstString(repositoryElement, "projectUrl") ?? FirstString(root, "projectUrl"),
@@ -686,6 +1383,15 @@ internal sealed class MarketManifestMetadata
             ReleaseNotes = FirstString(repositoryElement, "releaseNotes")
                 ?? FirstString(publicationElement, "releaseNotes")
                 ?? FirstString(root, "releaseNotes"),
+            ReleaseTag = FirstString(publicationElement, "releaseTag")
+                ?? FirstString(manifestElement, "releaseTag")
+                ?? FirstString(root, "releaseTag"),
+            ReleaseAssetName = FirstString(publicationElement, "releaseAssetName")
+                ?? FirstString(manifestElement, "releaseAssetName")
+                ?? FirstString(root, "releaseAssetName"),
+            Sha256 = FirstString(publicationElement, "sha256") ?? FirstString(root, "sha256"),
+            PackageSizeBytes = FirstInt64(publicationElement, "packageSizeBytes")
+                ?? FirstInt64(root, "packageSizeBytes"),
             Tags = ReadStringArray(repositoryElement, "tags").Concat(ReadStringArray(root, "tags"))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
@@ -696,8 +1402,147 @@ internal sealed class MarketManifestMetadata
                 SettingsSections = ReadStringArray(capabilitiesElement, "settingsSections"),
                 Exports = ReadStringArray(capabilitiesElement, "exports"),
                 MessageTypes = ReadStringArray(capabilitiesElement, "messageTypes")
-            }
+            },
+            PackageSources = ReadPackageSources(publicationElement)
         };
+    }
+
+    public void ValidateAgainst(
+        MarketPluginManifestData packageManifest,
+        string releaseTag,
+        string releaseAssetName,
+        PackageInfo packageInfo)
+    {
+        ValidateStandalone();
+        if (!string.Equals(SchemaVersion, "2.0.0", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{packageManifest.Id}' must use schemaVersion '2.0.0'.");
+        }
+
+        EnsureOptionalMatch(PluginId, packageManifest.Id, "plugin id", packageManifest.Id);
+        EnsureOptionalMatch(Version, packageManifest.Version, "version", packageManifest.Id);
+        EnsureOptionalMatch(ApiVersion, packageManifest.ApiVersion, "apiVersion", packageManifest.Id);
+        EnsureOptionalMatch(EntranceAssembly, packageManifest.EntranceAssembly, "entranceAssembly", packageManifest.Id);
+        EnsureOptionalMatch(ReleaseTag, releaseTag, "releaseTag", packageManifest.Id);
+        EnsureOptionalMatch(ReleaseAssetName, releaseAssetName, "releaseAssetName", packageManifest.Id);
+
+        if (!string.IsNullOrWhiteSpace(Sha256) &&
+            !string.Equals(Sha256.Trim(), packageInfo.Sha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{packageManifest.Id}' declares SHA-256 '{Sha256}', but the package SHA-256 is '{packageInfo.Sha256}'.");
+        }
+
+        if (PackageSizeBytes is { } packageSize && packageSize != packageInfo.PackageSizeBytes)
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{packageManifest.Id}' declares packageSizeBytes '{packageSize}', but the package contains '{packageInfo.PackageSizeBytes}' bytes.");
+        }
+
+        if (PackageSources.Count > 0)
+        {
+            var expectedOrder = new[] { "releaseAsset", "rawFallback", "workspaceLocal" };
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var previousOrder = -1;
+            foreach (var source in PackageSources)
+            {
+                var order = Array.IndexOf(expectedOrder, source.Kind);
+                if (order < 0 || order < previousOrder || !seen.Add(source.Kind))
+                {
+                    throw new InvalidOperationException(
+                        $"market-manifest.json for '{packageManifest.Id}' must declare unique packageSources in releaseAsset -> rawFallback -> workspaceLocal order.");
+                }
+
+                if (string.IsNullOrWhiteSpace(source.Url))
+                {
+                    throw new InvalidOperationException(
+                        $"market-manifest.json for '{packageManifest.Id}' contains an empty package source URL.");
+                }
+
+                previousOrder = order;
+            }
+        }
+    }
+
+    public void ValidateStandalone()
+    {
+        var pluginId = RequireMetadata(PluginId, "manifest.id/pluginId");
+        _ = RequireMetadata(Name, "manifest.name/displayName");
+        _ = RequireMetadata(Description, "manifest.description");
+        _ = RequireMetadata(Author, "manifest.author");
+        var version = RequireThreePartVersion(Version, "manifest.version", pluginId);
+        var apiVersion = RequireThreePartVersion(ApiVersion, "manifest.apiVersion/compatibility.apiVersion", pluginId);
+        if (System.Version.Parse(apiVersion).Major != 5)
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' targets PluginSdk API '{apiVersion}', but production requires API major 5.");
+        }
+
+        _ = RequireThreePartVersion(MinHostVersion, "compatibility.minHostVersion", pluginId);
+        var entranceAssembly = EntranceAssembly?.Trim();
+        if (!string.IsNullOrWhiteSpace(entranceAssembly) &&
+            (!string.Equals(Path.GetFileName(entranceAssembly), entranceAssembly, StringComparison.Ordinal) ||
+             !entranceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' declares invalid entranceAssembly '{entranceAssembly}'.");
+        }
+
+        if (!string.Equals(SchemaVersion, "2.0.0", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' must use schemaVersion '2.0.0'.");
+        }
+
+        var releaseTag = RequireMetadata(ReleaseTag, "publication.releaseTag");
+        var expectedReleaseTag = $"v{version}";
+        if (!string.Equals(releaseTag, expectedReleaseTag, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' releaseTag must be '{expectedReleaseTag}', but found '{releaseTag}'.");
+        }
+
+        var releaseAssetName = RequireMetadata(ReleaseAssetName, "publication.releaseAssetName");
+        var expectedAssetName = $"{pluginId}.{version}.laapp";
+        if (!string.Equals(releaseAssetName, expectedAssetName, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' releaseAssetName must be '{expectedAssetName}', but found '{releaseAssetName}'.");
+        }
+
+        var sha256 = RequireMetadata(Sha256, "publication.sha256");
+        if (sha256.Length != 64 || sha256.Any(character => !Uri.IsHexDigit(character)))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' declares invalid publication.sha256 '{sha256}'.");
+        }
+
+        if (PackageSizeBytes is not { } packageSize || packageSize <= 0)
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' must declare positive publication.packageSizeBytes.");
+        }
+
+        var repositoryUrl = RequireMetadata(RepositoryUrl, "repository.repositoryUrl");
+        _ = GitHubRepositoryIdentity.Parse(repositoryUrl);
+
+        var expectedOrder = new[] { "releaseAsset", "rawFallback", "workspaceLocal" };
+        if (PackageSources.Count != expectedOrder.Length)
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' must declare exactly three canonical package sources.");
+        }
+
+        for (var index = 0; index < expectedOrder.Length; index++)
+        {
+            if (!string.Equals(PackageSources[index].Kind, expectedOrder[index], StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(PackageSources[index].Url))
+            {
+                throw new InvalidOperationException(
+                    $"market-manifest.json for '{pluginId}' packageSources[{index}] must be '{expectedOrder[index]}' with a non-empty URL.");
+            }
+        }
     }
 
     private static JsonElement? TryGetObject(JsonElement source, string propertyName)
@@ -724,6 +1569,19 @@ internal sealed class MarketManifestMetadata
 
         var text = property.GetString();
         return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+    }
+
+    private static long? FirstInt64(JsonElement? source, string propertyName)
+    {
+        if (!source.HasValue ||
+            !source.Value.TryGetProperty(propertyName, out var property) ||
+            property.ValueKind != JsonValueKind.Number ||
+            !property.TryGetInt64(out var value))
+        {
+            return null;
+        }
+
+        return value;
     }
 
     private static List<string> ReadStringArray(JsonElement? source, string propertyName)
@@ -755,7 +1613,73 @@ internal sealed class MarketManifestMetadata
 
         return set.OrderBy(value => value, StringComparer.OrdinalIgnoreCase).ToList();
     }
+
+    private static List<MarketManifestPackageSource> ReadPackageSources(JsonElement? publication)
+    {
+        if (!publication.HasValue ||
+            !publication.Value.TryGetProperty("packageSources", out var sources) ||
+            sources.ValueKind != JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        var result = new List<MarketManifestPackageSource>();
+        foreach (var source in sources.EnumerateArray())
+        {
+            if (source.ValueKind != JsonValueKind.Object)
+            {
+                throw new InvalidOperationException("market-manifest.json publication.packageSources must contain objects.");
+            }
+
+            result.Add(new MarketManifestPackageSource(
+                FirstString(source, "kind") ?? string.Empty,
+                FirstString(source, "url") ?? FirstString(source, "path") ?? string.Empty));
+        }
+
+        return result;
+    }
+
+    private static void EnsureOptionalMatch(
+        string? declaredValue,
+        string actualValue,
+        string fieldName,
+        string pluginId)
+    {
+        if (!string.IsNullOrWhiteSpace(declaredValue) &&
+            !string.Equals(declaredValue.Trim(), actualValue, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' declares {fieldName} '{declaredValue}', but the package/release declares '{actualValue}'.");
+        }
+    }
+
+    private static string RequireMetadata(string? value, string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidOperationException($"market-manifest.json is missing required property '{propertyName}'.");
+        }
+
+        return value.Trim();
+    }
+
+    private static string RequireThreePartVersion(string? value, string propertyName, string pluginId)
+    {
+        var normalized = RequireMetadata(value, propertyName);
+        var parts = normalized.Split('.');
+        if (parts.Length != 3 ||
+            parts.Any(part => !int.TryParse(part, out var number) || number < 0) ||
+            !System.Version.TryParse(normalized, out _))
+        {
+            throw new InvalidOperationException(
+                $"market-manifest.json for '{pluginId}' declares invalid version '{normalized}' for '{propertyName}'.");
+        }
+
+        return normalized;
+    }
 }
+
+internal sealed record MarketManifestPackageSource(string Kind, string Url);
 
 internal sealed class GitHubRelease
 {
@@ -771,6 +1695,9 @@ internal sealed class GitHubRelease
     [JsonPropertyName("created_at")]
     public DateTimeOffset? CreatedAt { get; init; }
 
+    [JsonPropertyName("updated_at")]
+    public DateTimeOffset? UpdatedAt { get; init; }
+
     [JsonPropertyName("assets")]
     public List<MarketReleaseAsset> Assets { get; init; } = [];
 
@@ -784,6 +1711,18 @@ internal sealed class GitHubRelease
         if (Assets.Count == 0)
         {
             throw new InvalidOperationException($"Latest release '{TagName}' for '{repository.Owner}/{repository.Name}' has no assets.");
+        }
+
+        foreach (var asset in Assets)
+        {
+            if (string.IsNullOrWhiteSpace(asset.Name) ||
+                asset.Size <= 0 ||
+                !Uri.TryCreate(asset.BrowserDownloadUrl, UriKind.Absolute, out var downloadUri) ||
+                downloadUri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new InvalidOperationException(
+                    $"Latest release '{TagName}' for '{repository.Owner}/{repository.Name}' contains invalid asset metadata.");
+            }
         }
     }
 }
@@ -808,13 +1747,18 @@ internal sealed class GitHubRepositoryIdentity
     public static GitHubRepositoryIdentity Parse(string repositoryUrl)
     {
         if (!Uri.TryCreate(repositoryUrl, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps ||
             !string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException($"Unsupported repository url '{repositoryUrl}'.");
         }
 
         var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (segments.Length < 2 || string.IsNullOrWhiteSpace(segments[0]) || string.IsNullOrWhiteSpace(segments[1]))
+        if (segments.Length != 2 ||
+            string.IsNullOrWhiteSpace(segments[0]) ||
+            string.IsNullOrWhiteSpace(segments[1]) ||
+            uri.Query.Length > 0 ||
+            uri.Fragment.Length > 0)
         {
             throw new InvalidOperationException($"Repository url '{repositoryUrl}' must point to the repository root.");
         }
@@ -829,6 +1773,11 @@ internal sealed class GitHubRepositoryIdentity
 
 internal sealed class MarketPluginManifestData
 {
+    private static readonly System.Text.RegularExpressions.Regex VersionPattern = new(
+        "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant |
+        System.Text.RegularExpressions.RegexOptions.Compiled);
+
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
@@ -851,9 +1800,50 @@ internal sealed class MarketPluginManifestData
             throw new InvalidOperationException($"Package '{packagePath}' contains an incomplete plugin manifest.");
         }
 
-        if (!System.Version.TryParse(ApiVersion, out _))
+        if (!VersionPattern.IsMatch(Version) || !System.Version.TryParse(Version, out _))
+        {
+            throw new InvalidOperationException($"Package '{packagePath}' declares invalid version '{Version}'. Expected major.minor.patch.");
+        }
+
+        if (!VersionPattern.IsMatch(ApiVersion) || !System.Version.TryParse(ApiVersion, out var pluginApiVersion))
         {
             throw new InvalidOperationException($"Package '{packagePath}' declares invalid apiVersion '{ApiVersion}'.");
+        }
+
+        var productionApiVersion = System.Version.Parse("5.0.0");
+        if (pluginApiVersion.Major != productionApiVersion.Major)
+        {
+            throw new InvalidOperationException(
+                $"Package '{packagePath}' targets PluginSdk API '{ApiVersion}', but the production market requires API major '{productionApiVersion.Major}' ({productionApiVersion}).");
+        }
+
+        if (!string.Equals(Path.GetFileName(EntranceAssembly), EntranceAssembly, StringComparison.Ordinal) ||
+            !EntranceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Package '{packagePath}' declares invalid root entranceAssembly '{EntranceAssembly}'.");
+        }
+
+        var contractKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var contract in SharedContracts)
+        {
+            if (string.IsNullOrWhiteSpace(contract.Id) ||
+                !VersionPattern.IsMatch(contract.Version) ||
+                string.IsNullOrWhiteSpace(contract.AssemblyName) ||
+                contract.AssemblyName.Contains('/') ||
+                contract.AssemblyName.Contains('\\') ||
+                !contract.AssemblyName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Package '{packagePath}' contains an invalid shared contract declaration.");
+            }
+
+            var key = $"{contract.Id}@{contract.Version}";
+            if (!contractKeys.Add(key))
+            {
+                throw new InvalidOperationException(
+                    $"Package '{packagePath}' contains duplicate shared contract '{key}'.");
+            }
         }
     }
 }
@@ -872,7 +1862,7 @@ internal sealed class MarketIndexDocument
     public string SourceName { get; init; } = string.Empty;
 
     [JsonPropertyName("generatedAt")]
-    public DateTimeOffset GeneratedAt { get; init; }
+    public DateTimeOffset GeneratedAt { get; set; }
 
     [JsonPropertyName("contracts")]
     public List<MarketContract> Contracts { get; init; } = [];

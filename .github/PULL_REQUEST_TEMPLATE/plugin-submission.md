@@ -1,102 +1,105 @@
 ---
-name: 插件收录申请 / Plugin Submission
-about: 向 LanAirApp 官方市场提交插件收录申请
-title: "[Plugin] 收录 <插件ID>"
+name: 轻应用上架 / Plugin Submission
+about: 将 PluginSdk 5 轻应用提交到 LanAirApp 官方市场
+title: "[Plugin] <插件ID> v<版本>"
 labels: plugin-submission
 ---
 
-## 插件信息 / Plugin Information
+> [!IMPORTANT]
+> 生产市场当前只接收 **LanMountainDesktop PluginSdk API `5.0.0`** 插件：安装包必须是根目录含 `plugin.json` 的 `.laapp`。使用 `airapp.json` 的 AirApp API 1 历史原型和 API 6 设计原型尚无生产加载链路，不能通过本模板上架。
 
-| 字段 | 值 |
-|------|-----|
-| **插件 ID** | <!-- 如 LanMountainDesktop.YourPlugin --> |
-| **插件名称** | <!-- 如 Your Plugin --> |
-| **作者** | <!-- 如 YourName --> |
-| **简介** | <!-- 一句话描述插件功能 --> |
-| **仓库 URL** | <!-- 必须为 github.com 仓库，如 https://github.com/owner/repo --> |
-| **最新 Release Tag** | <!-- 如 v1.0.0 --> |
-| **.laapp Asset 名称** | <!-- 如 YourPlugin.1.0.0.laapp --> |
-| **apiVersion** | <!-- 必须为 4.x，如 4.0.0 --> |
-| **最低宿主版本** | <!-- 如 0.7.4，不确定填 0.0.1 --> |
+## 最快上架 / Quick Submission
 
-## 注册表条目 / Registry Entry
+1. 在插件仓库发布 `vX.Y.Z` Release，并上传 `<插件ID>.X.Y.Z.laapp` 和 `market-manifest.json` 两个 Asset。
+2. 只在 `airappmarket/registry/official-plugins.json` 的 `plugins` 数组末尾添加一条记录，不要手工修改 `airappmarket/index.json`。
+3. 填写下面的链接和清单；CI 会下载真实 Release 资产并完成最终校验。
 
-请在下方填写要添加到 `airappmarket/registry/official-plugins.json` 的条目（JSON 格式）：
+详细字段和示例见 [收录指南](../../docs/收录指南.md) 与 [market-manifest 模板](../../airappmarket/templates/market-manifest.template.json)。
+
+## 发布信息 / Release Information
+
+| 字段 | 请填写 |
+|------|--------|
+| **插件 ID** | <!-- 例：LanMountainDesktop.YourPlugin --> |
+| **插件名称** | <!-- 例：Your Plugin --> |
+| **作者** | <!-- 作者或组织名 --> |
+| **简介** | <!-- 一句话说明用途 --> |
+| **版本（不含 v）** | <!-- 例：1.0.0 --> |
+| **仓库 URL** | <!-- https://github.com/owner/repo --> |
+| **Release Tag** | <!-- v1.0.0 --> |
+| **Release URL** | <!-- https://github.com/owner/repo/releases/tag/v1.0.0 --> |
+| **`.laapp` URL** | <!-- https://github.com/owner/repo/releases/download/v1.0.0/LanMountainDesktop.YourPlugin.1.0.0.laapp --> |
+| **`market-manifest.json` URL** | <!-- https://github.com/owner/repo/releases/download/v1.0.0/market-manifest.json --> |
+| **PluginSdk API** | `5.0.0` |
+| **最低宿主版本** | <!-- 必须 >= 0.8.6 --> |
+| **本地验证结果** | <!-- PASS；如失败请附输出 --> |
+| **宿主实机测试** | <!-- LanMountainDesktop 版本、系统和结果 --> |
+| **CI URL / 结果** | <!-- 提交 PR 后补充，或填写 PASS --> |
+
+## 注册表变更 / Registry Entry
+
+最小可用条目如下；主页、图标、标签和能力提示可按 [收录指南](../../docs/收录指南.md) 追加：
 
 ```json
 {
   "id": "<插件ID>",
-  "repositoryUrl": "<仓库URL>",
+  "repositoryUrl": "<GitHub仓库URL>",
   "marketManifestAssetName": "market-manifest.json",
-  "projectUrl": "<项目主页URL>",
-  "readmeUrl": "<README URL>",
-  "homepageUrl": "<主页URL>",
-  "iconUrl": "<图标URL>",
-  "defaultMinHostVersion": "<最低宿主版本>",
-  "tags": [
-    "<标签1>",
-    "<标签2>"
-  ],
-  "capabilityHints": {
-    "desktopComponents": [],
-    "settingsSections": [],
-    "exports": [],
-    "messageTypes": []
-  }
+  "defaultMinHostVersion": "0.8.6"
 }
 ```
 
-> **提示**：请参考 [收录指南](../docs/收录指南.md) 中"注册表条目字段说明"一节填写各字段。
+## 上架清单 / Submission Checklist
 
-## 共享契约 / Shared Contracts
+### Release 与版本
 
-<!-- 如果插件导出了共享契约，请填写以下信息；如果没有，删除本节 -->
+- [ ] 仓库是可访问的 GitHub 仓库，根目录含 `README.md`
+- [ ] Release Tag 严格为 `vX.Y.Z`，且版本与 `plugin.json`、`market-manifest.json` 完全一致
+- [ ] Release 中的包名严格为 `<插件ID>.<版本>.laapp`（版本部分不含 `v`）
+- [ ] 同名 `.laapp` 已放在插件仓库 `main` 根目录，作为 `rawFallback`，且与 Release Asset 的 SHA-256/大小一致
+- [ ] Release 同时包含名为 `market-manifest.json` 的 Asset，且 `schemaVersion` 为 `2.0.0`
+- [ ] `apiVersion` 为当前生产 API `5.0.0`，`minHostVersion` 不低于 `0.8.6`
 
-| 字段 | 值 |
-|------|-----|
-| **契约 ID** | <!-- 如 LanMountainDesktop.SharedContracts.YourContract --> |
-| **版本** | <!-- 如 1.0.0 --> |
-| **程序集名称** | <!-- 如 YourContract.dll --> |
-| **SHA256** | <!-- 契约 DLL 的 SHA256 哈希 --> |
-| **文件大小 (bytes)** | <!-- 契约 DLL 的文件大小 --> |
+### 安装包
 
-## 自检清单 / Pre-submission Checklist
+- [ ] `.laapp` 根目录包含合法的 `plugin.json`
+- [ ] `plugin.json` 的 `entranceAssembly` 对应 DLL 确实存在于包中
+- [ ] 包内不含宿主程序集：`LanMountainDesktop.PluginSdk.dll`、`Avalonia*.dll` 或 `sharedContracts` 声明的共享契约 DLL
+- [ ] 中英文本地化文件完整；插件已在亮色和暗色主题下实际加载运行
 
-<!-- 提交前请逐项确认，在 [ ] 中填入 x 标记已完成项 -->
+### 市场元数据
 
-### 必要条件
+- [ ] `publication.sha256` 和 `publication.packageSizeBytes` 由最终 `.laapp` 计算，且与 Release Asset 一致
+- [ ] `publication.packageSources` 恰好包含三项，并按 `releaseAsset` → `rawFallback` → `workspaceLocal` 排列
+- [ ] Release Tag、包名、下载 URL、插件 ID、版本、API 和入口 DLL 在两份清单中一致
+- [ ] 新共享契约（如有）已单独提供下载 URL、SHA-256 和大小；共享契约 DLL 未打入 `.laapp`
 
-- [ ] `plugin.json` 中 `apiVersion` 为 `4.x`
-- [ ] 已在插件仓库创建 GitHub Release，并上传 `.laapp` 文件作为 Release Asset
-- [ ] `.laapp` 包内包含合法的 `plugin.json`
-- [ ] `.laapp` 包内 `entranceAssembly` 指向的程序集存在
-- [ ] 插件仓库根目录包含 `README.md`
-- [ ] 提供了 `Localization/zh-CN.json` 和 `Localization/en-US.json` 本地化文件
-- [ ] `plugin.json` 中 `id` 与注册表条目中 `id` 一致
+### PR 与验证
 
-### 推荐条件
+- [ ] 只修改了 `airappmarket/registry/official-plugins.json`，未修改生成文件 `airappmarket/index.json`
+- [ ] 已从 LanAirApp 仓库根目录运行下方本地验证，结果全部通过
+- [ ] 本 PR 的 **AirAppMarket Validate** CI 已通过
 
-- [ ] Release 中同时上传了 `market-manifest.json` 作为 Asset
-- [ ] 插件在 LanMountainDesktop 中实际加载并运行正常
-- [ ] 设置页（如有）功能正常
-- [ ] 桌面组件（如有）显示和交互正常
-- [ ] 亮色/暗色主题下显示正常
-- [ ] 中英文本地化文本完整
+将 `$Package` 和 `$Manifest` 指向最终发布的两个 Asset（可先下载到本地）：
 
-### 注册表变更
+```powershell
+$Package = ".\LanMountainDesktop.YourPlugin.1.0.0.laapp"
+$Manifest = ".\market-manifest.json"
+$PluginId = "LanMountainDesktop.YourPlugin"
 
-- [ ] 仅修改了 `airappmarket/registry/official-plugins.json`，未修改 `airappmarket/index.json`（索引由 CI 自动生成）
-- [ ] 注册表条目 JSON 格式正确
-- [ ] `repositoryUrl` 为有效的 `github.com` 仓库地址
+pwsh -File .\scripts\Test-PluginPackage.ps1 -PackagePath $Package -RequireCanonicalFileName
+dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder --configuration Release -- --validate-release-package $Package --market-manifest $Manifest --plugin-id $PluginId
+dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder --configuration Release -- --registry .\airappmarket\registry\official-plugins.json --validate-registry-only
+```
 
-## 截图 / Screenshots
+## 共享契约（可选）/ Shared Contracts
 
-<!-- 如有桌面组件或设置页，请附上截图 -->
+<!-- 仅当 plugin.json 声明了尚未收录的 sharedContracts 时填写；否则删除本节。 -->
 
-| 桌面组件 | 设置页 |
-|----------|--------|
-| <!-- 截图 --> | <!-- 截图 --> |
+| 契约 ID / 版本 | 程序集名称 | 下载 URL | SHA-256 / bytes |
+|-----------------|------------|----------|-----------------|
+| <!-- ID@1.0.0 --> | <!-- Contract.dll --> | <!-- https://... --> | <!-- sha256 / size --> |
 
-## 补充说明 / Additional Notes
+## 截图与补充说明 / Screenshots and Notes
 
-<!-- 任何需要审核者了解的信息，如已知问题、特殊依赖等 -->
+<!-- 附上桌面组件或设置页截图，以及审核者需要了解的特殊依赖、权限或已知问题。 -->

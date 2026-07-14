@@ -2,7 +2,7 @@
   "schemaVersion": "3.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-06-15T00:00:00Z",
+  "generatedAt": "2026-07-14T01:10:12.2575624+00:00",
   "contracts": [
     {
       "id": "LanMountainDesktop.SharedContracts.SampleClock",
@@ -15,110 +15,54 @@
   ],
   "plugins": [
     {
-      "pluginId": "Elysia.LanDesktopConnect",
-      "name": "Elysia LanDesktop Connect",
-      "description": "连接 Elysia 服务的 AirApp，提供 IPC 桥接与 WebSocket 网关能力。",
-      "author": "wwiinnddyy",
-      "version": "0.0.1",
-      "apiVersion": "5.0.0",
-      "minHostVersion": "0.7.4",
-      "entranceAssembly": "Elysia.LanDesktopConnect.dll",
-      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
-      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
-      "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
-      "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
-      "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
-      "releaseTag": "v0.0.1",
-      "releaseAssetName": "Elysia.LanDesktopConnect.0.0.1.laapp",
-      "tags": ["ipc", "bridge", "websocket", "gateway", "elysia"],
-      "settingsSections": ["IpcBridgeSettingsSection"],
-      "messageTypes": ["BunStatusChangedEvent", "IpcMessage"],
-      "packageSources": [
-        {
-          "kind": "releaseAsset",
-          "url": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect/releases/download/v0.0.1/Elysia.LanDesktopConnect.0.0.1.laapp"
-        },
-        {
-          "kind": "rawFallback",
-          "url": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/Elysia.LanDesktopConnect.0.0.1.laapp"
-        },
-        {
-          "kind": "workspaceLocal",
-          "url": "workspace://elysia.LanDesktopConnect/Elysia.LanDesktopConnect.0.0.1.laapp"
-        }
-      ]
-    },
-    {
-      "pluginId": "LanMountainDesktop.SamplePlugin",
-      "name": "示例时钟",
-      "description": "官方示例 AirApp，展示时钟组件开发。",
-      "author": "LanMountainDesktop Team",
-      "version": "0.3.1",
-      "apiVersion": "5.0.0",
-      "minHostVersion": "0.0.1",
-      "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
-      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
-      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
-      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
-      "releaseTag": "v0.3.1",
-      "releaseAssetName": "LanMountainDesktop.SamplePlugin.0.3.1.laapp",
-      "tags": ["示例", "时钟", "教程", "example", "official", "sdk"],
-      "sharedContracts": [
-        {
-          "id": "LanMountainDesktop.SharedContracts.SampleClock",
-          "version": "2.0.0",
-          "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
-        }
-      ],
-      "desktopComponents": ["SampleClockWidget"],
-      "packageSources": [
-        {
-          "kind": "releaseAsset",
-          "url": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/releases/download/v0.3.1/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-        },
-        {
-          "kind": "rawFallback",
-          "url": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-        },
-        {
-          "kind": "workspaceLocal",
-          "url": "workspace://LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.0.3.1.laapp"
-        }
-      ]
-    },
-    {
       "pluginId": "VoiceHubLanDesktop",
-      "name": "VoiceHub",
-      "description": "校园广播电台公开歌单 AirApp，支持实时更新与自定义刷新。",
-      "author": "wwiinnddyy",
-      "version": "0.0.8",
+      "name": "VoiceHub Campus Playlist",
+      "description": "Shows the VoiceHub public playlist in LanMountainDesktop.",
+      "author": "LaoShui",
+      "version": "0.1.0",
       "apiVersion": "5.0.0",
-      "minHostVersion": "0.7.4",
+      "minHostVersion": "0.8.6",
       "entranceAssembly": "VoiceHubLanDesktop.dll",
       "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
       "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
       "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
       "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
       "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
-      "releaseTag": "v0.0.8",
-      "releaseAssetName": "VoiceHubLanDesktop.0.0.8.laapp",
-      "tags": ["语音", "助手", "voicehub", "music", "playlist", "radio"],
-      "desktopComponents": ["VoiceHubPlaylistWidget"],
-      "settingsSections": ["VoiceHubSettingsSection"],
+      "releaseTag": "v0.1.0",
+      "releaseAssetName": "VoiceHubLanDesktop.0.1.0.laapp",
+      "sha256": "ae14d759a6e166df6a28aa5008e171ae6fd4164d0fd43c71365325d82d223f07",
+      "md5": "4ad8b32749e56da8b58b0f01f4016441",
+      "packageSizeBytes": 65241,
+      "publishedAt": "2026-04-30T06:22:55+00:00",
+      "updatedAt": "2026-04-30T06:22:59+00:00",
+      "releaseNotes": "VoiceHub playlist widget for LanMountainDesktop. Supports custom API URL, refresh interval, requester visibility, and max item count.",
+      "tags": [
+        "music",
+        "playlist",
+        "radio",
+        "voicehub"
+      ],
+      "sharedContracts": [],
+      "desktopComponents": [
+        "VoiceHubPlaylistWidget"
+      ],
+      "settingsSections": [
+        "VoiceHubSettingsSection"
+      ],
+      "exports": [],
+      "messageTypes": [],
       "packageSources": [
         {
           "kind": "releaseAsset",
-          "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.0.8/VoiceHubLanDesktop.0.0.8.laapp"
+          "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v0.1.0/VoiceHubLanDesktop.0.1.0.laapp"
         },
         {
           "kind": "rawFallback",
-          "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.0.8.laapp"
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.0.1.0.laapp"
         },
         {
           "kind": "workspaceLocal",
-          "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.0.8.laapp"
+          "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.0.1.0.laapp"
         }
       ]
     }

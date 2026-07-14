@@ -10,6 +10,7 @@ internal sealed class SamplePluginCloseDesktopWidget : Border
 {
     private readonly PluginLocalizer _localizer;
     private readonly IHostApplicationLifecycle? _hostApplicationLifecycle;
+    private readonly PluginAppearanceSnapshot? _appearanceSnapshot;
     private readonly TextBlock _titleTextBlock;
     private readonly TextBlock _statusTextBlock;
 
@@ -17,6 +18,7 @@ internal sealed class SamplePluginCloseDesktopWidget : Border
     {
         _localizer = PluginLocalizer.Create(context);
         _hostApplicationLifecycle = context.GetService<IHostApplicationLifecycle>();
+        _appearanceSnapshot = context.GetAppearanceSnapshot();
 
         _titleTextBlock = new TextBlock
         {
@@ -85,7 +87,6 @@ internal sealed class SamplePluginCloseDesktopWidget : Border
         };
         BorderBrush = new SolidColorBrush(Color.Parse("#66FB7185"));
         BorderThickness = new Thickness(1);
-        CornerRadius = new CornerRadius(18);
         Padding = new Thickness(14, 10);
         Child = actionButton;
 
@@ -99,7 +100,9 @@ internal sealed class SamplePluginCloseDesktopWidget : Border
         {
             Width = 36,
             Height = 36,
-            CornerRadius = new CornerRadius(999),
+            CornerRadius = _appearanceSnapshot.ResolveCornerRadius(
+                PluginCornerRadiusPreset.Island,
+                new CornerRadius(999)),
             Background = new SolidColorBrush(Color.Parse("#33F87171")),
             BorderBrush = new SolidColorBrush(Color.Parse("#88FCA5A5")),
             BorderThickness = new Thickness(1),
@@ -137,7 +140,9 @@ internal sealed class SamplePluginCloseDesktopWidget : Border
     {
         var basis = Bounds.Height > 1 ? Bounds.Height : 72;
         Padding = new Thickness(Math.Clamp(basis * 0.18, 12, 18), Math.Clamp(basis * 0.14, 8, 14));
-        CornerRadius = new CornerRadius(Math.Clamp(basis * 0.32, 16, 24));
+        CornerRadius = _appearanceSnapshot.ResolveCornerRadius(
+            PluginCornerRadiusPreset.Lg,
+            new CornerRadius(Math.Clamp(basis * 0.32, 16, 24)));
 
         if (Child is not Button actionButton || actionButton.Content is not Grid contentGrid)
         {
