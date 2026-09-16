@@ -1,105 +1,65 @@
 # AirApp Market
 
-`airappmarket/` 是阑山桌面（LanMountainDesktop）的官方传统插件市场源。生产宿主只消费
-`index.json` 的 flat v3 快照；索引由注册表和插件仓库的已发布 Release 自动生成，不接受手写版本、
-API、哈希或包大小。
+## 中文
 
-## 生产协议
+`airappmarket/` 是阑山桌面的官方轻应用市场源目录。宿主只读取这里的 `index.json`，
+再根据索引里的元数据解析轻应用、共享契约和下载地址。
 
-| 层级 | 文件 | 版本 | 职责 |
-|---|---|---|---|
-| 官方注册表 | `registry/official-plugins.json` | `1.0.0` | 保存仓库指针、市场覆盖信息和启停状态 |
-| 插件发布元数据 | Release Asset `market-manifest.json` | `2.0.0` | 保存展示、兼容性、能力和发布元数据 |
-| 插件运行清单 | `.laapp!/plugin.json` | PluginSdk API `5.0.0` | 插件 ID、版本、入口程序集和共享契约真源 |
-| 宿主市场索引 | `index.json` | flat `3.0.0` | 宿主直接读取的自包含目录和安装元数据 |
+### 约定
 
-AirAppSdk API 6 属于独立的 AirApp 应用模型，不进入本传统 PluginSdk 5 插件市场协议。
+- `schema/`、`tools/AirAppMarket.Validator` 和 `index.json` 必须保持一致
+- `plugins[].apiVersion` 主版本号必须等于 AirApp SDK 的 `1`，否则条目不会被收录
+- 每个轻应用的 `sharedContracts` 都必须在顶层 `contracts[]` 中有对应条目，
+  否则宿主装得上、载不起来
+- 版本、依赖与包内容的真源是轻应用自己的 `.laapp`，不是这份索引
+- 只有 GitHub 上的公开仓库能被收录，私有仓库的 Release 用户下载不到
 
-## 生成与安装链路
+### 目录
 
-1. IndexBuilder 读取 `official-plugins.json`，跳过 `enabled: false` 的条目。
-2. 对每个启用条目读取 GitHub 最新 Release 和 `market-manifest.json`。
-3. 下载注册表中的共享契约，校验实际 SHA-256 和大小。
-4. 下载 `.laapp`，读取包内根目录 `plugin.json`，检查入口 DLL、API 5、版本、Release Tag 和资产名。
-5. 从实际下载字节计算 SHA-256、MD5 和包大小；市场索引不信任手写校验值。
-6. 生成 self-contained flat v3 `index.json`。
-7. 宿主按 `releaseAsset` → `rawFallback` → `workspaceLocal` 顺序尝试安装，并再次校验 SHA-256 和大小。
+| 路径 | 说明 |
+|---|---|
+| `index.json` | 宿主读取的市场索引，由 CI 生成，不要手工编辑 |
+| `registry/official-airapps.json` | 官方收录名单，唯一需要人工维护的文件 |
+| `schema/airappmarket-index.schema.json` | 索引的 JSON Schema（schemaVersion 3.0.0） |
+| `contracts/` | 市场分发的共享契约程序集，按 `<契约ID>/<版本>/` 组织 |
+| `assets/` | 市场用到的静态图标 |
+| `tools/AirAppMarket.IndexBuilder` | 名单 + GitHub Release → `index.json` |
+| `tools/AirAppMarket.Validator` | 校验 `index.json` |
 
-每个官方条目至少需要 `releaseAsset`，可再提供后续回退源。生成器当前统一输出三种源：
+### 职责
 
-- `releaseAsset`：GitHub Release 的权威安装包；
-- `rawFallback`：插件仓库 `main` 根目录中的同名包；
-- `workspaceLocal`：多仓库本地开发环境中的同名包。
+- 维护官方市场索引与收录名单
+- 维护 Schema、校验工具和静态市场资源
+- 维护共享契约程序集及其 SHA-256
 
-## 发布一致性要求
+### 与示例轻应用的关系
 
-设插件 ID 为 `LanMountainDesktop.YourPlugin`，版本为 `1.2.3`：
-
-- `plugin.json.apiVersion` 必须为 `5.x`（当前生产基线 `5.0.0`）；
-- `minHostVersion` 必须至少为 `0.8.6`，这是首个包含 Plugin SDK 5 的宿主版本；
-- GitHub Release Tag 必须为 `v1.2.3`；
-- Release Asset 必须为 `LanMountainDesktop.YourPlugin.1.2.3.laapp`；
-- `.laapp!/plugin.json` 的 `id`、`version`、`apiVersion` 必须与发布元数据一致；
-- `entranceAssembly` 必须是包根目录中唯一存在的 DLL；
-- `sharedContracts` 的每个引用必须已发布在注册表 `contracts` 中；
-- `market-manifest.json` 必须使用 schema `2.0.0`，且其版本、Tag、资产名、SHA 和大小不得与实际包冲突。
-
-## 临时禁用不兼容插件
-
-当某仓库最新 Release 尚未迁移到 PluginSdk 5，或发布包校验失败时，可保留注册信息但设置：
-
-```json
-{
-  "id": "Example.Plugin",
-  "enabled": false,
-  "disabledReason": "Latest published package still targets PluginSdk API 4.0.0."
-}
-```
-
-`enabled` 和 `disabledReason` 仅属于注册表/构建阶段，不会写入宿主消费的 flat v3 索引。新 Release
-通过真实包重建后再恢复 `enabled: true`。
-
-## 本地验证
-
-```powershell
-# 离线校验注册表
-dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder -- `
-  --registry .\airappmarket\registry\official-plugins.json `
-  --validate-registry-only
-
-# 运行校验器正/负回归
-dotnet run --project .\airappmarket\tools\AirAppMarket.Validator -- `
-  --self-test --expected-api-version 5.0.0
-
-# 校验插件仓库的发布元数据模板
-dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder -- `
-  --validate-market-manifest .\path\to\market-manifest.json
-
-# 在发布前交叉校验本地 .laapp 与 market-manifest.json
-dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder -- `
-  --validate-release-package .\path\to\YourPlugin.1.0.0.laapp `
-  --market-manifest .\path\to\market-manifest.json `
-  --plugin-id LanMountainDesktop.YourPlugin
-
-# 从真实 GitHub Release 重建索引
-dotnet run --project .\airappmarket\tools\AirAppMarket.IndexBuilder -- `
-  --registry .\airappmarket\registry\official-plugins.json `
-  --output .\airappmarket\index.json `
-  --require-market-manifest
-
-# 校验提交的 flat v3 索引、Schema、包源顺序和完整性字段
-dotnet run --project .\airappmarket\tools\AirAppMarket.Validator -- `
-  .\airappmarket\index.json `
-  .\airappmarket\schema\airappmarket-index.schema.json `
-  --expected-api-version 5.0.0
-```
-
-CI 会重复执行注册表校验、校验器回归、已提交索引校验、真实 Release 重建和重建结果校验。
+- 官方示例条目指向独立仓库 `LanMountainDesktop.SamplePlugin`，那里是唯一的官方参考实现
+- 本仓库只保留它用到的共享契约源码 `LanMountainDesktop.SharedContracts.SampleClock`
 
 ## English
 
-The official market uses four explicit contracts: registry v1, release `market-manifest.json` v2,
-PluginSdk 5 `plugin.json`, and the host-facing self-contained flat index v3. The index builder downloads
-the real release package, verifies its manifest and entry assembly, computes SHA-256 and package size,
-and emits canonical package sources. Incompatible published releases stay registered with
-`enabled: false` and a `disabledReason`; build-time control fields never leak into the host index.
+`airappmarket/` is the official AirApp market source for LanMountainDesktop. The host reads
+`index.json` here and resolves AirApps, shared contracts, and download URLs from its metadata.
+
+### Conventions
+
+- keep `schema/`, `tools/AirAppMarket.Validator`, and `index.json` in sync
+- `plugins[].apiVersion` must share major version `1` with the AirApp SDK, or the entry is not listed
+- every AirApp `sharedContracts` reference must exist in the top-level `contracts[]`, otherwise
+  the AirApp installs and then fails to load
+- the `.laapp` package is the source of truth for version, dependencies, and content — not this index
+- only public GitHub repositories can be listed; users cannot download private release assets
+
+### Responsibilities
+
+- maintain the official market index and the official roster
+- maintain the schema, validator, and static market assets
+- maintain shared contract assemblies and their SHA-256 digests
+
+### Relationship with the sample AirApp
+
+- the official sample entry points to the standalone `LanMountainDesktop.SamplePlugin` repository,
+  which is the single official reference implementation
+- this repository only keeps the shared contract source it depends on,
+  `LanMountainDesktop.SharedContracts.SampleClock`

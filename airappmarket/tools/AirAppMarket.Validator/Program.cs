@@ -1,433 +1,222 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
-return await ValidatorCli.RunAsync(args);
+return RunAsync(args);
 
-internal static class ValidatorCli
+static int RunAsync(string[] args)
 {
-    public static Task<int> RunAsync(string[] args)
+    try
     {
-        try
+        var indexPath = args.Length > 0
+            ? Path.GetFullPath(args[0])
+            : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "index.json"));
+        var schemaPath = args.Length > 1
+            ? Path.GetFullPath(args[1])
+            : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(indexPath)!, "schema", "airappmarket-index.schema.json"));
+
+        if (!File.Exists(indexPath))
         {
-            var options = CliOptions.Parse(args);
-            if (options.ShowHelp)
-            {
-                PrintHelp();
-                return Task.FromResult(0);
-            }
-
-            if (options.RunSelfTests)
-            {
-                ValidatorSelfTests.Run(options.ExpectedApiVersion);
-                return Task.FromResult(0);
-            }
-
-            var indexPath = Path.GetFullPath(options.IndexPath);
-            var schemaPath = Path.GetFullPath(options.SchemaPath ?? Path.Combine(
-                Path.GetDirectoryName(indexPath)!,
-                "schema",
-                "airappmarket-index.schema.json"));
-
-            if (!File.Exists(indexPath))
-            {
-                throw new FileNotFoundException($"Market index '{indexPath}' was not found.", indexPath);
-            }
-
-            if (!File.Exists(schemaPath))
-            {
-                throw new FileNotFoundException($"Market schema '{schemaPath}' was not found.", schemaPath);
-            }
-
-            MarketSchemaContract.Validate(File.ReadAllText(schemaPath), schemaPath);
-            var index = MarketIndexDocument.Load(
-                File.ReadAllText(indexPath),
-                indexPath,
-                options.ExpectedApiVersion);
-
-            Console.WriteLine($"Validated '{indexPath}'.");
-            Console.WriteLine($"SchemaVersion: {index.SchemaVersion}");
-            Console.WriteLine($"Source: {index.SourceName} ({index.SourceId})");
-            Console.WriteLine($"GeneratedAt: {index.GeneratedAt:O}");
-            Console.WriteLine($"ExpectedPluginApi: {options.ExpectedApiVersion} (major-compatible)");
-            Console.WriteLine($"Contracts: {index.Contracts.Count}");
-            Console.WriteLine($"Plugins: {index.Plugins.Count}");
-            Console.WriteLine($"VerifiedPackages: {index.Plugins.Count(plugin => plugin.PackageSizeBytes > 0 && plugin.Sha256.Length == 64)}");
-            return Task.FromResult(0);
+            throw new FileNotFoundException($"Market index '{indexPath}' was not found.", indexPath);
         }
-        catch (Exception ex)
+
+        if (!File.Exists(schemaPath))
         {
-            Console.Error.WriteLine(ex.Message);
-            return Task.FromResult(1);
+            throw new FileNotFoundException($"Market schema '{schemaPath}' was not found.", schemaPath);
         }
+
+        JsonDocument.Parse(File.ReadAllText(schemaPath));
+        var index = MarketIndex.Load(File.ReadAllText(indexPath), indexPath);
+
+        Console.WriteLine($"Validated '{indexPath}'.");
+        Console.WriteLine($"SchemaVersion: {index.SchemaVersion}");
+        Console.WriteLine($"Source: {index.SourceName} ({index.SourceId})");
+        Console.WriteLine($"AirApp SDK API: {AirAppMarketPolicy.ApiVersion}");
+        Console.WriteLine($"Contracts: {index.Contracts.Count}");
+        Console.WriteLine($"AirApps: {index.AirApps.Count}");
+        return 0;
     }
-
-    private static void PrintHelp()
+    catch (Exception ex)
     {
-        Console.WriteLine("AirAppMarket.Validator");
-        Console.WriteLine();
-        Console.WriteLine("Validates the production flat AirAppMarket index (schemaVersion 3.0.0).");
-        Console.WriteLine();
-        Console.WriteLine("Usage:");
-        Console.WriteLine("  dotnet run --project airappmarket/tools/AirAppMarket.Validator -- [index] [schema] [options]");
-        Console.WriteLine("  dotnet run --project airappmarket/tools/AirAppMarket.Validator -- --self-test [options]");
-        Console.WriteLine();
-        Console.WriteLine("Options:");
-        Console.WriteLine("  --expected-api-version <version>  Required compatible PluginSdk API. Default: 5.0.0");
-        Console.WriteLine("  --self-test                       Run built-in positive and negative regressions.");
-        Console.WriteLine("  --help                            Show help.");
+        Console.Error.WriteLine(ex.Message);
+        return 1;
     }
 }
 
-internal sealed class CliOptions
+/// <summary>
+/// Market publishing policy. Keep in sync with the host's <c>AirAppSdkInfo.ApiVersion</c> and
+/// <c>AirAppMarketSchema.Version</c>.
+/// </summary>
+internal static class AirAppMarketPolicy
 {
-    public string IndexPath { get; private set; } = Path.Combine("airappmarket", "index.json");
-    public string? SchemaPath { get; private set; }
-    public string ExpectedApiVersion { get; private set; } = "5.0.0";
-    public bool RunSelfTests { get; private set; }
-    public bool ShowHelp { get; private set; }
+    /// <summary>The only market index schema the host understands.</summary>
+    public const string SchemaVersion = "3.0.0";
 
-    public static CliOptions Parse(string[] args)
-    {
-        var options = new CliOptions();
-        var positionals = new List<string>();
+    /// <summary>
+    /// The single AirApp SDK API version the official market publishes for. An entry whose major
+    /// differs is refused by every shipped host, so it must never reach the index.
+    /// </summary>
+    public const string ApiVersion = "1.0.0";
 
-        for (var i = 0; i < args.Length; i++)
-        {
-            switch (args[i])
-            {
-                case "--expected-api-version":
-                    options.ExpectedApiVersion = ReadValue(args, ref i, "--expected-api-version");
-                    break;
-                case "--self-test":
-                    options.RunSelfTests = true;
-                    break;
-                case "--help":
-                case "-h":
-                    options.ShowHelp = true;
-                    break;
-                default:
-                    if (args[i].StartsWith("-", StringComparison.Ordinal))
-                    {
-                        throw new InvalidOperationException($"Unknown option '{args[i]}'.");
-                    }
-
-                    positionals.Add(args[i]);
-                    break;
-            }
-        }
-
-        if (positionals.Count > 2)
-        {
-            throw new InvalidOperationException("Expected at most two positional arguments: index path and schema path.");
-        }
-
-        if (positionals.Count > 0)
-        {
-            options.IndexPath = positionals[0];
-        }
-
-        if (positionals.Count > 1)
-        {
-            options.SchemaPath = positionals[1];
-        }
-
-        _ = MarketValidation.ParseVersion(options.ExpectedApiVersion, "expected API version", "command line");
-        return options;
-    }
-
-    private static string ReadValue(string[] args, ref int index, string option)
-    {
-        if (index + 1 >= args.Length)
-        {
-            throw new InvalidOperationException($"Option '{option}' requires a value.");
-        }
-
-        index++;
-        return args[index];
-    }
-}
-
-internal static class MarketSchemaContract
-{
-    private static readonly string[] RequiredPluginProperties =
-    [
-        "pluginId",
-        "name",
-        "description",
-        "author",
-        "version",
-        "apiVersion",
-        "minHostVersion",
-        "entranceAssembly",
-        "repositoryUrl",
-        "releaseTag",
-        "releaseAssetName",
-        "sha256",
-        "packageSizeBytes",
-        "packageSources"
-    ];
-
-    public static void Validate(string json, string sourceName)
-    {
-        using var document = JsonDocument.Parse(json, MarketValidation.DocumentOptions);
-        var root = document.RootElement;
-
-        var schemaVersion = root
-            .GetProperty("properties")
-            .GetProperty("schemaVersion")
-            .GetProperty("const")
-            .GetString();
-        if (!string.Equals(schemaVersion, MarketValidation.SchemaVersion, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Market schema '{sourceName}' must declare schemaVersion const '{MarketValidation.SchemaVersion}'.");
-        }
-
-        var plugin = root.GetProperty("$defs").GetProperty("plugin");
-        if (!plugin.TryGetProperty("additionalProperties", out var additionalProperties) ||
-            additionalProperties.ValueKind != JsonValueKind.False)
-        {
-            throw new InvalidOperationException($"Market schema '{sourceName}' must disallow unknown plugin properties.");
-        }
-
-        var required = plugin.GetProperty("required")
-            .EnumerateArray()
-            .Select(value => value.GetString())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .ToHashSet(StringComparer.Ordinal);
-        var missing = RequiredPluginProperties.Where(property => !required.Contains(property)).ToArray();
-        if (missing.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"Market schema '{sourceName}' does not require integrity-critical plugin properties: {string.Join(", ", missing)}.");
-        }
-
-        var sourceKinds = root
-            .GetProperty("$defs")
-            .GetProperty("packageSource")
-            .GetProperty("properties")
-            .GetProperty("kind")
-            .GetProperty("enum")
-            .EnumerateArray()
-            .Select(value => value.GetString())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .ToArray();
-        if (!sourceKinds.SequenceEqual(MarketValidation.PackageSourceKinds, StringComparer.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Market schema '{sourceName}' package source kinds must be: {string.Join(", ", MarketValidation.PackageSourceKinds)}.");
-        }
-    }
+    public static readonly Version ApiVersionParsed = Version.Parse(ApiVersion);
 }
 
 internal static class MarketValidation
 {
-    public const string SchemaVersion = "3.0.0";
-
-    public static readonly string[] PackageSourceKinds =
-    [
-        "releaseAsset",
-        "rawFallback",
-        "workspaceLocal"
-    ];
-
-    public static readonly JsonDocumentOptions DocumentOptions = new()
-    {
-        AllowTrailingCommas = true,
-        CommentHandling = JsonCommentHandling.Skip
-    };
-
     public static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
-        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow
+        AllowTrailingCommas = true
     };
-
-    private static readonly Regex VersionPattern = new(
-        "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-        RegexOptions.CultureInvariant | RegexOptions.Compiled);
-
-    private static readonly Regex PluginIdPattern = new(
-        "^[A-Za-z0-9][A-Za-z0-9._-]*$",
-        RegexOptions.CultureInvariant | RegexOptions.Compiled);
-
-    public static string Require(string? value, string propertyName, string sourceName)
-    {
-        var normalized = Normalize(value);
-        if (normalized.Length == 0)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' is missing required property '{propertyName}'.");
-        }
-
-        return normalized;
-    }
 
     public static string Normalize(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
     }
 
-    public static Version ParseVersion(string? value, string propertyName, string sourceName)
+    public static string Require(string? value, string propertyName, string sourceName)
+    {
+        var normalized = Normalize(value);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            throw new InvalidOperationException($"Market index '{sourceName}' is missing required property '{propertyName}'.");
+        }
+
+        return normalized;
+    }
+
+    public static string NormalizeUrl(string? value, string propertyName, string sourceName)
     {
         var normalized = Require(value, propertyName, sourceName);
-        if (!VersionPattern.IsMatch(normalized) || !Version.TryParse(normalized, out var parsed))
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid semantic version '{normalized}' for '{propertyName}'. Expected 'major.minor.patch'.");
+                $"Market index '{sourceName}' declares invalid URL '{normalized}' for '{propertyName}'.");
+        }
+
+        return normalized;
+    }
+
+    public static string NormalizeOptionalUrl(string? value, string propertyName, string sourceName)
+    {
+        return string.IsNullOrWhiteSpace(value) ? string.Empty : NormalizeUrl(value, propertyName, sourceName);
+    }
+
+    /// <summary>
+    /// The host rebuilds release and raw URLs from this value, so it must be a bare
+    /// <c>https://github.com/{owner}/{repository}</c> root.
+    /// </summary>
+    public static string NormalizeGitHubRepositoryUrl(string? value, string propertyName, string sourceName)
+    {
+        var normalized = NormalizeUrl(value, propertyName, sourceName);
+        var uri = new Uri(normalized);
+        var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (!string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase) || segments.Length != 2)
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' declares '{normalized}' for '{propertyName}'. Expected 'https://github.com/{{owner}}/{{repository}}'.");
+        }
+
+        return normalized;
+    }
+
+    public static Version NormalizeVersion(string? value, string propertyName, string sourceName)
+    {
+        var normalized = Require(value, propertyName, sourceName);
+        if (!TryParseVersion(normalized, out var parsed) || parsed is null)
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' declares invalid version '{normalized}' for '{propertyName}'.");
         }
 
         return parsed;
     }
 
-    public static string NormalizeVersion(string? value, string propertyName, string sourceName)
-    {
-        var normalized = Require(value, propertyName, sourceName);
-        _ = ParseVersion(normalized, propertyName, sourceName);
-        return normalized;
-    }
-
-    public static string NormalizePluginId(string? value, string propertyName, string sourceName)
-    {
-        var normalized = Require(value, propertyName, sourceName);
-        if (!PluginIdPattern.IsMatch(normalized) || normalized.Contains("..", StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid plugin id '{normalized}'. Use letters, digits, '.', '_' or '-' without whitespace.");
-        }
-
-        return normalized;
-    }
-
-    public static string NormalizeSha256(string? value, string propertyName, string sourceName)
+    public static string NormalizeHex(string? value, int length, string propertyName, string sourceName)
     {
         var normalized = Require(value, propertyName, sourceName).ToLowerInvariant();
-        if (normalized.Length != 64 || normalized.Any(character => !Uri.IsHexDigit(character)))
+        if (normalized.Length != length || normalized.Any(ch => !Uri.IsHexDigit(ch)))
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid SHA-256 '{normalized}' for '{propertyName}'.");
+                $"Market index '{sourceName}' declares invalid {propertyName} '{normalized}'. Expected {length} hex digits.");
         }
 
         return normalized;
     }
 
-    public static string NormalizeOptionalMd5(string? value, string propertyName, string sourceName)
+    public static string NormalizeOptionalHex(string? value, int length, string propertyName, string sourceName)
     {
-        var normalized = Normalize(value).ToLowerInvariant();
-        if (normalized.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        if (normalized.Length != 32 || normalized.Any(character => !Uri.IsHexDigit(character)))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid MD5 '{normalized}' for '{propertyName}'.");
-        }
-
-        return normalized;
+        return string.IsNullOrWhiteSpace(value) ? string.Empty : NormalizeHex(value, length, propertyName, sourceName);
     }
 
-    public static string NormalizeHttpUrl(string? value, string propertyName, string sourceName, bool optional = false)
+    public static string NormalizeReleaseTag(string? value, string propertyName, string sourceName)
     {
-        var normalized = Normalize(value);
-        if (optional && normalized.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        normalized = Require(normalized, propertyName, sourceName);
-        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
-            uri.Scheme != Uri.UriSchemeHttps)
+        var normalized = Require(value, propertyName, sourceName);
+        if (!normalized.StartsWith('v') || !TryParseVersion(normalized[1..], out _))
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid HTTPS URL '{normalized}' for '{propertyName}'.");
+                $"Market index '{sourceName}' declares invalid release tag '{normalized}' for '{propertyName}'. Expected format 'v1.2.3'.");
         }
 
         return normalized;
     }
 
-    public static GitHubRepositoryIdentity NormalizeGitHubRepositoryUrl(
-        string? value,
+    public static List<string> NormalizeDistinct(
+        IReadOnlyCollection<string> values,
         string propertyName,
         string sourceName)
     {
-        var normalized = NormalizeHttpUrl(value, propertyName, sourceName);
-        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
-            uri.Scheme != Uri.UriSchemeHttps ||
-            !string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase))
+        var present = values.Where(value => !string.IsNullOrWhiteSpace(value)).ToList();
+        var normalized = present
+            .Select(Normalize)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (normalized.Count != present.Count)
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares non-GitHub repository URL '{normalized}' for '{propertyName}'.");
-        }
-
-        var segments = uri.AbsolutePath
-            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (segments.Length != 2 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' repository URL '{normalized}' must point to a GitHub repository root.");
-        }
-
-        return new GitHubRepositoryIdentity(segments[0], segments[1], $"https://github.com/{segments[0]}/{segments[1]}");
-    }
-
-    public static string NormalizeAssemblyName(string? value, string propertyName, string sourceName)
-    {
-        var normalized = Require(value, propertyName, sourceName);
-        if (!string.Equals(Path.GetFileName(normalized), normalized, StringComparison.Ordinal) ||
-            !normalized.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid assembly name '{normalized}' for '{propertyName}'.");
+                $"Market index '{sourceName}' contains duplicate entries in '{propertyName}'.");
         }
 
         return normalized;
     }
 
-    public static string NormalizePackageFileName(string? value, string propertyName, string sourceName)
+    public static bool TryParseVersion(string? value, out Version? version)
     {
-        var normalized = Require(value, propertyName, sourceName);
-        if (!string.Equals(Path.GetFileName(normalized), normalized, StringComparison.Ordinal) ||
-            !normalized.EndsWith(".laapp", StringComparison.OrdinalIgnoreCase))
+        version = null;
+        var normalized = Normalize(value);
+        if (string.IsNullOrWhiteSpace(normalized))
         {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid package file name '{normalized}' for '{propertyName}'.");
+            return false;
         }
 
-        return normalized;
-    }
-
-    public static List<string> NormalizeDistinctStrings(
-        IReadOnlyCollection<string>? values,
-        string propertyName,
-        string sourceName,
-        string pluginId)
-    {
-        var sourceValues = values ?? [];
-        var normalized = new List<string>(sourceValues.Count);
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var value in sourceValues)
+        var separatorIndex = normalized.IndexOfAny(['-', '+', ' ']);
+        if (separatorIndex > 0)
         {
-            var item = Normalize(value);
-            if (item.Length == 0 || !seen.Add(item))
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' plugin '{pluginId}' contains a blank or duplicate value in '{propertyName}'.");
-            }
-
-            normalized.Add(item);
+            normalized = normalized[..separatorIndex];
         }
 
-        return normalized;
+        if (!Version.TryParse(normalized, out var parsed))
+        {
+            return false;
+        }
+
+        version = new Version(
+            Math.Max(0, parsed.Major),
+            Math.Max(0, parsed.Minor),
+            Math.Max(0, parsed.Build));
+        return true;
     }
 }
 
-internal sealed class MarketIndexDocument
+/// <summary>
+/// The self-contained flat market index (schemaVersion 3.0.0). Mirrors the host's
+/// <c>AirAppMarketIndexDocument</c>: every AirApp entry carries all of its display and acquisition
+/// metadata inline, and the wire format keeps the historical <c>plugins</c>/<c>pluginId</c> keys.
+/// </summary>
+internal sealed class MarketIndex
 {
     [JsonPropertyName("schemaVersion")]
     public string SchemaVersion { get; init; } = string.Empty;
@@ -442,44 +231,26 @@ internal sealed class MarketIndexDocument
     public DateTimeOffset GeneratedAt { get; init; }
 
     [JsonPropertyName("contracts")]
-    public List<MarketContractEntry> Contracts { get; init; } = [];
+    public List<MarketContract> Contracts { get; init; } = [];
 
     [JsonPropertyName("plugins")]
-    public List<MarketPluginEntry> Plugins { get; init; } = [];
+    public List<MarketAirApp> AirApps { get; init; } = [];
 
-    public static MarketIndexDocument Load(
-        string json,
-        string sourceName,
-        string expectedApiVersion)
+    public static MarketIndex Load(string json, string sourceName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(json);
-        ArgumentException.ThrowIfNullOrWhiteSpace(sourceName);
+        var document = JsonSerializer.Deserialize<MarketIndex>(json.TrimStart('﻿'), MarketValidation.JsonOptions)
+            ?? throw new InvalidOperationException($"Failed to parse market index '{sourceName}'.");
 
-        MarketIndexDocument document;
-        try
-        {
-            document = JsonSerializer.Deserialize<MarketIndexDocument>(
-                json.TrimStart('\uFEFF'),
-                MarketValidation.JsonOptions) ?? throw new InvalidOperationException(
-                    $"Failed to deserialize market index '{sourceName}'.");
-        }
-        catch (JsonException ex)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' is not a valid flat v3 document: {ex.Message}",
-                ex);
-        }
-
-        return document.ValidateAndNormalize(sourceName, expectedApiVersion);
+        return document.ValidateAndNormalize(sourceName);
     }
 
-    private MarketIndexDocument ValidateAndNormalize(string sourceName, string expectedApiVersion)
+    private MarketIndex ValidateAndNormalize(string sourceName)
     {
         var schemaVersion = MarketValidation.Require(SchemaVersion, nameof(SchemaVersion), sourceName);
-        if (!string.Equals(schemaVersion, MarketValidation.SchemaVersion, StringComparison.Ordinal))
+        if (!string.Equals(schemaVersion, AirAppMarketPolicy.SchemaVersion, StringComparison.Ordinal))
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' uses schemaVersion '{schemaVersion}', but production requires flat schema '{MarketValidation.SchemaVersion}'.");
+                $"Market index '{sourceName}' uses schemaVersion '{schemaVersion}', but the host only supports '{AirAppMarketPolicy.SchemaVersion}'.");
         }
 
         if (GeneratedAt == default)
@@ -487,69 +258,59 @@ internal sealed class MarketIndexDocument
             throw new InvalidOperationException($"Market index '{sourceName}' is missing a valid generatedAt timestamp.");
         }
 
-        var expectedApi = MarketValidation.ParseVersion(expectedApiVersion, "expected API version", sourceName);
-        var normalizedContracts = NormalizeContracts(sourceName);
-        var normalizedPlugins = NormalizePlugins(sourceName, expectedApi, normalizedContracts);
-        if (normalizedPlugins.Count == 0)
+        var contracts = new List<MarketContract>(Contracts.Count);
+        var contractKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var contract in Contracts)
         {
-            throw new InvalidOperationException($"Market index '{sourceName}' does not declare any plugins.");
+            var normalized = contract.ValidateAndNormalize(sourceName);
+            if (!contractKeys.Add($"{normalized.Id}@{normalized.Version}"))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' contains duplicate shared contract '{normalized.Id}@{normalized.Version}'.");
+            }
+
+            contracts.Add(normalized);
         }
 
-        return new MarketIndexDocument
+        var airApps = new List<MarketAirApp>(AirApps.Count);
+        var seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var airApp in AirApps)
         {
-            SchemaVersion = MarketValidation.SchemaVersion,
+            var normalized = airApp.ValidateAndNormalize(sourceName);
+            if (!seenIds.Add(normalized.AirAppId))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' contains duplicate AirApp id '{normalized.AirAppId}'.");
+            }
+
+            // The host resolves shared contracts against this index's contracts list, so a dangling
+            // reference means the AirApp installs and then fails to load.
+            foreach (var reference in normalized.SharedContracts)
+            {
+                if (!contractKeys.Contains($"{reference.Id}@{reference.Version}"))
+                {
+                    throw new InvalidOperationException(
+                        $"Market index '{sourceName}' AirApp '{normalized.AirAppId}' requires shared contract " +
+                        $"'{reference.Id}@{reference.Version}', which the index does not publish.");
+                }
+            }
+
+            airApps.Add(normalized);
+        }
+
+        return new MarketIndex
+        {
+            SchemaVersion = AirAppMarketPolicy.SchemaVersion,
             SourceId = MarketValidation.Require(SourceId, nameof(SourceId), sourceName),
             SourceName = MarketValidation.Require(SourceName, nameof(SourceName), sourceName),
             GeneratedAt = GeneratedAt,
-            Contracts = normalizedContracts,
-            Plugins = normalizedPlugins
+            Contracts = contracts,
+            AirApps = airApps
         };
-    }
-
-    private List<MarketContractEntry> NormalizeContracts(string sourceName)
-    {
-        var normalized = new List<MarketContractEntry>((Contracts ?? []).Count);
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var contract in Contracts ?? [])
-        {
-            var item = contract.ValidateAndNormalize(sourceName);
-            var key = $"{item.Id}@{item.Version}";
-            if (!seen.Add(key))
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' contains duplicate shared contract '{key}'.");
-            }
-
-            normalized.Add(item);
-        }
-
-        return normalized;
-    }
-
-    private List<MarketPluginEntry> NormalizePlugins(
-        string sourceName,
-        Version expectedApiVersion,
-        IReadOnlyCollection<MarketContractEntry> contracts)
-    {
-        var normalized = new List<MarketPluginEntry>((Plugins ?? []).Count);
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var plugin in Plugins ?? [])
-        {
-            var item = plugin.ValidateAndNormalize(sourceName, expectedApiVersion, contracts);
-            if (!seen.Add(item.PluginId))
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' contains duplicate plugin id '{item.PluginId}'.");
-            }
-
-            normalized.Add(item);
-        }
-
-        return normalized;
     }
 }
 
-internal sealed class MarketContractEntry
+internal sealed class MarketContract
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = string.Empty;
@@ -569,30 +330,94 @@ internal sealed class MarketContractEntry
     [JsonPropertyName("packageSizeBytes")]
     public long PackageSizeBytes { get; init; }
 
-    public MarketContractEntry ValidateAndNormalize(string sourceName)
+    public MarketContract ValidateAndNormalize(string sourceName)
     {
         if (PackageSizeBytes <= 0)
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' declares invalid packageSizeBytes '{PackageSizeBytes}' for shared contract '{Id}'.");
+                $"Market index '{sourceName}' declares invalid packageSizeBytes '{PackageSizeBytes}' for contract '{Id}'.");
         }
 
-        return new MarketContractEntry
+        return new MarketContract
         {
             Id = MarketValidation.Require(Id, nameof(Id), sourceName),
-            Version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName),
-            AssemblyName = MarketValidation.NormalizeAssemblyName(AssemblyName, nameof(AssemblyName), sourceName),
-            DownloadUrl = MarketValidation.NormalizeHttpUrl(DownloadUrl, nameof(DownloadUrl), sourceName),
-            Sha256 = MarketValidation.NormalizeSha256(Sha256, nameof(Sha256), sourceName),
+            Version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName).ToString(),
+            AssemblyName = MarketValidation.Require(AssemblyName, nameof(AssemblyName), sourceName),
+            DownloadUrl = MarketValidation.NormalizeUrl(DownloadUrl, nameof(DownloadUrl), sourceName),
+            Sha256 = MarketValidation.NormalizeHex(Sha256, 64, nameof(Sha256), sourceName),
             PackageSizeBytes = PackageSizeBytes
         };
     }
 }
 
-internal sealed class MarketPluginEntry
+internal sealed class MarketSharedContractReference
+{
+    [JsonPropertyName("id")]
+    public string Id { get; init; } = string.Empty;
+
+    [JsonPropertyName("version")]
+    public string Version { get; init; } = string.Empty;
+
+    [JsonPropertyName("assemblyName")]
+    public string AssemblyName { get; init; } = string.Empty;
+
+    public MarketSharedContractReference ValidateAndNormalize(string sourceName)
+    {
+        return new MarketSharedContractReference
+        {
+            Id = MarketValidation.Require(Id, nameof(Id), sourceName),
+            Version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName).ToString(),
+            AssemblyName = MarketValidation.Require(AssemblyName, nameof(AssemblyName), sourceName)
+        };
+    }
+}
+
+internal sealed class MarketPackageSource
+{
+    [JsonPropertyName("kind")]
+    public string Kind { get; init; } = string.Empty;
+
+    [JsonPropertyName("url")]
+    public string Url { get; init; } = string.Empty;
+
+    public MarketPackageSource ValidateAndNormalize(string sourceName, string airAppId)
+    {
+        var kind = MarketValidation.Require(Kind, nameof(Kind), sourceName);
+        if (kind is not ("releaseAsset" or "rawFallback" or "workspaceLocal"))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' AirApp '{airAppId}' declares unsupported package source kind '{kind}'.");
+        }
+
+        var url = MarketValidation.Require(Url, nameof(Url), sourceName);
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' AirApp '{airAppId}' declares invalid URL '{url}' for package source '{kind}'.");
+        }
+
+        if (kind == "workspaceLocal")
+        {
+            if (!string.Equals(uri.Scheme, "workspace", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Market index '{sourceName}' AirApp '{airAppId}' package source '{kind}' must use a workspace:// URL.");
+            }
+        }
+        else if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+        {
+            throw new InvalidOperationException(
+                $"Market index '{sourceName}' AirApp '{airAppId}' package source '{kind}' must use an http(s) URL.");
+        }
+
+        return new MarketPackageSource { Kind = kind, Url = url };
+    }
+}
+
+internal sealed class MarketAirApp
 {
     [JsonPropertyName("pluginId")]
-    public string PluginId { get; init; } = string.Empty;
+    public string AirAppId { get; init; } = string.Empty;
 
     [JsonPropertyName("name")]
     public string Name { get; init; } = string.Empty;
@@ -661,7 +486,7 @@ internal sealed class MarketPluginEntry
     public List<MarketSharedContractReference> SharedContracts { get; init; } = [];
 
     [JsonPropertyName("packageSources")]
-    public List<MarketPackageSourceEntry> PackageSources { get; init; } = [];
+    public List<MarketPackageSource> PackageSources { get; init; } = [];
 
     [JsonPropertyName("desktopComponents")]
     public List<string> DesktopComponents { get; init; } = [];
@@ -675,414 +500,95 @@ internal sealed class MarketPluginEntry
     [JsonPropertyName("messageTypes")]
     public List<string> MessageTypes { get; init; } = [];
 
-    public MarketPluginEntry ValidateAndNormalize(
-        string sourceName,
-        Version expectedApiVersion,
-        IReadOnlyCollection<MarketContractEntry> contracts)
+    public MarketAirApp ValidateAndNormalize(string sourceName)
     {
-        var pluginId = MarketValidation.NormalizePluginId(PluginId, nameof(PluginId), sourceName);
-        var version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName);
+        var airAppId = MarketValidation.Require(AirAppId, nameof(AirAppId), sourceName);
+
         var apiVersion = MarketValidation.NormalizeVersion(ApiVersion, nameof(ApiVersion), sourceName);
-        var parsedApiVersion = MarketValidation.ParseVersion(apiVersion, nameof(ApiVersion), sourceName);
-        if (parsedApiVersion.Major != expectedApiVersion.Major)
+        if (apiVersion.Major != AirAppMarketPolicy.ApiVersionParsed.Major)
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' targets PluginSdk API '{apiVersion}', but production requires API major '{expectedApiVersion.Major}' ({expectedApiVersion}).");
+                $"Market index '{sourceName}' AirApp '{airAppId}' declares apiVersion '{ApiVersion}', " +
+                $"but the market publishes for AirApp SDK API '{AirAppMarketPolicy.ApiVersion}'. " +
+                "The major version must match or no shipped host can install it.");
         }
 
-        var minHostVersion = MarketValidation.NormalizeVersion(MinHostVersion, nameof(MinHostVersion), sourceName);
-        var parsedMinHostVersion = MarketValidation.ParseVersion(minHostVersion, nameof(MinHostVersion), sourceName);
-        if (expectedApiVersion.Major == 5 && parsedMinHostVersion < new Version(0, 8, 6))
+        if (PackageSizeBytes < 0)
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' targets PluginSdk API 5 and must require host version 0.8.6 or newer, but declares '{minHostVersion}'.");
+                $"Market index '{sourceName}' AirApp '{airAppId}' declares invalid packageSizeBytes '{PackageSizeBytes}'.");
         }
 
-        var entranceAssembly = MarketValidation.NormalizeAssemblyName(EntranceAssembly, nameof(EntranceAssembly), sourceName);
-        var repository = MarketValidation.NormalizeGitHubRepositoryUrl(RepositoryUrl, nameof(RepositoryUrl), sourceName);
-        var releaseTag = NormalizeReleaseTag(ReleaseTag, version, sourceName, pluginId);
-        var releaseAssetName = MarketValidation.NormalizePackageFileName(ReleaseAssetName, nameof(ReleaseAssetName), sourceName);
-        var expectedAssetName = $"{pluginId}.{version}.laapp";
-        if (!string.Equals(releaseAssetName, expectedAssetName, StringComparison.OrdinalIgnoreCase))
+        return new MarketAirApp
         {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' release asset must be named '{expectedAssetName}', but found '{releaseAssetName}'.");
-        }
-
-        if (PackageSizeBytes <= 0)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' declares invalid packageSizeBytes '{PackageSizeBytes}'.");
-        }
-
-        var packageSources = NormalizePackageSources(
-            PackageSources,
-            sourceName,
-            pluginId,
-            repository,
-            releaseTag,
-            releaseAssetName);
-        var sharedContracts = NormalizeSharedContracts(SharedContracts, sourceName, pluginId, contracts);
-
-        if (PublishedAt != default && UpdatedAt != default && UpdatedAt < PublishedAt)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' updatedAt precedes publishedAt.");
-        }
-
-        return new MarketPluginEntry
-        {
-            PluginId = pluginId,
+            AirAppId = airAppId,
             Name = MarketValidation.Require(Name, nameof(Name), sourceName),
             Description = MarketValidation.Require(Description, nameof(Description), sourceName),
             Author = MarketValidation.Require(Author, nameof(Author), sourceName),
-            Version = version,
-            ApiVersion = apiVersion,
-            MinHostVersion = minHostVersion,
-            EntranceAssembly = entranceAssembly,
-            IconUrl = MarketValidation.NormalizeHttpUrl(IconUrl, nameof(IconUrl), sourceName, optional: true),
-            ReadmeUrl = MarketValidation.NormalizeHttpUrl(ReadmeUrl, nameof(ReadmeUrl), sourceName, optional: true),
-            ProjectUrl = MarketValidation.NormalizeHttpUrl(ProjectUrl, nameof(ProjectUrl), sourceName, optional: true),
-            HomepageUrl = MarketValidation.NormalizeHttpUrl(HomepageUrl, nameof(HomepageUrl), sourceName, optional: true),
-            RepositoryUrl = repository.NormalizedUrl,
-            ReleaseTag = releaseTag,
-            ReleaseAssetName = releaseAssetName,
-            Sha256 = MarketValidation.NormalizeSha256(Sha256, nameof(Sha256), sourceName),
-            Md5 = MarketValidation.NormalizeOptionalMd5(Md5, nameof(Md5), sourceName),
+            Version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName).ToString(),
+            ApiVersion = apiVersion.ToString(),
+            MinHostVersion = string.IsNullOrWhiteSpace(MinHostVersion)
+                ? string.Empty
+                : MarketValidation.NormalizeVersion(MinHostVersion, nameof(MinHostVersion), sourceName).ToString(),
+            EntranceAssembly = MarketValidation.Require(EntranceAssembly, nameof(EntranceAssembly), sourceName),
+            IconUrl = MarketValidation.NormalizeOptionalUrl(IconUrl, nameof(IconUrl), sourceName),
+            ReadmeUrl = MarketValidation.NormalizeOptionalUrl(ReadmeUrl, nameof(ReadmeUrl), sourceName),
+            ProjectUrl = MarketValidation.NormalizeOptionalUrl(ProjectUrl, nameof(ProjectUrl), sourceName),
+            HomepageUrl = MarketValidation.NormalizeOptionalUrl(HomepageUrl, nameof(HomepageUrl), sourceName),
+            RepositoryUrl = MarketValidation.NormalizeGitHubRepositoryUrl(RepositoryUrl, nameof(RepositoryUrl), sourceName),
+            ReleaseTag = MarketValidation.NormalizeReleaseTag(ReleaseTag, nameof(ReleaseTag), sourceName),
+            ReleaseAssetName = MarketValidation.Require(ReleaseAssetName, nameof(ReleaseAssetName), sourceName),
+            Sha256 = MarketValidation.NormalizeOptionalHex(Sha256, 64, nameof(Sha256), sourceName),
+            Md5 = MarketValidation.NormalizeOptionalHex(Md5, 32, nameof(Md5), sourceName),
             PackageSizeBytes = PackageSizeBytes,
             PublishedAt = PublishedAt,
             UpdatedAt = UpdatedAt,
             ReleaseNotes = MarketValidation.Normalize(ReleaseNotes),
-            Tags = MarketValidation.NormalizeDistinctStrings(Tags, nameof(Tags), sourceName, pluginId),
-            SharedContracts = sharedContracts,
-            PackageSources = packageSources,
-            DesktopComponents = MarketValidation.NormalizeDistinctStrings(DesktopComponents, nameof(DesktopComponents), sourceName, pluginId),
-            SettingsSections = MarketValidation.NormalizeDistinctStrings(SettingsSections, nameof(SettingsSections), sourceName, pluginId),
-            Exports = MarketValidation.NormalizeDistinctStrings(Exports, nameof(Exports), sourceName, pluginId),
-            MessageTypes = MarketValidation.NormalizeDistinctStrings(MessageTypes, nameof(MessageTypes), sourceName, pluginId)
+            Tags = MarketValidation.NormalizeDistinct(Tags, nameof(Tags), sourceName),
+            SharedContracts = NormalizeSharedContracts(sourceName, airAppId),
+            PackageSources = NormalizePackageSources(sourceName, airAppId),
+            DesktopComponents = MarketValidation.NormalizeDistinct(DesktopComponents, nameof(DesktopComponents), sourceName),
+            SettingsSections = MarketValidation.NormalizeDistinct(SettingsSections, nameof(SettingsSections), sourceName),
+            Exports = MarketValidation.NormalizeDistinct(Exports, nameof(Exports), sourceName),
+            MessageTypes = MarketValidation.NormalizeDistinct(MessageTypes, nameof(MessageTypes), sourceName)
         };
     }
 
-    private static string NormalizeReleaseTag(
-        string? rawValue,
-        string version,
-        string sourceName,
-        string pluginId)
+    private List<MarketSharedContractReference> NormalizeSharedContracts(string sourceName, string airAppId)
     {
-        var releaseTag = MarketValidation.Require(rawValue, nameof(ReleaseTag), sourceName);
-        if (!releaseTag.StartsWith('v') ||
-            !string.Equals(releaseTag[1..], version, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' releaseTag must be exactly 'v{version}', but found '{releaseTag}'.");
-        }
-
-        return releaseTag;
-    }
-
-    private static List<MarketPackageSourceEntry> NormalizePackageSources(
-        IReadOnlyCollection<MarketPackageSourceEntry>? sources,
-        string sourceName,
-        string pluginId,
-        GitHubRepositoryIdentity repository,
-        string releaseTag,
-        string releaseAssetName)
-    {
-        var sourceItems = sources ?? [];
-        if (sourceItems.Count is < 1 or > 3)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' must declare between one and three package sources.");
-        }
-
-        var normalized = new List<MarketPackageSourceEntry>(sourceItems.Count);
-        var seenKinds = new HashSet<string>(StringComparer.Ordinal);
-        var previousOrder = -1;
-        foreach (var source in sourceItems)
-        {
-            var item = source.ValidateAndNormalize(
-                sourceName,
-                pluginId,
-                repository,
-                releaseTag,
-                releaseAssetName);
-            var order = Array.IndexOf(MarketValidation.PackageSourceKinds, item.Kind);
-            if (order < previousOrder)
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' plugin '{pluginId}' package sources must follow releaseAsset -> rawFallback -> workspaceLocal order.");
-            }
-
-            if (!seenKinds.Add(item.Kind))
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' plugin '{pluginId}' declares duplicate package source kind '{item.Kind}'.");
-            }
-
-            previousOrder = order;
-            normalized.Add(item);
-        }
-
-        if (!seenKinds.Contains("releaseAsset"))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' must provide a releaseAsset package source.");
-        }
-
-        return normalized;
-    }
-
-    private static List<MarketSharedContractReference> NormalizeSharedContracts(
-        IReadOnlyCollection<MarketSharedContractReference>? dependencies,
-        string sourceName,
-        string pluginId,
-        IReadOnlyCollection<MarketContractEntry> contracts)
-    {
-        var normalized = new List<MarketSharedContractReference>((dependencies ?? []).Count);
+        var normalized = new List<MarketSharedContractReference>(SharedContracts.Count);
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var dependency in dependencies ?? [])
+        foreach (var reference in SharedContracts)
         {
-            var item = dependency.ValidateAndNormalize(sourceName, pluginId);
-            var key = $"{item.Id}@{item.Version}";
-            if (!seen.Add(key))
+            var normalizedReference = reference.ValidateAndNormalize(sourceName);
+            if (!seen.Add($"{normalizedReference.Id}@{normalizedReference.Version}"))
             {
                 throw new InvalidOperationException(
-                    $"Market index '{sourceName}' plugin '{pluginId}' declares duplicate shared contract '{key}'.");
+                    $"Market index '{sourceName}' AirApp '{airAppId}' declares duplicate shared contract " +
+                    $"'{normalizedReference.Id}@{normalizedReference.Version}'.");
             }
 
-            if (!contracts.Any(contract =>
-                    string.Equals(contract.Id, item.Id, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(contract.Version, item.Version, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(contract.AssemblyName, item.AssemblyName, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new InvalidOperationException(
-                    $"Market index '{sourceName}' plugin '{pluginId}' references unpublished shared contract '{key}' ({item.AssemblyName}).");
-            }
-
-            normalized.Add(item);
+            normalized.Add(normalizedReference);
         }
 
         return normalized;
     }
-}
 
-internal sealed class MarketSharedContractReference
-{
-    [JsonPropertyName("id")]
-    public string Id { get; init; } = string.Empty;
-
-    [JsonPropertyName("version")]
-    public string Version { get; init; } = string.Empty;
-
-    [JsonPropertyName("assemblyName")]
-    public string AssemblyName { get; init; } = string.Empty;
-
-    public MarketSharedContractReference ValidateAndNormalize(string sourceName, string pluginId)
+    private List<MarketPackageSource> NormalizePackageSources(string sourceName, string airAppId)
     {
-        return new MarketSharedContractReference
-        {
-            Id = MarketValidation.Require(Id, nameof(Id), sourceName),
-            Version = MarketValidation.NormalizeVersion(Version, nameof(Version), sourceName),
-            AssemblyName = MarketValidation.NormalizeAssemblyName(AssemblyName, nameof(AssemblyName), sourceName)
-        };
-    }
-}
+        var normalized = PackageSources
+            .Select(source => source.ValidateAndNormalize(sourceName, airAppId))
+            .ToList();
 
-internal sealed class MarketPackageSourceEntry
-{
-    [JsonPropertyName("kind")]
-    public string Kind { get; init; } = string.Empty;
-
-    [JsonPropertyName("url")]
-    public string Url { get; init; } = string.Empty;
-
-    public MarketPackageSourceEntry ValidateAndNormalize(
-        string sourceName,
-        string pluginId,
-        GitHubRepositoryIdentity repository,
-        string releaseTag,
-        string releaseAssetName)
-    {
-        var kind = MarketValidation.Require(Kind, nameof(Kind), sourceName);
-        if (!MarketValidation.PackageSourceKinds.Contains(kind, StringComparer.Ordinal))
+        // The host walks these in order and falls back to the next one, so the order is part of the contract.
+        var requiredOrder = new[] { "releaseAsset", "rawFallback", "workspaceLocal" };
+        if (normalized.Count != requiredOrder.Length ||
+            !normalized.Select(source => source.Kind).SequenceEqual(requiredOrder, StringComparer.Ordinal))
         {
             throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' declares unsupported package source kind '{kind}'.");
+                $"Market index '{sourceName}' AirApp '{airAppId}' must provide exactly these package sources in order: {string.Join(", ", requiredOrder)}.");
         }
 
-        var url = MarketValidation.Require(Url, nameof(Url), sourceName);
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' declares invalid package source URL '{url}'.");
-        }
-
-        ValidateUrl(kind, uri, sourceName, pluginId, repository, releaseTag, releaseAssetName);
-        return new MarketPackageSourceEntry { Kind = kind, Url = url };
-    }
-
-    private static void ValidateUrl(
-        string kind,
-        Uri uri,
-        string sourceName,
-        string pluginId,
-        GitHubRepositoryIdentity repository,
-        string releaseTag,
-        string releaseAssetName)
-    {
-        var segments = uri.AbsolutePath
-            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(Uri.UnescapeDataString)
-            .ToArray();
-
-        var valid = kind switch
-        {
-            "releaseAsset" =>
-                uri.Scheme == Uri.UriSchemeHttps &&
-                string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase) &&
-                segments.Length == 6 &&
-                string.Equals(segments[0], repository.Owner, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[1], repository.Name, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[2], "releases", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[3], "download", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[4], releaseTag, StringComparison.Ordinal) &&
-                string.Equals(segments[5], releaseAssetName, StringComparison.OrdinalIgnoreCase),
-            "rawFallback" =>
-                uri.Scheme == Uri.UriSchemeHttps &&
-                string.Equals(uri.Host, "raw.githubusercontent.com", StringComparison.OrdinalIgnoreCase) &&
-                segments.Length == 4 &&
-                string.Equals(segments[0], repository.Owner, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[1], repository.Name, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[2], "main", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(segments[3], releaseAssetName, StringComparison.OrdinalIgnoreCase),
-            "workspaceLocal" =>
-                string.Equals(uri.Scheme, "workspace", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(uri.Host, repository.Name, StringComparison.OrdinalIgnoreCase) &&
-                segments.Length == 1 &&
-                string.Equals(segments[0], releaseAssetName, StringComparison.OrdinalIgnoreCase),
-            _ => false
-        };
-
-        if (!valid)
-        {
-            throw new InvalidOperationException(
-                $"Market index '{sourceName}' plugin '{pluginId}' package source '{kind}' does not match repository '{repository.Owner}/{repository.Name}', release '{releaseTag}', and asset '{releaseAssetName}'.");
-        }
-    }
-}
-
-internal sealed record GitHubRepositoryIdentity(string Owner, string Name, string NormalizedUrl);
-
-internal static class ValidatorSelfTests
-{
-    public static void Run(string expectedApiVersion)
-    {
-        var valid = JsonNode.Parse(CreateValidIndexJson())!.AsObject();
-        _ = MarketIndexDocument.Load(valid.ToJsonString(), "self-test-valid.json", expectedApiVersion);
-
-        ExpectFailure("nested/legacy schema", valid, expectedApiVersion, root => root["schemaVersion"] = "2.0.0");
-        ExpectFailure("wrong PluginSdk major", valid, expectedApiVersion, root => Plugin(root)["apiVersion"] = "4.0.0");
-        ExpectFailure("host version predates PluginSdk 5", valid, expectedApiVersion, root => Plugin(root)["minHostVersion"] = "0.8.5");
-        ExpectFailure("invalid SHA-256", valid, expectedApiVersion, root => Plugin(root)["sha256"] = "bad");
-        ExpectFailure("invalid package size", valid, expectedApiVersion, root => Plugin(root)["packageSizeBytes"] = 0);
-        ExpectFailure("release/version mismatch", valid, expectedApiVersion, root => Plugin(root)["releaseTag"] = "v9.9.9");
-        ExpectFailure("package source order", valid, expectedApiVersion, root =>
-        {
-            var sources = Plugin(root)["packageSources"]!.AsArray();
-            var first = sources[0]!.DeepClone();
-            sources[0] = sources[1]!.DeepClone();
-            sources[1] = first;
-        });
-        ExpectFailure("dangling shared contract", valid, expectedApiVersion, root =>
-            Plugin(root)["sharedContracts"]![0]!["version"] = "9.9.9");
-        ExpectFailure("unknown flat-v3 property", valid, expectedApiVersion, root =>
-            Plugin(root)["legacyPublication"] = new JsonObject());
-
-        Console.WriteLine("AirAppMarket.Validator self-tests passed (1 valid + 9 invalid cases).");
-    }
-
-    private static JsonObject Plugin(JsonObject root)
-    {
-        return root["plugins"]![0]!.AsObject();
-    }
-
-    private static void ExpectFailure(
-        string name,
-        JsonObject valid,
-        string expectedApiVersion,
-        Action<JsonObject> mutate)
-    {
-        var candidate = valid.DeepClone().AsObject();
-        mutate(candidate);
-        try
-        {
-            _ = MarketIndexDocument.Load(candidate.ToJsonString(), $"self-test-{name}.json", expectedApiVersion);
-        }
-        catch (InvalidOperationException)
-        {
-            return;
-        }
-
-        throw new InvalidOperationException($"Validator self-test '{name}' unexpectedly succeeded.");
-    }
-
-    private static string CreateValidIndexJson()
-    {
-        return """
-            {
-              "schemaVersion": "3.0.0",
-              "sourceId": "self-test",
-              "sourceName": "AirAppMarket Validator Self-Test",
-              "generatedAt": "2026-07-14T00:00:00Z",
-              "contracts": [
-                {
-                  "id": "LanMountainDesktop.SharedContracts.Sample",
-                  "version": "1.0.0",
-                  "assemblyName": "LanMountainDesktop.SharedContracts.Sample.dll",
-                  "downloadUrl": "https://raw.githubusercontent.com/owner/LanAirApp/main/contract.dll",
-                  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                  "packageSizeBytes": 1024
-                }
-              ],
-              "plugins": [
-                {
-                  "pluginId": "LanMountainDesktop.SelfTest",
-                  "name": "Self Test",
-                  "description": "Valid flat v3 fixture.",
-                  "author": "LanMountainDesktop",
-                  "version": "1.2.3",
-                  "apiVersion": "5.0.0",
-                  "minHostVersion": "0.8.6",
-                  "entranceAssembly": "LanMountainDesktop.SelfTest.dll",
-                  "repositoryUrl": "https://github.com/owner/SelfTest",
-                  "releaseTag": "v1.2.3",
-                  "releaseAssetName": "LanMountainDesktop.SelfTest.1.2.3.laapp",
-                  "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-                  "packageSizeBytes": 4096,
-                  "sharedContracts": [
-                    {
-                      "id": "LanMountainDesktop.SharedContracts.Sample",
-                      "version": "1.0.0",
-                      "assemblyName": "LanMountainDesktop.SharedContracts.Sample.dll"
-                    }
-                  ],
-                  "packageSources": [
-                    {
-                      "kind": "releaseAsset",
-                      "url": "https://github.com/owner/SelfTest/releases/download/v1.2.3/LanMountainDesktop.SelfTest.1.2.3.laapp"
-                    },
-                    {
-                      "kind": "rawFallback",
-                      "url": "https://raw.githubusercontent.com/owner/SelfTest/main/LanMountainDesktop.SelfTest.1.2.3.laapp"
-                    },
-                    {
-                      "kind": "workspaceLocal",
-                      "url": "workspace://SelfTest/LanMountainDesktop.SelfTest.1.2.3.laapp"
-                    }
-                  ]
-                }
-              ]
-            }
-            """;
+        return normalized;
     }
 }

@@ -36,19 +36,13 @@ jobs:
 
       - name: Regenerate official market index
         shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --registry airappmarket\registry\official-plugins.json --validate-registry-only
-          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --validate-market-manifest airappmarket\templates\market-manifest.template.json
-          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --self-test
-          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --registry airappmarket\registry\official-plugins.json --output airappmarket\index.json --require-market-manifest
+          dotnet run --project airappmarket\tools\AirAppMarket.IndexBuilder\AirAppMarket.IndexBuilder.csproj -- --registry airappmarket\registry\official-airapps.json --output airappmarket\index.json
 
       - name: Validate generated index
         shell: pwsh
         run: |
-          dotnet run --project airappmarket\tools\AirAppMarket.Validator\AirAppMarket.Validator.csproj -- --self-test --expected-api-version 5.0.0
-          dotnet run --project airappmarket\tools\AirAppMarket.Validator\AirAppMarket.Validator.csproj -- airappmarket\index.json airappmarket\schema\airappmarket-index.schema.json --expected-api-version 5.0.0
+          dotnet run --project airappmarket\tools\AirAppMarket.Validator\AirAppMarket.Validator.csproj -- airappmarket\index.json airappmarket\schema\airappmarket-index.schema.json
 
       - name: Commit refreshed index
         shell: pwsh

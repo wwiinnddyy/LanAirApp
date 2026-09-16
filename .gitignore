@@ -22,6 +22,10 @@
 packages/*
 !packages/.gitkeep
 
+# AirApp packages are distributed through each AirApp's GitHub Release,
+# never committed into the market repository.
+*.laapp
+
 # Local temp and logs
 .env
 *.log

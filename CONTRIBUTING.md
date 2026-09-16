@@ -2,68 +2,73 @@
 
 ## 中文
 
-感谢你对 LanAirApp 插件生态的关注！本指南说明如何向官方市场贡献插件。
+感谢你对 LanAirApp 生态的关注！本指南说明如何向官方市场贡献轻应用（AirApp）。
+
+轻应用的唯一 SDK 是 `LanMountainDesktop.AirAppSdk`，API 版本 `1.0.0`，清单文件 `airapp.json`。
+旧的 `LanMountainDesktop.PluginSdk` 与 `plugin.json` 已废弃，市场不再收录。
 
 ### 贡献类型
 
 | 类型 | 说明 |
 |------|------|
-| **插件收录** | 将新插件添加到官方市场索引 |
-| **插件更新** | 更新已收录插件的注册信息（标签、能力提示等） |
-| **文档改进** | 改进开发文档、打包指引或收录指南 |
-| **工具改进** | 改进 IndexBuilder、Validator 或 PluginPackager |
+| **轻应用收录** | 将新轻应用添加到官方市场索引 |
+| **轻应用更新** | 更新已收录轻应用的注册信息（标签、能力提示等） |
+| **文档改进** | 改进收录指南与收录标准 |
+| **工具改进** | 改进 IndexBuilder 或 Validator |
 | **Bug 修复** | 修复市场索引、Schema 或工具链的问题 |
 
-### 插件收录流程
+### 轻应用收录流程
 
 #### 方式一：提交 Pull Request（推荐）
 
 1. **确认前置条件**
-   - 插件 `plugin.json` 中 `apiVersion` 为 `4.x`
-   - 已在插件仓库创建 GitHub Release 并上传 `.laapp` 文件
-   - `.laapp` 包内包含合法的 `plugin.json` 和入口程序集
+   - `airapp.json` 中 `apiVersion` 为 `1.0.0`
+   - 仓库是 GitHub 上的**公开**仓库
+   - 已创建 GitHub Release 并上传 `.laapp` 文件（构建时由 SDK 自动生成）
+   - `.laapp` 包内包含合法的 `airapp.json` 和入口程序集
    - 提供了中英文本地化文件
 
 2. **Fork 本仓库**
 
 3. **编辑注册表**
-   - 打开 `airappmarket/registry/official-plugins.json`
+   - 打开 `airappmarket/registry/official-airapps.json`
    - 在 `plugins` 数组中添加新条目（格式见 [收录指南](docs/收录指南.md)）
    - **不要**手动修改 `airappmarket/index.json`（由 CI 自动生成）
 
 4. **提交 Pull Request**
-   - 使用 **"插件收录申请"** PR 模板
-   - 填写插件信息、注册表条目和自检清单
+   - 使用 **"轻应用收录申请"** PR 模板
+   - 填写轻应用信息、注册表条目和自检清单
    - 附上桌面组件和设置页的截图
 
 5. **等待审核**
    - CI 会自动校验 `index.json` 的合法性
-   - 维护者会审核插件的功能、代码质量和合规性
+   - 维护者会审核轻应用的功能、代码质量和合规性
    - 审核通过后合并到 `main`
 
 6. **自动生效**
-   - 合并后 CI 会自动重新生成 `index.json`
-   - 新插件即刻出现在官方市场中
+   - 合并后 CI 会重新生成 `index.json`
+   - 如果此时仓库还没有符合要求的 Release，IndexBuilder 会跳过该条目并打印原因；
+     发布 Release 后重新触发刷新即可生效
 
 #### 方式二：提交 Issue
 
-如果你不想直接编辑注册表，可以提交一个 **"插件收录申请"** Issue，维护者会根据信息代为编辑注册表并提交 PR。
+如果你不想直接编辑注册表，可以提交一个 **"轻应用收录申请"** Issue，维护者会根据信息代为编辑注册表并提交 PR。
 
 ### 注册表条目格式
 
 ```json
 {
-  "id": "LanMountainDesktop.YourPlugin",
+  "id": "com.example.yourairapp",
   "repositoryUrl": "https://github.com/owner/repo",
   "marketManifestAssetName": "market-manifest.json",
   "projectUrl": "https://github.com/owner/repo",
   "readmeUrl": "https://raw.githubusercontent.com/owner/repo/main/README.md",
   "homepageUrl": "https://github.com/owner/repo",
   "iconUrl": "https://raw.githubusercontent.com/owner/repo/main/Assets/icon.png",
-  "defaultMinHostVersion": "0.7.4",
+  "defaultMinHostVersion": "0.9.1",
   "tags": ["tag1", "tag2"],
   "capabilityHints": {
-    "desktopComponents": ["YourWidget"],
+    "desktopComponents": [],
     "settingsSections": ["YourSettingsSection"],
     "exports": [],
     "messageTypes": []
@@ -77,9 +82,9 @@
 
 收录审核遵循以下标准（详见 [收录标准](docs/收录标准.md)）：
 
-- **功能完整**：插件在 LanMountainDesktop 中能正常加载和运行
-- **API 合规**：`apiVersion` 为 `4.x`，使用 SDK v4 语义
-- **包格式正确**：`.laapp` 包含合法的 `plugin.json` 和入口程序集
+- **功能完整**：轻应用在 LanMountainDesktop 中能正常加载和运行
+- **API 合规**：`apiVersion` 为 `1.0.0`，使用 `LanMountainDesktop.AirAppSdk`
+- **包格式正确**：`.laapp` 包含合法的 `airapp.json` 和入口程序集
 - **本地化**：提供 `zh-CN.json` 和 `en-US.json`
 - **主题适配**：亮色/暗色主题下显示正常
 - **无安全隐患**：不包含恶意代码、不泄露用户数据
@@ -96,38 +101,42 @@
 
 ## English
 
-Thank you for your interest in the LanAirApp plugin ecosystem! This guide explains how to contribute plugins to the official market.
+Thank you for your interest in the LanAirApp ecosystem! This guide explains how to contribute AirApps to the official market.
+
+The one and only SDK is `LanMountainDesktop.AirAppSdk`, API version `1.0.0`, manifest `airapp.json`.
+The legacy `LanMountainDesktop.PluginSdk` and `plugin.json` are retired and are no longer accepted.
 
 ### Contribution Types
 
 | Type | Description |
 |------|-------------|
-| **Plugin Submission** | Add a new plugin to the official market index |
-| **Plugin Update** | Update registration info for an existing plugin (tags, capability hints, etc.) |
-| **Documentation** | Improve development docs, packaging guides, or submission guides |
-| **Tooling** | Improve IndexBuilder, Validator, or PluginPackager |
+| **AirApp Submission** | Add a new AirApp to the official market index |
+| **AirApp Update** | Update registration info for a listed AirApp (tags, capability hints, etc.) |
+| **Documentation** | Improve the submission guide and submission standards |
+| **Tooling** | Improve IndexBuilder or Validator |
 | **Bug Fix** | Fix issues in the market index, schema, or toolchain |
 
-### Plugin Submission Flow
+### AirApp Submission Flow
 
 #### Option A: Pull Request (Recommended)
 
 1. **Verify prerequisites**
-   - `plugin.json` has `apiVersion` set to `4.x`
-   - A GitHub Release exists with a `.laapp` asset
-   - The `.laapp` contains a valid `plugin.json` and entrance assembly
+   - `airapp.json` has `apiVersion` set to `1.0.0`
+   - The repository is **public** on GitHub
+   - A GitHub Release exists with a `.laapp` asset (produced by the SDK at build time)
+   - The `.laapp` contains a valid `airapp.json` and entrance assembly
    - Localization files (`zh-CN.json`, `en-US.json`) are provided
 
 2. **Fork this repository**
 
 3. **Edit the registry**
-   - Open `airappmarket/registry/official-plugins.json`
+   - Open `airappmarket/registry/official-airapps.json`
    - Add a new entry to the `plugins` array (see [Submission Guide](docs/收录指南.md) for format)
    - Do **not** manually edit `airappmarket/index.json` (auto-generated by CI)
 
 4. **Open a Pull Request**
-   - Use the **"Plugin Submission"** PR template
-   - Fill in plugin info, registry entry, and checklist
+   - Use the **"AirApp Submission"** PR template
+   - Fill in AirApp info, registry entry, and checklist
    - Attach screenshots of desktop components and settings pages
 
 5. **Await review**
@@ -137,27 +146,28 @@ Thank you for your interest in the LanAirApp plugin ecosystem! This guide explai
 
 6. **Automatic propagation**
    - After merge, CI regenerates `index.json`
-   - The new plugin appears in the official market immediately
+   - If the repository has no qualifying release yet, IndexBuilder skips the entry and prints why;
+     publish a release and re-run the refresh to make it live
 
 #### Option B: Issue
 
-If you prefer not to edit the registry directly, open a **"Plugin Submission Request"** issue. Maintainers will create the registry entry on your behalf.
+If you prefer not to edit the registry directly, open an **"AirApp Submission Request"** issue. Maintainers will create the registry entry on your behalf.
 
 ### Registry Entry Format
 
 ```json
 {
-  "id": "LanMountainDesktop.YourPlugin",
+  "id": "com.example.yourairapp",
   "repositoryUrl": "https://github.com/owner/repo",
   "marketManifestAssetName": "market-manifest.json",
   "projectUrl": "https://github.com/owner/repo",
   "readmeUrl": "https://raw.githubusercontent.com/owner/repo/main/README.md",
   "homepageUrl": "https://github.com/owner/repo",
   "iconUrl": "https://raw.githubusercontent.com/owner/repo/main/Assets/icon.png",
-  "defaultMinHostVersion": "0.7.4",
+  "defaultMinHostVersion": "0.9.1",
   "tags": ["tag1", "tag2"],
   "capabilityHints": {
-    "desktopComponents": ["YourWidget"],
+    "desktopComponents": [],
     "settingsSections": ["YourSettingsSection"],
     "exports": [],
     "messageTypes": []
@@ -171,9 +181,9 @@ See [Submission Guide](docs/收录指南.md) for detailed field descriptions.
 
 Submissions are reviewed against the following criteria (see [Submission Standards](docs/收录标准.md) for details):
 
-- **Functional**: Plugin loads and runs correctly in LanMountainDesktop
-- **API Compliant**: `apiVersion` is `4.x`, using SDK v4 semantics
-- **Package Valid**: `.laapp` contains a valid `plugin.json` and entrance assembly
+- **Functional**: the AirApp loads and runs correctly in LanMountainDesktop
+- **API Compliant**: `apiVersion` is `1.0.0`, built against `LanMountainDesktop.AirAppSdk`
+- **Package Valid**: `.laapp` contains a valid `airapp.json` and entrance assembly
 - **Localized**: `zh-CN.json` and `en-US.json` are provided
 - **Theme Compatible**: Renders correctly in both light and dark themes
 - **Secure**: No malicious code, no user data leakage

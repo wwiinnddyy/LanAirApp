@@ -1,7 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/market-index.schema.json",
-  "title": "Deprecated AirAppMarket schema alias",
-  "description": "Compatibility alias. New integrations must use airappmarket-index.schema.json (flat schemaVersion 3.0.0).",
-  "$ref": "./airappmarket-index.schema.json"
-}

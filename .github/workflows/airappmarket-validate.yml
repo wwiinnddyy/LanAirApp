@@ -23,26 +23,5 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Build market tools
-        run: |
-          dotnet build airappmarket/tools/AirAppMarket.IndexBuilder/AirAppMarket.IndexBuilder.csproj --configuration Release
-          dotnet build airappmarket/tools/AirAppMarket.Validator/AirAppMarket.Validator.csproj --configuration Release
-
-      - name: Validate registry and validator regressions
-        run: |
-          dotnet run --project airappmarket/tools/AirAppMarket.IndexBuilder --configuration Release --no-build -- --registry airappmarket/registry/official-plugins.json --validate-registry-only
-          dotnet run --project airappmarket/tools/AirAppMarket.IndexBuilder --configuration Release --no-build -- --validate-market-manifest airappmarket/templates/market-manifest.template.json
-          dotnet run --project airappmarket/tools/AirAppMarket.IndexBuilder --configuration Release --no-build -- --self-test
-          dotnet run --project airappmarket/tools/AirAppMarket.Validator --configuration Release --no-build -- --self-test --expected-api-version 5.0.0
-
-      - name: Validate committed AirAppMarket index
-        run: dotnet run --project airappmarket/tools/AirAppMarket.Validator --configuration Release --no-build -- airappmarket/index.json airappmarket/schema/airappmarket-index.schema.json --expected-api-version 5.0.0
-
-      - name: Regenerate index from verified release packages
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          dotnet run --project airappmarket/tools/AirAppMarket.IndexBuilder --configuration Release --no-build -- --registry airappmarket/registry/official-plugins.json --output "${RUNNER_TEMP}/airappmarket-index.json" --require-market-manifest
-
-      - name: Validate regenerated index
-        run: dotnet run --project airappmarket/tools/AirAppMarket.Validator --configuration Release --no-build -- "${RUNNER_TEMP}/airappmarket-index.json" airappmarket/schema/airappmarket-index.schema.json --expected-api-version 5.0.0
+      - name: Validate AirAppMarket index
+        run: dotnet run --project airappmarket/tools/AirAppMarket.Validator -- airappmarket/index.json airappmarket/schema/airappmarket-index.schema.json

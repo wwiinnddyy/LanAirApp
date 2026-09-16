@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 插件开发文档 / Plugin Development Docs
-    url: https://github.com/wwiinnddyy/LanAirApp/tree/main/docs
-    about: 查阅插件开发、打包和收录的完整文档
-  - name: 插件开发指引 / Plugin Development Guide
-    url: https://github.com/wwiinnddyy/LanAirApp/blob/main/LanAirApp/docs/PLUGIN_DEVELOPMENT.md
-    about: v4 插件开发指引（清单、组件注册、外观能力）
-  - name: 插件打包指引 / Plugin Packaging Guide
-    url: https://github.com/wwiinnddyy/LanAirApp/blob/main/LanAirApp/docs/PLUGIN_PACKAGING.md
-    about: .laapp 打包格式和发布链路说明
+  - name: 轻应用开发文档 / AirApp Development Docs
+    url: https://github.com/wwiinnddyy/LanMountainDesktop/tree/main/docs/01-AirApp%E5%BC%80%E5%8F%91
+    about: AirApp SDK 1.0.0 的开发文档（清单、组件注册、设置页、API 参考）
+  - name: 从 PluginSdk 迁移 / Migrating from PluginSdk
+    url: https://github.com/wwiinnddyy/LanMountainDesktop/blob/main/docs/AIRAPP_SDK_V1_MIGRATION.md
+    about: 旧 PluginSdk 与 plugin.json 迁移到 AirAppSdk 与 airapp.json 的对照指南
+  - name: 收录指南 / Submission Guide
+    url: https://github.com/wwiinnddyy/LanAirApp/blob/main/docs/%E6%94%B6%E5%BD%95%E6%8C%87%E5%8D%97.md
+    about: 发布 Release 并提交收录 PR 的完整流程

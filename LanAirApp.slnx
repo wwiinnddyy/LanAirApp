@@ -1,11 +1,10 @@
 <Solution>
-  <Folder Name="/LanAirApp/" />
-  <Folder Name="/LanAirApp/samples/">
-    <Project Path="LanAirApp/samples/LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.csproj" />
+  <Folder Name="/airappmarket/" />
+  <Folder Name="/airappmarket/tools/">
+    <Project Path="airappmarket/tools/AirAppMarket.IndexBuilder/AirAppMarket.IndexBuilder.csproj" />
+    <Project Path="airappmarket/tools/AirAppMarket.Validator/AirAppMarket.Validator.csproj" />
   </Folder>
-  <Folder Name="/LanAirApp/tools/">
-    <Project Path="LanAirApp/tools/LanMountainDesktop.PluginPackager/LanMountainDesktop.PluginPackager.csproj" />
+  <Folder Name="/contracts/">
+    <Project Path="LanMountainDesktop.SharedContracts.SampleClock/LanMountainDesktop.SharedContracts.SampleClock.csproj" />
   </Folder>
-  <Project Path="LanMountainDesktop.PluginSdk.Tests/LanMountainDesktop.PluginSdk.Tests.csproj" />
-  <Project Path="LanMountainDesktop.SharedContracts.SampleClock/LanMountainDesktop.SharedContracts.SampleClock.csproj" />
 </Solution>
