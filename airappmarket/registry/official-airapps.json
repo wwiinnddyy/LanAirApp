@@ -117,31 +117,6 @@
           "IpcMessage"
         ]
       }
-    },
-    {
-      "id": "LanMountainDesktop.SchedulePlugin",
-      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
-      "marketManifestAssetName": "market-manifest.json",
-      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
-      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin/main/README.md",
-      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SchedulePlugin",
-      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/plugin-marketplace.svg",
-      "defaultMinHostVersion": "0.9.1",
-      "tags": [
-        "schedule",
-        "timetable",
-        "official"
-      ],
-      "capabilityHints": {
-        "desktopComponents": [
-          "LanMountainDesktop.SchedulePlugin.NextPlan",
-          "LanMountainDesktop.SchedulePlugin.TodayTimeline",
-          "LanMountainDesktop.SchedulePlugin.TodayBoard"
-        ],
-        "settingsSections": [],
-        "exports": [],
-        "messageTypes": []
-      }
     }
   ],
   "contracts": [
