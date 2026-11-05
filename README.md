@@ -1,4 +1,4 @@
-# LanAirApp — 阑山桌面官方轻应用市场
+﻿# LanAirApp — 阑山桌面官方轻应用市场
 
 > 这里是**市场源**，不是 SDK 仓库。AirApp SDK 的代码与开发文档都在主仓库
 > [LanMountainDesktop](https://github.com/wwiinnddyy/LanMountainDesktop)。
@@ -27,6 +27,7 @@ airappmarket/
 ├── index.json                      # 宿主读取的市场索引（由 CI 生成，不要手工编辑）
 ├── registry/official-airapps.json  # 官方收录名单（唯一需要人工维护的文件）
 ├── schema/airappmarket-index.schema.json
+├── schema/market-manifest.schema.json
 ├── contracts/<契约ID>/<版本>/*.dll # 市场分发的共享契约程序集
 ├── assets/                         # 市场用到的静态图标
 └── tools/

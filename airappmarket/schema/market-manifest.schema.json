@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/market-manifest.schema.json",
+  "title": "AirApp market-manifest v2",
+  "description": "单个轻应用随 GitHub Release 发布的市场清单（market-manifest.json）。AirAppMarket.IndexBuilder 读取它补全展示/兼容性元数据（缺区块时回退到 registry 与包内 airapp.json）；Test-PluginConsistency 校验它与包内清单一致。区块齐全度以本 schema 的 required 为准，字段拼写必须与消费方一致：IndexBuilder 只认 camelCase 精确名。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "generatedAt",
+    "manifest",
+    "compatibility",
+    "repository",
+    "publication"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/schema/market-manifest.schema.json"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "2.0.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "manifest": {
+      "type": "object",
+      "description": "包内 airapp.json 的镜像：IndexBuilder 与 Test-PluginConsistency 都从这里取 id/version/apiVersion 等权威值。",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "author",
+        "version",
+        "apiVersion",
+        "entranceAssembly"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "apiVersion": {
+          "type": "string",
+          "pattern": "^1\\."
+        },
+        "entranceAssembly": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "runtime": {
+          "type": "object"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "releaseTag": {
+          "type": "string"
+        },
+        "releaseAssetName": {
+          "type": "string"
+        },
+        "releaseNotes": {
+          "type": "string"
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minHostVersion",
+        "apiVersion"
+      ],
+      "properties": {
+        "minHostVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "apiVersion": {
+          "type": "string",
+          "pattern": "^1\\."
+        },
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "description": "IndexBuilder 的展示/链接元数据来源（优先于 registry 条目）。",
+      "additionalProperties": false,
+      "properties": {
+        "repositoryUrl": {
+          "type": "string"
+        },
+        "projectUrl": {
+          "type": "string"
+        },
+        "readmeUrl": {
+          "type": "string"
+        },
+        "homepageUrl": {
+          "type": "string"
+        },
+        "iconUrl": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "releaseNotes": {
+          "type": "string"
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "description": "本次发布的位置与完整性信息；Test-PluginConsistency 用它核对 releaseTag 与资产名。",
+      "additionalProperties": false,
+      "required": [
+        "releaseTag",
+        "releaseAssetName"
+      ],
+      "properties": {
+        "releaseTag": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "releaseAssetName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "downloadUrl": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "packageSizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "releaseNotes": {
+          "type": "string"
+        },
+        "packageSources": {
+          "type": "array",
+          "description": "包获取途径（IndexBuilder 优先用 GitHub Release 资产，这里供宿主/校验工具核对下载地址）。",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "url"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "minLength": 1
+              },
+              "assetName": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              },
+              "sizeBytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "releaseTag": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "能力提示：IndexBuilder 读取 desktopComponents/settingsSections/exports/messageTypes 四个数组；sharedContracts 供人读。",
+      "additionalProperties": false,
+      "properties": {
+        "desktopComponents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "settingsSections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "messageTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sharedContracts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
