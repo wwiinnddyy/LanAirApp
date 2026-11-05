@@ -2,7 +2,7 @@
   "schemaVersion": "3.0.0",
   "sourceId": "official.lanairapp",
   "sourceName": "LanAirApp Official Market",
-  "generatedAt": "2026-11-05T00:51:09.6398821+00:00",
+  "generatedAt": "2026-11-05T15:26:47.4226951+00:00",
   "contracts": [
     {
       "id": "LanMountainDesktop.SharedContracts.SampleClock",
@@ -13,5 +13,269 @@
       "packageSizeBytes": 4608
     }
   ],
-  "plugins": []
+  "plugins": [
+    {
+      "pluginId": "Classworks4LanDesktop",
+      "name": "Classworks 作业组件",
+      "description": "在阑山桌面上显示并同步 Classworks 班级作业板数据。",
+      "author": "Classworks4LanDesktop",
+      "version": "0.3.0",
+      "apiVersion": "1.0.1",
+      "minHostVersion": "0.9.1",
+      "entranceAssembly": "ClassworksPlugin.dll",
+      "iconUrl": "",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/Classworks4LanDesktop/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/Classworks4LanDesktop",
+      "homepageUrl": "https://github.com/wwiinnddyy/Classworks4LanDesktop",
+      "repositoryUrl": "https://github.com/wwiinnddyy/Classworks4LanDesktop",
+      "releaseTag": "v0.3.0",
+      "releaseAssetName": "Classworks4LanDesktop.0.3.0.laapp",
+      "sha256": "1e6ab8a06a404a68bf37122e0c1be84f502702e48047952e3a6228da9d14fe6e",
+      "md5": "45e2745a4c51f8a00a204a78525901ad",
+      "packageSizeBytes": 304698,
+      "publishedAt": "2026-11-05T00:52:08+00:00",
+      "updatedAt": "2026-11-05T00:52:08+00:00",
+      "releaseNotes": "迁移到 LanMountainDesktop.AirAppSdk 1.0.1（apiVersion 1.0.1）。",
+      "tags": [
+        "classworks",
+        "education",
+        "homework"
+      ],
+      "sharedContracts": [],
+      "desktopComponents": [
+        "Classworks4LanDesktop.Homework"
+      ],
+      "settingsSections": [],
+      "exports": [],
+      "messageTypes": [],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/Classworks4LanDesktop/releases/download/v0.3.0/Classworks4LanDesktop.0.3.0.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/Classworks4LanDesktop/main/Classworks4LanDesktop.0.3.0.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://Classworks4LanDesktop/Classworks4LanDesktop.0.3.0.laapp"
+        }
+      ]
+    },
+    {
+      "pluginId": "Elysia.LanDesktopConnect",
+      "name": "Elysia IPC Bridge",
+      "description": "基于 Elysia 的本地 IPC 网关，在阑山桌面与 Tauri、Web、Rust 和 Node.js 应用之间提供双向通信。",
+      "author": "Elysia",
+      "version": "0.2.0",
+      "apiVersion": "1.0.1",
+      "minHostVersion": "0.9.1",
+      "entranceAssembly": "Elysia.LanDesktopConnect.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/assets/elysia.svg",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "homepageUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "repositoryUrl": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect",
+      "releaseTag": "v0.2.0",
+      "releaseAssetName": "Elysia.LanDesktopConnect.0.2.0.laapp",
+      "sha256": "65aae678e0f62d2f3a605f276bc847d372334b82807d2f79ca0671b0db0d2e4c",
+      "md5": "0e05ffe411257233eb8d325886af1aa6",
+      "packageSizeBytes": 106358,
+      "publishedAt": "2026-11-05T00:52:22+00:00",
+      "updatedAt": "2026-11-05T00:52:22+00:00",
+      "releaseNotes": "迁移到 LanMountainDesktop.AirAppSdk 1.0.1（apiVersion 1.0.1）。",
+      "tags": [
+        "bridge",
+        "elysia",
+        "gateway",
+        "ipc",
+        "websocket"
+      ],
+      "sharedContracts": [],
+      "desktopComponents": [
+        "Elysia.LanDesktopConnect.GatewayStatus"
+      ],
+      "settingsSections": [
+        "IpcBridgeSettingsSection"
+      ],
+      "exports": [],
+      "messageTypes": [
+        "BunStatusChangedEvent",
+        "IpcMessage"
+      ],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/elysia.LanDesktopConnect/releases/download/v0.2.0/Elysia.LanDesktopConnect.0.2.0.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/elysia.LanDesktopConnect/main/Elysia.LanDesktopConnect.0.2.0.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://elysia.LanDesktopConnect/Elysia.LanDesktopConnect.0.2.0.laapp"
+        }
+      ]
+    },
+    {
+      "pluginId": "com.landesktop.hot",
+      "name": "LanDesktopHot 热榜",
+      "description": "为阑山桌面提供知乎等平台的热榜资讯组件。",
+      "author": "LanDesktopHot",
+      "version": "1.0.0",
+      "apiVersion": "1.0.1",
+      "minHostVersion": "0.9.1",
+      "entranceAssembly": "LanDesktopHot.dll",
+      "iconUrl": "",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanDesktopHot/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanDesktopHot",
+      "releaseTag": "v1.0.0",
+      "releaseAssetName": "LanDesktopHot.1.0.0.laapp",
+      "sha256": "a92abea2939aebcab9387a461439064e0339e99db9dc503f0ae6a79255057daa",
+      "md5": "9c1cacb8aa373127d1ff04770c29e423",
+      "packageSizeBytes": 36043,
+      "publishedAt": "2026-11-05T00:53:26+00:00",
+      "updatedAt": "2026-11-05T00:53:26+00:00",
+      "releaseNotes": "迁移到 LanMountainDesktop.AirAppSdk 1.0.1（apiVersion 1.0.1）。",
+      "tags": [
+        "feed",
+        "hot",
+        "news",
+        "zhihu"
+      ],
+      "sharedContracts": [],
+      "desktopComponents": [
+        "zhihu-hotlist"
+      ],
+      "settingsSections": [],
+      "exports": [],
+      "messageTypes": [],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/LanDesktopHot/releases/download/v1.0.0/LanDesktopHot.1.0.0.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/LanDesktopHot/main/LanDesktopHot.1.0.0.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://LanDesktopHot/LanDesktopHot.1.0.0.laapp"
+        }
+      ]
+    },
+    {
+      "pluginId": "LanMountainDesktop.SamplePlugin",
+      "name": "LanMountain Sample AirApp",
+      "description": "官方示例轻应用：演示 AirApp SDK 的组件、设置节、导出契约、后台服务与共享契约用法。",
+      "author": "LanMountainDesktop",
+      "version": "1.0.0",
+      "apiVersion": "1.0.1",
+      "minHostVersion": "0.9.1",
+      "entranceAssembly": "LanMountainDesktop.SamplePlugin.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanAirApp/main/airappmarket/assets/sample-plugin.svg",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "homepageUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "repositoryUrl": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin",
+      "releaseTag": "v1.0.0",
+      "releaseAssetName": "LanMountainDesktop.SamplePlugin.1.0.0.laapp",
+      "sha256": "2b072ddc4bec0c341d83be8cf16017dbe25b572632798cd1476f522880ac99ba",
+      "md5": "21db8a14013346324934a4d68fba7e28",
+      "packageSizeBytes": 42160,
+      "publishedAt": "2026-11-05T00:51:53+00:00",
+      "updatedAt": "2026-11-05T00:51:53+00:00",
+      "releaseNotes": "迁移到 LanMountainDesktop.AirAppSdk 1.0.1（apiVersion 1.0.1）。",
+      "tags": [
+        "example",
+        "official",
+        "sdk"
+      ],
+      "sharedContracts": [
+        {
+          "id": "LanMountainDesktop.SharedContracts.SampleClock",
+          "version": "2.0.0",
+          "assemblyName": "LanMountainDesktop.SharedContracts.SampleClock.dll"
+        }
+      ],
+      "desktopComponents": [
+        "LanMountainDesktop.SamplePlugin.CloseDesktop",
+        "LanMountainDesktop.SamplePlugin.StatusClock"
+      ],
+      "settingsSections": [],
+      "exports": [],
+      "messageTypes": [],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/releases/download/v1.0.0/LanMountainDesktop.SamplePlugin.1.0.0.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/LanMountainDesktop.SamplePlugin/main/LanMountainDesktop.SamplePlugin.1.0.0.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://LanMountainDesktop.SamplePlugin/LanMountainDesktop.SamplePlugin.1.0.0.laapp"
+        }
+      ]
+    },
+    {
+      "pluginId": "com.voicehub.landesktop",
+      "name": "VoiceHub 校园歌单",
+      "description": "显示声动校园广播电台的公开歌单，支持实时更新和自定义刷新。",
+      "author": "LaoShui",
+      "version": "1.0.0",
+      "apiVersion": "1.0.1",
+      "minHostVersion": "0.9.1",
+      "entranceAssembly": "VoiceHubLanDesktop.dll",
+      "iconUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/Assets/icon.png",
+      "readmeUrl": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/README.md",
+      "projectUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "homepageUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "repositoryUrl": "https://github.com/wwiinnddyy/VoiceHubLanDesktop",
+      "releaseTag": "v1.0.0",
+      "releaseAssetName": "VoiceHubLanDesktop.1.0.0.laapp",
+      "sha256": "5555d7d8d50837b4927d14f670144981643d1052c4c6e1c4c5f8cf0cd942ff13",
+      "md5": "77da45521011357ae0cf2c988fbb8b11",
+      "packageSizeBytes": 63433,
+      "publishedAt": "2026-11-05T00:53:21+00:00",
+      "updatedAt": "2026-11-05T00:53:21+00:00",
+      "releaseNotes": "迁移到 LanMountainDesktop.AirAppSdk 1.0.1（apiVersion 1.0.1）。",
+      "tags": [
+        "music",
+        "playlist",
+        "radio",
+        "voicehub"
+      ],
+      "sharedContracts": [],
+      "desktopComponents": [
+        "voicehub-playlist"
+      ],
+      "settingsSections": [
+        "VoiceHubSettingsSection"
+      ],
+      "exports": [],
+      "messageTypes": [],
+      "packageSources": [
+        {
+          "kind": "releaseAsset",
+          "url": "https://github.com/wwiinnddyy/VoiceHubLanDesktop/releases/download/v1.0.0/VoiceHubLanDesktop.1.0.0.laapp"
+        },
+        {
+          "kind": "rawFallback",
+          "url": "https://raw.githubusercontent.com/wwiinnddyy/VoiceHubLanDesktop/main/VoiceHubLanDesktop.1.0.0.laapp"
+        },
+        {
+          "kind": "workspaceLocal",
+          "url": "workspace://VoiceHubLanDesktop/VoiceHubLanDesktop.1.0.0.laapp"
+        }
+      ]
+    }
+  ]
 }
